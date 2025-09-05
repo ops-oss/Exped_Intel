@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- If you want perfect Framer typography, keep your exported fonts.css here -->
+  <!-- Your exported font-face rules -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
-    /* --- TOKENS ----------------------------------------------------------- */
-    :root{
-      /* from your export */
-      --bg: rgb(232, 229, 226);            /* page background */
-      --ink: rgb(30, 30, 30);              /* text */
-      --paper: rgb(255, 255, 255);         /* surface, if needed */
-      --accent: rgb(254, 87, 51);
+    /* Your tokens (you pasted this earlier) */
+    :root{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}*{box-sizing:border-box;-webkit-font-smoothing:inherit}h1,h2,h3,h4,h5,h6,p,figure{margin:0}body,input,textarea,select,button{font-size:12px;font-family:sans-serif}body{--token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232, 229, 226);--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30, 30, 30);--token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255, 255, 255);--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254, 87, 51)}
 
+    /* Aliases so the rest of the CSS can be readable */
+    :root{
+      --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
+      --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
+      --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
+      --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      /* type scale approximating your Framer page */
-      --h1: clamp(34px, 7.6vw, 64px);
-      --label: 14px;
-      --body: 18px;
+      --h1: clamp(32px, 7vw, 56px);
+      --h2: clamp(22px, 2.2vw, 32px);
+      --h3: clamp(18px, 1.8vw, 24px);
+      --body: 16px;
+      --small: 13px;
     }
 
-    /* --- GLOBAL ----------------------------------------------------------- */
-    *,*::before,*::after { box-sizing: border-box; }
-    html,body { height: 100%; }
+    html, body { height: 100%; }
     body {
       margin: 0;
       background: var(--bg);
@@ -35,251 +35,240 @@
       font-family: var(--font-sans);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      line-height: 1.45;
     }
     img { display:block; max-width:100%; height:auto; }
     a { color: inherit; text-underline-offset: 2px; }
 
-    /* --- LAYOUT ----------------------------------------------------------- */
+    /* Grid: content column + gutters */
     .page {
-      display:grid;
-      grid-template-columns: minmax(16px,1fr) minmax(0,1120px) minmax(16px,1fr);
+      display: grid;
+      grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
       grid-auto-rows: min-content;
-      row-gap: 28px;
+      row-gap: 24px;
     }
     .page > * { grid-column: 2; }
 
-    /* Title & meta block (TOP) */
-    .title { font-size: var(--h1); font-weight: 700; line-height: 1.06; letter-spacing: -0.01em; }
-    .metaGrid {
+    /* Title + meta (top) */
+    .title-wrap { padding-top: 8px; }
+    .title { font-size: var(--h1); line-height: 1.05; font-weight: 700; }
+    .meta {
+      margin-top: 16px;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 28px 40px;
-      margin-top: 16px;
+      gap: 24px 32px;
+      font-size: clamp(14px, 1.6vw, 18px);
     }
-    .metaItem .label {
-      font-size: var(--label);
+    .meta .label {
       letter-spacing: .18em;
-      text-transform: uppercase;
-      opacity: .65;
-      margin-bottom: 8px;
+      font-size: var(--small);
+      opacity: .6;
     }
-    .metaItem .value {
-      font-size: clamp(18px, 3.5vw, 28px);
-      font-weight: 500;
-      line-height: 1.25;
-    }
+    .meta .value { font-weight: 500; }
 
-    /* Hero (BELOW meta), no borders/radius */
-    .hero { margin-top: 8px; }
+    /* FULL-BLEED hero below meta */
+    .hero-bleed { grid-column: 1 / -1; }
+    .hero-bleed img { width: 100%; height: auto; }
     .credit {
+      grid-column: 2;        /* align with content column */
+      text-align: right;
+      font-size: var(--small);
       margin-top: 8px;
-      text-align: right;        /* right-aligned under image */
-      font-size: 14px;
-      opacity: .8;
     }
-    .credit a { color: var(--accent); text-decoration: none; }
-    .credit a:hover { text-decoration: underline; }
+    .credit a { color: var(--accent); text-decoration: underline; }
 
-    /* Content text block */
+    /* Body copy block (“Mission Brief” content) */
     .pre {
       white-space: pre-wrap;
-      font-size: var(--body);
       line-height: 1.55;
+      font-size: clamp(16px, 1.6vw, 18px);
     }
 
-    /* Embeds (no borders/radius) */
+    /* Generic embed (no borders/radius) */
     .embed { aspect-ratio: 16/9; }
-    .embed iframe { width:100%; height:100%; border:0; display:block; }
+    .embed iframe { width: 100%; height: 100%; border: 0; display:block; }
 
-    /* GPX actions (button centered BELOW iframe) */
-    .gpx-actions{
-      margin-top: 14px;
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:center;
-    }
+    /* GPX area */
+    .gpx { display: grid; row-gap: 12px; }
     .btn {
-      display:inline-flex; align-items:center; gap:10px;
-      padding: 12px 18px;
-      border: 0;
-      border-radius: 999px;
-      background: var(--ink);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12);
+      background: var(--paper); font-weight: 600; width: max-content; margin: 0 auto; /* centered */
     }
-    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
 
-    /* Responsive tweaks */
-    @media (max-width: 960px) {
-      .page { grid-template-columns: 12px minmax(0, 810px) 12px; }
+    /* Tablet */
+    @media (max-width: 810px) {
+      .page { grid-template-columns: 12px minmax(0, 1fr) 12px; }
+      .meta { grid-template-columns: 1fr 1fr; gap: 16px 20px; }
     }
-    @media (max-width: 600px) {
-      .page { grid-template-columns: 10px minmax(0, 1fr) 10px; }
-      .metaGrid { grid-template-columns: 1fr 1fr; gap: 20px; }
+    /* Phone */
+    @media (max-width: 480px) {
+      .page { grid-template-columns: 8px minmax(0, 1fr) 8px; }
+      .title { font-size: clamp(28px, 9vw, 40px); }
+      .meta { grid-template-columns: 1fr 1fr; }
     }
 
-    /* tiny status line while testing */
-    .status { font-size: 12px; opacity:.65; text-align:center; }
+    .status { font-size: 12px; opacity:.7; text-align:center; padding:6px 0; }
   </style>
 </head>
 <body>
   <div class="page">
     <div id="status" class="status">Loading…</div>
 
-    <!-- TOP: title + meta -->
-    <header>
+    <!-- Title + Meta -->
+    <section class="title-wrap">
       <h1 id="title" class="title"></h1>
-      <div class="metaGrid">
-        <div class="metaItem">
-          <div class="label">Category</div>
+      <div class="meta">
+        <div>
+          <div class="label">CATEGORY</div>
           <div id="category" class="value"></div>
         </div>
-        <div class="metaItem">
-          <div class="label">Season</div>
+        <div>
+          <div class="label">SEASON</div>
           <div id="season" class="value"></div>
         </div>
-        <div class="metaItem">
-          <div class="label">Location</div>
+        <div>
+          <div class="label">LOCATION</div>
           <div id="location" class="value"></div>
         </div>
-        <div class="metaItem">
-          <div class="label">Date</div>
-          <div id="date" class="value"></div>
+        <div>
+          <div class="label">DATE</div>
+          <div id="date" class="value mono"></div>
         </div>
       </div>
-    </header>
+    </section>
 
-    <!-- Hero BELOW meta -->
-    <figure class="hero">
+    <!-- FULL-BLEED Hero (image) -->
+    <figure class="hero-bleed">
       <img id="hero" alt="Expedition hero image" />
-      <figcaption id="credit" class="credit"></figcaption>
     </figure>
+    <div id="credit" class="credit"></div>
 
-    <!-- Mission text -->
+    <!-- Mission Brief text -->
     <section>
       <div id="mission" class="pre"></div>
     </section>
 
-    <!-- Google Map (no section header) -->
+    <!-- Google Map (no header) -->
     <section>
       <div class="embed">
-        <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </section>
 
-    <!-- GPX Studio (iframe first, button BELOW and centered) -->
-    <section id="gpxSection">
-      <div id="gpxEmbedWrap" class="embed" style="margin-top:12px">
+    <!-- GPX Studio (embed first, button centered below) -->
+    <section class="gpx">
+      <div class="embed">
         <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
-      <div id="gpxActions" class="gpx-actions">
-        <a id="gpxBtn" class="btn" href="#" download>Download GPX</a>
-      </div>
-      <div id="trailheads" class="status" style="margin-top:8px"></div>
+      <a id="gpxBtn" class="btn" href="#" download>
+        <span>⬇️ Download GPX</span>
+      </a>
+      <div class="mono" id="trailheads" style="text-align:center;"></div>
     </section>
   </div>
 
   <script>
-    // --- tiny helpers -------------------------------------------------------
-    const $ = id => document.getElementById(id);
-    const get = (o,p) => p.split('.').reduce((a,k)=>a?.[k], o);
-    const first = (o,keys)=> keys.map(k=>get(o,k)).find(v=>v!==undefined && v!==null && v!=="");
+    // ---------- helpers ----------
+    const $ = (id) => document.getElementById(id);
+    const get = (obj, path) => path.split('.').reduce((o,k)=>o?.[k], obj);
+    const first = (obj, keys) => keys.map(k => get(obj, k)).find(v => v !== undefined && v !== null && v !== "");
+    const setText = (id, val) => { const el=$(id); if(!val){el?.remove();return;} el.textContent=val; };
+    const setHTML = (id, val) => { const el=$(id); if(!val){el?.remove();return;} el.innerHTML=val; };
+    const setSrc  = (id, val) => { const el=$(id); if(!val){el?.closest('section,figure,div')?.remove();return;} el.src=val; };
 
+    // Build GPX Studio URL from a public GPX file
+    const gpxStudioURL = (gpxUrl) => {
+      if(!gpxUrl) return "";
+      const state = { traces: [{ url: gpxUrl }], settings: { units: "imperial" } };
+      return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
+    };
+
+    // Slug: supports /expedition/{slug} and ?slug=…
     function getSlug(){
-      // supports /expedition/{slug} and ?slug=...
-      const url = new URL(location.href);
-      const q = url.searchParams.get("slug");
-      if (q) return q;
-      const parts = url.pathname.split("/").filter(Boolean);
-      const i = parts.findIndex(p => p.toLowerCase()==="expedition");
-      return i>-1 ? parts[i+1] : null;
-    }
-
-    function gpxStudioURL(src){
-      if (!src) return "";
-      return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify({
-        traces:[{ url: src }],
-        settings:{ units:"imperial" }
-      }));
+      const u = new URL(location.href);
+      const qs = u.searchParams.get("slug");
+      if(qs) return qs;
+      const parts = u.pathname.split("/").filter(Boolean);
+      const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
+      return idx > -1 ? parts[idx+1] : parts[parts.length-1];
     }
 
     async function main(){
       const status = $("status");
       const slug = getSlug();
-      if(!slug){ status.textContent="Missing slug. Use /expedition/{slug} or ?slug=..."; return; }
+      if(!slug){ status.textContent="Missing slug (use /expedition/{slug} or ?slug=)"; return; }
 
+      // Your Supabase bucket is "expedition" (singular)
       const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
 
+      status.textContent = "Fetching expedition…";
+      let data;
       try{
-        status.textContent = "Fetching…";
-        const res = await fetch(jsonURL, { cache:"no-store" });
+        const res = await fetch(jsonURL, { cache: "no-store" });
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        // Title & meta
-        $("title").textContent = first(data,["title"]) || "";
-        $("category").textContent = first(data,["category"]) || "";
-        $("season").textContent   = first(data,["season"])   || "";
-        $("location").textContent = first(data,["location"]) || "";
-        $("date").textContent     = first(data,["date"])     || "";
-
-        // Hero below meta
-        const hero = first(data,["hero_image","hero.url","image"]);
-        if (hero) $("hero").src = hero;
-
-        // Credit hyperlink uses image_link preferentially
-        const creditName = first(data,["image_credit","credit","photo_credit"]);
-        const creditHref = first(data,[
-          "image_link",               // <— your Unsplash page URL
-          "image_credit_link",
-          "credit_link",
-          "unsplash_link",
-          "unsplash_url"
-        ]) || (hero && /images\.unsplash\.com/i.test(hero) ? hero : "");
-
-        $("credit").innerHTML = creditName
-          ? (creditHref
-             ? `<a href="${creditHref}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-             : creditName)
-          : "";
-
-        // Mission text (preserve line breaks)
-        const mission = first(data,["mission_text","mission"]) || "";
-        $("mission").innerHTML = mission.replace(/\n/g,"<br>");
-
-        // Map iframe
-        $("map").src = first(data,["map_embed_url","map_embed"]) || "";
-
-        // GPX (iframe first, button centered below)
-        const gpxURL = first(data,[
-          "gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"
-        ]);
-        if (gpxURL){
-          const studio = gpxStudioURL(gpxURL);
-          $("gpxStudio").src = studio;
-          $("gpxBtn").href = gpxURL;
-          $("gpxBtn").download = (slug || "route") + ".gpx";
-          const th = [ first(data,["start_trailhead","start"]),
-                       first(data,["end_trailhead","end"]) ]
-                      .filter(Boolean).join(" → ");
-          $("trailheads").textContent = th;
-        } else {
-          $("gpxSection").style.display = "none";
-        }
-
-        status.textContent = "Loaded ✓";
-        setTimeout(()=>status.style.display="none", 800);
+        data = await res.json();
       }catch(err){
-        status.textContent = `Failed to load: ${err.message}`;
+        status.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
+        return;
       }
+
+      // Title + meta
+      setText("title",     first(data, ["title"]));
+      setText("category",  first(data, ["category"]));
+      setText("season",    first(data, ["season"]));
+      setText("location",  first(data, ["location"]));
+      setText("date",      first(data, ["date"]));
+
+      // Hero + credit (credit links to image_link, not the image itself)
+      const hero = first(data, ["hero_image","image"]);
+      const creditName = first(data, ["image_credit","credit_name"]);
+      const creditHref = first(data, [
+        "image_link",               // Unsplash page URL (your sheet field)
+        "image_credit_link",
+        "credit_link",
+        "unsplash_link",
+        "unsplash_url"
+      ]) || (hero && /images\.unsplash\.com/i.test(hero) ? hero : "");
+
+      setSrc("hero", hero);
+
+      if(creditName){
+        const creditEl = $("credit");
+        creditEl.innerHTML = creditHref
+          ? `<a href="${creditHref}" target="_blank" rel="noopener noreferrer">${creditName} (Unsplash)</a>`
+          : `${creditName} (Unsplash)`;
+      } else {
+        $("credit")?.remove();
+      }
+
+      // Mission text (keep line breaks)
+      const missionText = first(data, ["mission_text","brief","content"]) || "";
+      setHTML("mission", missionText.replace(/\\n/g, "<br/>"));
+
+      // Google map (use map_embed_url or map_embed)
+      const mapURL = first(data, ["map_embed_url","map_embed"]);
+      setSrc("map", mapURL);
+
+      // GPX (iframe + centered button below)
+      const gpxURL = first(data, ["gpx_download_link","gpx_url","gpx"]);
+      if(gpxURL){
+        $("gpxBtn").href = gpxURL;
+        $("gpxBtn").download = (slug || "route") + ".gpx";
+        setSrc("gpxStudio", gpxStudioURL(gpxURL));
+        const startTH = first(data, ["start_trailhead"]);
+        const endTH   = first(data, ["end_trailhead"]);
+        setText("trailheads", [startTH,endTH].filter(Boolean).join(" → "));
+      } else {
+        // hide the whole GPX section if not present
+        $("gpxStudio")?.closest("section")?.remove();
+      }
+
+      status.textContent = "Loaded ✓";
+      setTimeout(()=> status.remove(), 1200);
     }
 
-    main();
+    if (typeof window !== "undefined") main();
   </script>
 </body>
 </html>
