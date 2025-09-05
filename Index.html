@@ -183,116 +183,136 @@
     </section>
   </div>
 
-  <script>
-  function byId(id){ return document.getElementById(id); }
-  function getParam(name){ const u=new URL(location.href); return u.searchParams.get(name); }
-  function q(obj, path){ try{ return path.split('.').reduce((o,k)=>o?.[k], obj); }catch(e){ return undefined; } }
-  function setText(id, val){ const el=byId(id); if(!el) return; if(!val){ el.closest('[data-hide-if-empty]')?.remove(); return } el.textContent=val; }
-  function setHTML(id, val){ const el=byId(id); if(!el) return; if(!val){ el.closest('[data-hide-if-empty]')?.remove(); return } el.innerHTML=val; }
-  function setSrc(id, val){ const el=byId(id); if(!el) return; if(!val){ el.closest('[data-hide-if-empty],.embed,.hero')?.remove(); return } el.src=val; }
+<script>
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const qp = (name) => new URL(location.href).searchParams.get(name);
+  const get = (obj, path) => path.split('.').reduce((o, k) => (o ? o[k] : undefined), obj);
+  const first = (obj, keys) => {
+    for (const k of keys) {
+      const v = get(obj, k);
+      if (typeof v === "string" && v.trim()) return v.trim();
+      if (v) return v;
+    }
+    return "";
+  };
+  const setText = (id, val) => {
+    const el = $(id); if (!el) return;
+    if (!val) { el.closest('[data-hide-if-empty]')?.remove(); return; }
+    el.textContent = val;
+  };
+  const setHTML = (id, val) => {
+    const el = $(id); if (!el) return;
+    if (!val) { el.closest('[data-hide-if-empty]')?.remove(); return; }
+    el.innerHTML = val;
+  };
+  const setSrc = (id, val) => {
+    const el = $(id); if (!el) return;
+    if (!val) { el.closest('[data-hide-if-empty],.embed,.hero')?.remove(); return; }
+    el.src = val;
+  };
 
+  // GPX Studio builder
   function gpxStudioURL(gpxUrl){
     if(!gpxUrl) return "";
-    // add a cache-buster just in case the same URL was cached upstream
     const u = new URL(gpxUrl);
-    u.searchParams.set("_t", Date.now().toString());
-    const state={ traces:[{ url: u.toString() }], settings:{ units:"imperial" } };
-    return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify(state));
+    u.searchParams.set("_t", Date.now().toString()); // cache-buster
+    const state = { traces: [{ url: u.toString() }], settings: { units: "imperial" } };
+    return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
   }
 
   function getSlug(){
-    const fromQuery=getParam("slug");
-    if(fromQuery) return fromQuery;
-    const parts=(location.pathname||"/").split("/").filter(Boolean);
-    const idx=parts.findIndex(p=>p.toLowerCase()==="expedition");
-    return idx>-1 ? parts[idx+1] : null;
+    const q = qp("slug"); if (q) return q;
+    const parts = (location.pathname || "/").split("/").filter(Boolean);
+    const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
+    return idx > -1 ? parts[idx + 1] : null;
   }
 
-  function firstDefined(obj, keys){
-    for(const k of keys){ const v=q(obj,k); if(v) return v; }
-    return "";
-  }
-
-  function formatDateMaybe(val){
-    if(!val) return val;
-    if(/^\d{4}-\d{2}-\d{2}$/.test(val)){
-      const d=new Date(val+"T00:00:00Z");
-      return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
-    }
-    return val;
+  function looksLikeUnsplash(url){
+    return typeof url === "string" && /images\.unsplash\.com/i.test(url);
   }
 
   async function main(){
-    const statusEl=byId("status");
-    const slug=getSlug();
-
-    if(!slug){ statusEl.textContent="Missing slug. Use ?slug={file} or /expedition/{slug}"; return; }
+    const status = $("status");
+    const slug = getSlug();
+    if(!slug){ status.textContent = "Missing slug (?slug= or /expedition/{slug})"; return; }
 
     // Supabase (bucket 'expedition', singular)
-    const jsonURL=`https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
+    const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
+    status.textContent = "Fetching expedition…";
 
-    statusEl.textContent="Fetching expedition…";
     let data;
     try{
-      const res=await fetch(jsonURL,{cache:"no-store"});
-      if(!res.ok) throw new Error("HTTP "+res.status);
-      data=await res.json();
+      const res = await fetch(jsonURL, { cache: "no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
     }catch(err){
-      statusEl.textContent=`Failed to fetch ${jsonURL}: ${err.message}`;
+      status.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
       return;
     }
 
-    // HERO + CREDIT (credit = hyperlink, right-aligned under image)
-    setSrc("hero", firstDefined(data, ["hero_image","hero.url","image"]));
-    const creditName=firstDefined(data, ["image_credit","credit","photo_credit"]);
-    const creditLink=firstDefined(data, ["image_link","credit_link"]);
-    const creditEl=byId("credit");
+    // ----- HERO + CREDIT (link if possible) -----
+    const hero = first(data, ["hero_image","hero.url","image"]);
+    setSrc("hero", hero);
+
+    const creditName = first(data, ["image_credit","credit","photo_credit"]);
+    let creditLink  = first(data, ["image_link","credit_link","image_credit_link"]);
+    if(!creditLink && looksLikeUnsplash(hero)) creditLink = hero; // fallback so link is clickable
+
     if(creditName){
-      creditEl.innerHTML = creditLink
+      $("credit").innerHTML = creditLink
         ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
         : creditName;
     } else {
-      creditEl.style.display="none";
+      $("credit").style.display = "none";
     }
 
-    // TITLE + META
-    setText("title", firstDefined(data, ["title","name"]));
-    setText("categoryVal", firstDefined(data, ["category","type"]));
-    setText("seasonVal", firstDefined(data, ["season"]));
-    setText("locationVal", firstDefined(data, ["location","place"]));
-    setText("dateVal", formatDateMaybe(firstDefined(data, ["date","when"])));
+    // ----- TITLE + META -----
+    setText("title", first(data, ["title","name"]));
+    setText("categoryVal", first(data, ["category","type"]));
+    setText("seasonVal", first(data, ["season"]));
+    setText("locationVal", first(data, ["location","place"]));
+    const dateRaw = first(data, ["date","when"]);
+    let dateNice = dateRaw;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) {
+      dateNice = new Date(dateRaw + "T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    }
+    setText("dateVal", dateNice);
 
-    // MISSION
-    const missionText=firstDefined(data, ["mission_text","mission","brief","summary"]);
-    setHTML("mission", (missionText||"").replace(/\n/g,"<br/>"));
+    // ----- MISSION -----
+    const missionText = first(data, ["mission_text","mission","brief","summary"]) || "";
+    setHTML("mission", missionText.replace(/\n/g,"<br/>"));
 
-    // MAP
-    const mapURL=firstDefined(data, ["map_embed_url","map_embed","map.url"]);
+    // ----- MAP -----
+    const mapURL = first(data, ["map_embed_url","map_embed","map.url"]);
     setSrc("map", mapURL);
 
-    // GPX (your exact key first)
-    const gpxURL=firstDefined(data, [
+    // ----- GPX (never silently hide—show a gentle note instead) -----
+    const gpxURL = first(data, [
       "gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"
     ]);
 
+    const gpxSection = $("gpxSection");
     if(gpxURL){
-      const btn=byId("gpxBtn");
-      btn.href=gpxURL;
-      btn.download=(slug||"route")+".gpx";
-      setText("trailheads", [firstDefined(data,["start_trailhead","start"]), firstDefined(data,["end_trailhead","end"])].filter(Boolean).join(" → "));
+      const studioURL = gpxStudioURL(gpxURL);
+      $("gpxBtn").href = gpxURL;
+      $("gpxBtn").download = (slug || "route") + ".gpx";
+      $("gpxStudioLink").href = studioURL;
+      setSrc("gpxStudio", studioURL);
 
-      const studio=gpxStudioURL(gpxURL);
-      setSrc("gpxStudio", studio);
-      byId("gpxStudioLink").href = studio;
+      const th = [ first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"]) ]
+                 .filter(Boolean).join(" → ");
+      if(th) setText("trailheads", th);
     }else{
-      byId("gpxSection")?.remove();
+      // keep section and show why
+      setHTML("gpxSection", `<div style="opacity:.65;font-size:14px">No GPX link found in JSON (expected <code>gpx_download_link</code>).<br>Loaded from: <code>${jsonURL}</code></div>`);
     }
 
-    statusEl.textContent="Loaded ✓";
-    setTimeout(()=> statusEl.style.display="none", 1200);
+    status.textContent = "Loaded ✓";
+    setTimeout(()=> status.style.display = "none", 1000);
   }
 
-  if(typeof window!=="undefined") main();
-  </script>
+  if (typeof window !== "undefined") main();
+</script>
 </body>
 </html>
