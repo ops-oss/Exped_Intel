@@ -5,314 +5,281 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your @font-face bundle -->
+  <!-- If you want perfect Framer typography, keep your exported fonts.css here -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
-  :root{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-  *{box-sizing:border-box;-webkit-font-smoothing:inherit}
-  h1,h2,h3,h4,h5,h6,p,figure{margin:0}
-  body,input,textarea,select,button{font-size:12px;font-family:sans-serif}
+    /* --- TOKENS ----------------------------------------------------------- */
+    :root{
+      /* from your export */
+      --bg: rgb(232, 229, 226);            /* page background */
+      --ink: rgb(30, 30, 30);              /* text */
+      --paper: rgb(255, 255, 255);         /* surface, if needed */
+      --accent: rgb(254, 87, 51);
 
-  body{
-    /* tokens from your export */
-    --token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232,229,226); /* page bg */
-    --token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30,30,30);    /* ink */
-    --token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255,255,255); /* white */
-    --token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254,87,51);   /* accent */
+      --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-    --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
-    --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
-    --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
-    --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
+      /* type scale approximating your Framer page */
+      --h1: clamp(34px, 7.6vw, 64px);
+      --label: 14px;
+      --body: 18px;
+    }
 
-    --font-sans: "Poppins", Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* --- GLOBAL ----------------------------------------------------------- */
+    *,*::before,*::after { box-sizing: border-box; }
+    html,body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.45;
+    }
+    img { display:block; max-width:100%; height:auto; }
+    a { color: inherit; text-underline-offset: 2px; }
 
-    --h1: clamp(36px, 8vw, 72px);
-    --h2: clamp(18px, 3.2vw, 28px);
-    --body: clamp(15px, 2.3vw, 18px);
-    --small: 13px;
-  }
+    /* --- LAYOUT ----------------------------------------------------------- */
+    .page {
+      display:grid;
+      grid-template-columns: minmax(16px,1fr) minmax(0,1120px) minmax(16px,1fr);
+      grid-auto-rows: min-content;
+      row-gap: 28px;
+    }
+    .page > * { grid-column: 2; }
 
-  html, body { height: 100%; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  img { display:block; max-width:100%; height:auto; }
-  a { color: inherit; text-underline-offset: 2px; }
+    /* Title & meta block (TOP) */
+    .title { font-size: var(--h1); font-weight: 700; line-height: 1.06; letter-spacing: -0.01em; }
+    .metaGrid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px 40px;
+      margin-top: 16px;
+    }
+    .metaItem .label {
+      font-size: var(--label);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .65;
+      margin-bottom: 8px;
+    }
+    .metaItem .value {
+      font-size: clamp(18px, 3.5vw, 28px);
+      font-weight: 500;
+      line-height: 1.25;
+    }
 
-  /* Layout wrapper */
-  .page {
-    display: grid;
-    grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
-    grid-auto-rows: min-content;
-    row-gap: 28px;
-  }
-  .page > * { grid-column: 2; }
+    /* Hero (BELOW meta), no borders/radius */
+    .hero { margin-top: 8px; }
+    .credit {
+      margin-top: 8px;
+      text-align: right;        /* right-aligned under image */
+      font-size: 14px;
+      opacity: .8;
+    }
+    .credit a { color: var(--accent); text-decoration: none; }
+    .credit a:hover { text-decoration: underline; }
 
-  /* Title + meta grid */
-  .title-wrap { padding-top: 4px; }
-  .title { font-size: var(--h1); line-height: 1.04; font-weight: 700; letter-spacing:-0.02em; }
+    /* Content text block */
+    .pre {
+      white-space: pre-wrap;
+      font-size: var(--body);
+      line-height: 1.55;
+    }
 
-  .meta-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 40px;
-    margin-top: 24px;
-  }
-  .meta-block .label{
-    font-size: var(--small);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    opacity: .65;
-    margin-bottom: 6px;
-  }
-  .meta-block .val{
-    font-size: clamp(18px, 4.5vw, 28px);
-    line-height: 1.2;
-    font-weight: 500;
-  }
+    /* Embeds (no borders/radius) */
+    .embed { aspect-ratio: 16/9; }
+    .embed iframe { width:100%; height:100%; border:0; display:block; }
 
-  /* HERO below meta; no radius */
-  .hero { margin-top: 6px; }
-  .hero img { width: 100%; height: auto; }
-  .credit {
-    text-align: right;
-    margin-top: 6px;
-    color: var(--accent);
-    font-size: 12px;
-  }
-  .credit a{ color: var(--accent); text-decoration: none; }
-  .credit a:hover{ text-decoration: underline; }
+    /* GPX actions (button centered BELOW iframe) */
+    .gpx-actions{
+      margin-top: 14px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn {
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-  /* Mission — no card borders */
-  .section { padding: 0; }
-  .pre { white-space: pre-wrap; line-height: 1.55; font-size: var(--body); }
-  .section + .section { margin-top: 4px; }
+    /* Responsive tweaks */
+    @media (max-width: 960px) {
+      .page { grid-template-columns: 12px minmax(0, 810px) 12px; }
+    }
+    @media (max-width: 600px) {
+      .page { grid-template-columns: 10px minmax(0, 1fr) 10px; }
+      .metaGrid { grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
 
-  /* Embeds — *no* borders or radius */
-  .embed { border: 0; border-radius: 0; overflow: hidden; aspect-ratio: 16/9; background: transparent; }
-  .embed iframe { width: 100%; height: 100%; border: 0; display: block; }
-
-  /* GPX */
-  .gpx-row { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap: wrap; }
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding: 14px 22px; border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.14);
-    background: #000; color:#fff; cursor:pointer;
-    font-weight:700; letter-spacing:.02em; text-decoration:none;
-  }
-  .btn:hover{ filter:brightness(1.05); }
-  .debug{ font-size:12px; opacity:.6; margin-top:8px; }
-
-  /* Status strip */
-  .status { font-size: 12px; opacity: .7; text-align:center; padding: 6px 0; }
-
-  /* Tablet 810 centered */
-  @media (max-width: 1024px) {
-    .page { grid-template-columns: 12px minmax(0, 810px) 12px; }
-  }
-  /* Phone */
-  @media (max-width: 480px) {
-    .page { grid-template-columns: 8px minmax(0, 1fr) 8px; }
-    .title { font-size: clamp(34px, 10vw, 52px); }
-  }
+    /* tiny status line while testing */
+    .status { font-size: 12px; opacity:.65; text-align:center; }
   </style>
 </head>
 <body>
   <div class="page">
     <div id="status" class="status">Loading…</div>
 
-    <!-- TITLE + META (top) -->
-    <section class="title-wrap">
+    <!-- TOP: title + meta -->
+    <header>
       <h1 id="title" class="title"></h1>
-      <div class="meta-grid">
-        <div class="meta-block" data-hide-if-empty>
-          <div class="label">Location</div>
-          <div id="locationVal" class="val"></div>
-        </div>
-        <div class="meta-block" data-hide-if-empty>
-          <div class="label">Date</div>
-          <div id="dateVal" class="val"></div>
-        </div>
-        <div class="meta-block" data-hide-if-empty>
+      <div class="metaGrid">
+        <div class="metaItem">
           <div class="label">Category</div>
-          <div id="categoryVal" class="val"></div>
+          <div id="category" class="value"></div>
         </div>
-        <div class="meta-block" data-hide-if-empty>
+        <div class="metaItem">
           <div class="label">Season</div>
-          <div id="seasonVal" class="val"></div>
+          <div id="season" class="value"></div>
+        </div>
+        <div class="metaItem">
+          <div class="label">Location</div>
+          <div id="location" class="value"></div>
+        </div>
+        <div class="metaItem">
+          <div class="label">Date</div>
+          <div id="date" class="value"></div>
         </div>
       </div>
-    </section>
+    </header>
 
-    <!-- HERO (below meta). Credit is a right-aligned link under the image -->
+    <!-- Hero BELOW meta -->
     <figure class="hero">
       <img id="hero" alt="Expedition hero image" />
       <figcaption id="credit" class="credit"></figcaption>
     </figure>
 
-    <!-- MISSION -->
-    <section class="section">
+    <!-- Mission text -->
+    <section>
       <div id="mission" class="pre"></div>
     </section>
 
-    <!-- MAP (no header) -->
-    <section class="section" data-hide-if-empty>
+    <!-- Google Map (no section header) -->
+    <section>
       <div class="embed">
-        <iframe id="map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </section>
 
-    <!-- GPX (no header). Button BELOW the embed -->
-    <section class="section" data-hide-if-empty id="gpxSection">
-      <div class="embed">
+    <!-- GPX Studio (iframe first, button BELOW and centered) -->
+    <section id="gpxSection">
+      <div id="gpxEmbedWrap" class="embed" style="margin-top:12px">
         <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
-      <div class="gpx-row" style="margin-top:12px">
-        <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
-        <span class="val" id="trailheads"></span>
+      <div id="gpxActions" class="gpx-actions">
+        <a id="gpxBtn" class="btn" href="#" download>Download GPX</a>
       </div>
-      <div class="debug"><a id="gpxStudioLink" href="#" target="_blank" rel="noopener">Open GPX Studio URL</a></div>
+      <div id="trailheads" class="status" style="margin-top:8px"></div>
     </section>
   </div>
 
-<script>
-  // ---------- helpers ----------
-  const $ = (id) => document.getElementById(id);
-  const qp = (name) => new URL(location.href).searchParams.get(name);
-  const get = (obj, path) => path.split('.').reduce((o, k) => (o ? o[k] : undefined), obj);
-  const first = (obj, keys) => {
-    for (const k of keys) {
-      const v = get(obj, k);
-      if (typeof v === "string" && v.trim()) return v.trim();
-      if (v) return v;
-    }
-    return "";
-  };
-  const setText = (id, val) => {
-    const el = $(id); if (!el) return;
-    if (!val) { el.closest('[data-hide-if-empty]')?.remove(); return; }
-    el.textContent = val;
-  };
-  const setHTML = (id, val) => {
-    const el = $(id); if (!el) return;
-    if (!val) { el.closest('[data-hide-if-empty]')?.remove(); return; }
-    el.innerHTML = val;
-  };
-  const setSrc = (id, val) => {
-    const el = $(id); if (!el) return;
-    if (!val) { el.closest('[data-hide-if-empty],.embed,.hero')?.remove(); return; }
-    el.src = val;
-  };
+  <script>
+    // --- tiny helpers -------------------------------------------------------
+    const $ = id => document.getElementById(id);
+    const get = (o,p) => p.split('.').reduce((a,k)=>a?.[k], o);
+    const first = (o,keys)=> keys.map(k=>get(o,k)).find(v=>v!==undefined && v!==null && v!=="");
 
-  // GPX Studio builder
-  function gpxStudioURL(gpxUrl){
-    if(!gpxUrl) return "";
-    const u = new URL(gpxUrl);
-    u.searchParams.set("_t", Date.now().toString()); // cache-buster
-    const state = { traces: [{ url: u.toString() }], settings: { units: "imperial" } };
-    return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
-  }
-
-  function getSlug(){
-    const q = qp("slug"); if (q) return q;
-    const parts = (location.pathname || "/").split("/").filter(Boolean);
-    const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
-    return idx > -1 ? parts[idx + 1] : null;
-  }
-
-  function looksLikeUnsplash(url){
-    return typeof url === "string" && /images\.unsplash\.com/i.test(url);
-  }
-
-  async function main(){
-    const status = $("status");
-    const slug = getSlug();
-    if(!slug){ status.textContent = "Missing slug (?slug= or /expedition/{slug})"; return; }
-
-    // Supabase (bucket 'expedition', singular)
-    const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
-    status.textContent = "Fetching expedition…";
-
-    let data;
-    try{
-      const res = await fetch(jsonURL, { cache: "no-store" });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      data = await res.json();
-    }catch(err){
-      status.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
-      return;
+    function getSlug(){
+      // supports /expedition/{slug} and ?slug=...
+      const url = new URL(location.href);
+      const q = url.searchParams.get("slug");
+      if (q) return q;
+      const parts = url.pathname.split("/").filter(Boolean);
+      const i = parts.findIndex(p => p.toLowerCase()==="expedition");
+      return i>-1 ? parts[i+1] : null;
     }
 
-    // ----- HERO + CREDIT (link if possible) -----
-    const hero = first(data, ["hero_image","hero.url","image"]);
-    setSrc("hero", hero);
-
-    const creditName = first(data, ["image_credit","credit","photo_credit"]);
-    let creditLink  = first(data, ["image_link","credit_link","image_credit_link"]);
-    if(!creditLink && looksLikeUnsplash(hero)) creditLink = hero; // fallback so link is clickable
-
-    if(creditName){
-      $("credit").innerHTML = creditLink
-        ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-        : creditName;
-    } else {
-      $("credit").style.display = "none";
+    function gpxStudioURL(src){
+      if (!src) return "";
+      return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify({
+        traces:[{ url: src }],
+        settings:{ units:"imperial" }
+      }));
     }
 
-    // ----- TITLE + META -----
-    setText("title", first(data, ["title","name"]));
-    setText("categoryVal", first(data, ["category","type"]));
-    setText("seasonVal", first(data, ["season"]));
-    setText("locationVal", first(data, ["location","place"]));
-    const dateRaw = first(data, ["date","when"]);
-    let dateNice = dateRaw;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) {
-      dateNice = new Date(dateRaw + "T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    async function main(){
+      const status = $("status");
+      const slug = getSlug();
+      if(!slug){ status.textContent="Missing slug. Use /expedition/{slug} or ?slug=..."; return; }
+
+      const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
+
+      try{
+        status.textContent = "Fetching…";
+        const res = await fetch(jsonURL, { cache:"no-store" });
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Title & meta
+        $("title").textContent = first(data,["title"]) || "";
+        $("category").textContent = first(data,["category"]) || "";
+        $("season").textContent   = first(data,["season"])   || "";
+        $("location").textContent = first(data,["location"]) || "";
+        $("date").textContent     = first(data,["date"])     || "";
+
+        // Hero below meta
+        const hero = first(data,["hero_image","hero.url","image"]);
+        if (hero) $("hero").src = hero;
+
+        // Credit hyperlink uses image_link preferentially
+        const creditName = first(data,["image_credit","credit","photo_credit"]);
+        const creditHref = first(data,[
+          "image_link",               // <— your Unsplash page URL
+          "image_credit_link",
+          "credit_link",
+          "unsplash_link",
+          "unsplash_url"
+        ]) || (hero && /images\.unsplash\.com/i.test(hero) ? hero : "");
+
+        $("credit").innerHTML = creditName
+          ? (creditHref
+             ? `<a href="${creditHref}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
+             : creditName)
+          : "";
+
+        // Mission text (preserve line breaks)
+        const mission = first(data,["mission_text","mission"]) || "";
+        $("mission").innerHTML = mission.replace(/\n/g,"<br>");
+
+        // Map iframe
+        $("map").src = first(data,["map_embed_url","map_embed"]) || "";
+
+        // GPX (iframe first, button centered below)
+        const gpxURL = first(data,[
+          "gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"
+        ]);
+        if (gpxURL){
+          const studio = gpxStudioURL(gpxURL);
+          $("gpxStudio").src = studio;
+          $("gpxBtn").href = gpxURL;
+          $("gpxBtn").download = (slug || "route") + ".gpx";
+          const th = [ first(data,["start_trailhead","start"]),
+                       first(data,["end_trailhead","end"]) ]
+                      .filter(Boolean).join(" → ");
+          $("trailheads").textContent = th;
+        } else {
+          $("gpxSection").style.display = "none";
+        }
+
+        status.textContent = "Loaded ✓";
+        setTimeout(()=>status.style.display="none", 800);
+      }catch(err){
+        status.textContent = `Failed to load: ${err.message}`;
+      }
     }
-    setText("dateVal", dateNice);
 
-    // ----- MISSION -----
-    const missionText = first(data, ["mission_text","mission","brief","summary"]) || "";
-    setHTML("mission", missionText.replace(/\n/g,"<br/>"));
-
-    // ----- MAP -----
-    const mapURL = first(data, ["map_embed_url","map_embed","map.url"]);
-    setSrc("map", mapURL);
-
-    // ----- GPX (never silently hide—show a gentle note instead) -----
-    const gpxURL = first(data, [
-      "gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"
-    ]);
-
-    const gpxSection = $("gpxSection");
-    if(gpxURL){
-      const studioURL = gpxStudioURL(gpxURL);
-      $("gpxBtn").href = gpxURL;
-      $("gpxBtn").download = (slug || "route") + ".gpx";
-      $("gpxStudioLink").href = studioURL;
-      setSrc("gpxStudio", studioURL);
-
-      const th = [ first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"]) ]
-                 .filter(Boolean).join(" → ");
-      if(th) setText("trailheads", th);
-    }else{
-      // keep section and show why
-      setHTML("gpxSection", `<div style="opacity:.65;font-size:14px">No GPX link found in JSON (expected <code>gpx_download_link</code>).<br>Loaded from: <code>${jsonURL}</code></div>`);
-    }
-
-    status.textContent = "Loaded ✓";
-    setTimeout(()=> status.style.display = "none", 1000);
-  }
-
-  if (typeof window !== "undefined") main();
-</script>
+    main();
+  </script>
 </body>
 </html>
