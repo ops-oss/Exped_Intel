@@ -5,226 +5,219 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your exported font faces (the big Poppins/Inter block you pasted) -->
+  <!-- Keep this if you stored your @font-face blocks in /fonts.css -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
-    /* === TOKENS (using your values) ======================================= */
-    :root{
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    *{ box-sizing:border-box; -webkit-font-smoothing:inherit }
-    h1,h2,h3,h4,h5,h6,p,figure{ margin:0 }
-    body,input,textarea,select,button{ font-size:12px; font-family:sans-serif }
+  /* Framer-like base + your tokens */
+  :root{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  *{box-sizing:border-box;-webkit-font-smoothing:inherit}
+  h1,h2,h3,h4,h5,h6,p,figure{margin:0}
+  body,input,textarea,select,button{font-size:12px;font-family:sans-serif}
 
-    /* Colors from the snippet you provided + a bg alias so the body matches */
-    body{
-      --token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232, 229, 226); /* sand bg */
-      --token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30, 30, 30);    /* ink */
-      --token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255, 255, 255); /* paper */
-      --token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254, 87, 51);   /* accent */
-    }
+  body{
+    /* Your pasted token values */
+    --token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232,229,226); /* page bg */
+    --token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30,30,30);    /* ink */
+    --token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255,255,255); /* white */
+    --token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254,87,51);   /* accent */
 
-    /* Aliases so CSS stays readable */
-    :root{
-      --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
-      --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
-      --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
-      --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
+    /* Mapped shorthands */
+    --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
+    --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
+    --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
+    --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
 
-      /* Typography: point to your loaded families */
-      --font-sans: "Poppins", "Inter", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    --font-sans: "Poppins", Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
 
-      /* Radii & spacing tuned to your screenshots */
-      --radius-xl: 20px;
-      --radius-l: 16px;
-      --radius-m: 12px;
-      --radius-s: 8px;
+    --radius-l: 12px;
+    --radius-m: 10px;
+    --radius-s: 8px;
 
-      /* Type scale (close to Framer defaults you showed) */
-      --h1: clamp(28px, 3vw, 44px);
-      --h2: clamp(20px, 2.2vw, 32px);
-      --h3: clamp(17px, 1.6vw, 22px);
-      --body: 16px;
-      --small: 13px;
-    }
+    --h1: clamp(36px, 8vw, 72px);
+    --h2: clamp(18px, 3.2vw, 28px);
+    --h3: clamp(16px, 2.6vw, 22px);
+    --body: clamp(15px, 2.3vw, 18px);
+    --small: 13px;
+  }
 
-    /* === Base ============================================================= */
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: var(--font-sans);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    img { display:block; max-width:100%; height:auto; }
-    a { color: inherit; text-underline-offset: 2px; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  img { display:block; max-width:100%; height:auto; }
+  a { color: inherit; text-underline-offset: 2px; }
 
-    /* === Page grid ======================================================== */
-    .page {
-      display: grid;
-      grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
-      grid-auto-rows: min-content;
-      row-gap: 20px;
-      padding: 20px 0 40px;
-    }
-    .page > * { grid-column: 2; }
+  /* Layout wrapper */
+  .page {
+    display: grid;
+    grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
+    grid-auto-rows: min-content;
+    row-gap: 28px;
+  }
+  .page > * { grid-column: 2; }
 
-    /* Status (during load) */
-    .status { font-size: 12px; opacity: .65; text-align:center; padding: 6px 0; }
+  /* Hero */
+  .hero {
+    position: relative;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+  }
+  .hero img { width: 100%; height: auto; display:block; }
+  .credit {
+    position: absolute;
+    right: 16px; bottom: 12px;
+    color: var(--accent);
+    background: transparent;
+    font-size: 12px;
+  }
 
-    /* === Hero ============================================================= */
-    .hero {
-      position: relative;
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      background: var(--paper);
-      border: 1px solid rgba(0,0,0,.06);
-      /* Framer-like full bleed card look */
-      aspect-ratio: 16/9;
-    }
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* ensures full-bleed visual like your live page */
-    }
-    .credit {
-      position: absolute;
-      right: 12px; bottom: 12px;
-      background: rgba(0,0,0,.64);
-      color: white;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: var(--small);
-      line-height: 1;
-    }
+  /* Title + meta grid */
+  .title-wrap { padding-top: 4px; }
+  .title { font-size: var(--h1); line-height: 1.04; font-weight: 700; letter-spacing:-0.02em; }
 
-    /* === Title & Meta pills ============================================== */
-    .title-wrap { padding: 8px 2px 0 2px; }
-    .title { font-size: var(--h1); line-height: 1.08; font-weight: 700; }
-    .meta {
-      margin-top: 10px;
-      font-size: var(--small);
-      opacity: .9;
-      display:flex; gap:10px; flex-wrap:wrap;
-    }
-    .pill {
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: var(--paper);
-      border: 1px solid rgba(0,0,0,.08);
-      line-height: 1;
-    }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  .meta-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    margin-top: 24px;
+  }
+  .meta-block .label{
+    font-size: var(--small);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: .65;
+    margin-bottom: 6px;
+  }
+  .meta-block .val{
+    font-size: clamp(18px, 4.5vw, 28px);
+    line-height: 1.2;
+    font-weight: 500;
+  }
 
-    /* === Content cards (Mission / Map / GPX) ============================= */
-    .card {
-      background: var(--paper);
-      border-radius: var(--radius-xl);
-      border: 1px solid rgba(0,0,0,.06);
-      padding: 18px;
-    }
-    .card h2 { font-size: var(--h2); margin: 4px 0 12px; font-weight: 700; }
-    .card h3 { font-size: var(--h3); margin: 16px 0 8px; font-weight: 600; }
+  /* Sections (thin bordered containers) */
+  .section {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: var(--radius-l);
+    padding: 18px;
+  }
+  .section h2 { font-size: var(--h2); margin: 2px 0 12px; }
 
-    .pre {
-      white-space: pre-wrap;
-      line-height: 1.55;
-      font-size: var(--body);
-    }
+  /* Mission */
+  .pre {
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: var(--body);
+  }
 
-    /* Embeds (Google Map + GPX Studio) */
-    .embed {
-      background: #000;
-      border-radius: var(--radius-l);
-      overflow: hidden;
-      border: 1px solid rgba(0,0,0,.06);
-      aspect-ratio: 16/9;
-    }
-    .embed iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
+  /* Embeds */
+  .embed {
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,.18);
+    aspect-ratio: 16/9;
+    background: #f5f5f5;
+  }
+  .embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
 
-    /* GPX row */
-    .gpx-row {
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: var(--paper);
-      cursor: pointer;
-      font-weight: 700;
-      text-decoration:none;
-    }
-    .btn:hover { border-color: rgba(0,0,0,.2); }
+  /* GPX */
+  .gpx-row {
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap: wrap;
+  }
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 14px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.14);
+    background: #000;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-decoration: none;
+  }
+  .btn:hover { filter: brightness(1.05); }
 
-    /* === Tablet & Mobile ================================================== */
-    @media (max-width: 1120px) {
-      .page { grid-template-columns: 12px minmax(0, 1fr) 12px; }
-    }
-    /* Your “fixed 810” view: we center a max-width 810 look below this */
-    @media (max-width: 1024px) {
-      .page { grid-template-columns: minmax(12px, 1fr) minmax(0, 810px) minmax(12px, 1fr); }
-    }
-    @media (max-width: 480px) {
-      .page { grid-template-columns: 8px minmax(0, 1fr) 8px; }
-      .title { font-size: clamp(22px, 7vw, 30px); }
-      .credit { font-size: 12px; }
-      .card { border-radius: var(--radius-l); }
-      .hero { border-radius: var(--radius-l); }
-    }
+  /* Status strip */
+  .status { font-size: 12px; opacity: .7; text-align:center; padding: 6px 0; }
+
+  /* Tablet 810 centered */
+  @media (max-width: 1024px) {
+    .page { grid-template-columns: 12px minmax(0, 810px) 12px; }
+  }
+
+  /* Phone */
+  @media (max-width: 480px) {
+    .page { grid-template-columns: 8px minmax(0, 1fr) 8px; }
+    .title { font-size: clamp(34px, 10vw, 52px); }
+    .embed { aspect-ratio: 16/10; }
+    .credit { font-size: 12px; }
+  }
   </style>
 </head>
 <body>
   <div class="page">
     <div id="status" class="status">Loading…</div>
 
-    <!-- Hero -->
+    <!-- HERO -->
     <figure class="hero">
       <img id="hero" alt="Expedition hero image" />
       <figcaption id="credit" class="credit"></figcaption>
     </figure>
 
-    <!-- Title + meta -->
+    <!-- TITLE + META (labels exactly like your Framer page) -->
     <section class="title-wrap">
-      <h1 id="title" class="title"> </h1>
-      <div class="meta">
-        <span id="category" class="pill"> </span>
-        <span id="season" class="pill"> </span>
-        <span id="location" class="pill"> </span>
-        <span id="date" class="pill mono"> </span>
+      <h1 id="title" class="title"></h1>
+
+      <div class="meta-grid">
+        <div class="meta-block" data-hide-if-empty>
+          <div class="label">Category</div>
+          <div id="categoryVal" class="val"></div>
+        </div>
+        <div class="meta-block" data-hide-if-empty>
+          <div class="label">Season</div>
+          <div id="seasonVal" class="val"></div>
+        </div>
+        <div class="meta-block" data-hide-if-empty>
+          <div class="label">Location</div>
+          <div id="locationVal" class="val"></div>
+        </div>
+        <div class="meta-block" data-hide-if-empty>
+          <div class="label">Date</div>
+          <div id="dateVal" class="val"></div>
+        </div>
       </div>
     </section>
 
-    <!-- Mission Brief -->
-    <section class="card" id="missionCard">
+    <!-- MISSION BRIEF -->
+    <section class="section">
       <h2>Mission Brief</h2>
-      <div id="mission" class="pre"> </div>
+      <div id="mission" class="pre"></div>
     </section>
 
-    <!-- Google Map -->
-    <section class="card" id="mapCard">
+    <!-- GOOGLE MAP -->
+    <section class="section" data-hide-if-empty>
       <h2>Route Map (Google)</h2>
       <div class="embed">
         <iframe id="map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </section>
 
-    <!-- GPX Studio -->
-    <section class="card" id="gpxCard">
+    <!-- GPX -->
+    <section class="section">
       <h2>Interactive GPX</h2>
       <div class="gpx-row">
-        <a id="gpxBtn" class="btn" href="#" download>⬇️ Download GPX</a>
-        <span class="mono" id="trailheads"> </span>
+        <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
+        <span class="val" id="trailheads"></span>
       </div>
       <div class="embed" style="margin-top:12px">
         <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -233,99 +226,102 @@
   </div>
 
   <script>
-    // ---------------- Helpers ----------------
-    const $ = id => document.getElementById(id);
-    const pick = (o, path) => path.split('.').reduce((a,k)=>a && a[k], o);
-    const setText = (id, val) => { const el=$(id); if(!val){el?.remove();return} el.textContent = val; };
-    const setHTML = (id, val) => { const el=$(id); if(!val){el?.remove();return} el.innerHTML = val; };
-    const setSrc = (id, val) => { const el=$(id); const wrap=el?.closest('.hero,.embed'); if(!val){wrap?.remove();return} el.src = val; };
+  function byId(id){ return document.getElementById(id); }
+  function getParam(name){ const u = new URL(location.href); return u.searchParams.get(name); }
+  function q(obj, path){ try{ return path.split('.').reduce((o,k)=>o?.[k], obj); }catch(e){ return undefined; } }
+  function setText(id, val){ const el = byId(id); if(!el) return; if(!val){ el.closest('[data-hide-if-empty]')?.remove(); return } el.textContent = val; }
+  function setHTML(id, val){ const el = byId(id); if(!el) return; if(!val){ el.closest('[data-hide-if-empty]')?.remove(); return } el.innerHTML = val; }
+  function setSrc(id, val){ const el = byId(id); if(!el) return; if(!val){ el.closest('.embed,.hero,[data-hide-if-empty]')?.remove(); return } el.src = val; }
 
-    function gpxStudioURL(gpxUrl){
-      if(!gpxUrl) return "";
-      const state = { traces:[{ url:gpxUrl }], settings:{ units:"imperial" } };
-      return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
+  function gpxStudioURL(gpxUrl){
+    if(!gpxUrl) return "";
+    const state = { traces: [{ url: gpxUrl }], settings: { units: "imperial" } };
+    return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
+  }
+
+  function getSlug(){
+    const fromQuery = getParam("slug");
+    if (fromQuery) return fromQuery;
+    const parts = (location.pathname || "/").split("/").filter(Boolean);
+    const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
+    return idx > -1 ? parts[idx + 1] : null;
+  }
+
+  function firstDefined(obj, keys){
+    for (const k of keys){
+      const v = q(obj, k);
+      if (v) return v;
+    }
+    return "";
+  }
+
+  async function main(){
+    const statusEl = byId("status");
+    const slug = getSlug();
+
+    if(!slug){ statusEl.textContent = "Missing slug. Use ?slug={file} or /expedition/{slug}"; return; }
+
+    // Supabase (bucket 'expedition', singular)
+    const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
+
+    statusEl.textContent = "Fetching expedition…";
+    let data;
+    try{
+      const res = await fetch(jsonURL, { cache: "no-store" });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      data = await res.json();
+    }catch(err){
+      statusEl.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
+      return;
     }
 
-    // /expedition/{slug} or ?slug= fallback
-    function getSlug(){
-      const url = new URL(location.href);
-      const q = url.searchParams.get("slug");
-      if (q) return q;
-      const parts = (location.pathname||"/").split("/").filter(Boolean);
-      const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
-      return idx > -1 ? parts[idx+1] : null;
+    // HERO + CREDIT
+    setSrc("hero", firstDefined(data, ["hero_image","hero.url","image"]));
+    const creditName = firstDefined(data, ["image_credit","credit","photo_credit"]);
+    const creditLink = firstDefined(data, ["image_link","credit_link"]);
+    if(creditName){
+      byId("credit").innerHTML = creditLink
+        ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
+        : creditName;
+    } else {
+      byId("credit").style.display = "none";
     }
 
-    async function main(){
-      const status = $("status");
-      const slug = getSlug();
+    // TITLE + META
+    setText("title", firstDefined(data, ["title","name"]));
+    setText("categoryVal", firstDefined(data, ["category","type"]));
+    setText("seasonVal", firstDefined(data, ["season"]));
+    setText("locationVal", firstDefined(data, ["location","place"]));
+    setText("dateVal", firstDefined(data, ["date","when"]));
 
-      if(!slug){
-        status.textContent = "Missing slug. Use /expedition/{slug} or ?slug={slug}";
-        return;
-      }
+    // MISSION
+    const missionText = firstDefined(data, ["mission_text","mission","brief","summary"]);
+    setHTML("mission", (missionText || "").replace(/\n/g,"<br/>"));
 
-      // Your Supabase JSON (bucket: expedition — singular)
-      const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
+    // MAP
+    const mapURL = firstDefined(data, ["map_embed_url","map_embed","map.url"]);
+    setSrc("map", mapURL);
 
-      status.textContent = "Fetching expedition…";
-      let data;
-      try{
-        const res = await fetch(jsonURL, { cache: "no-store" });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        data = await res.json();
-      }catch(err){
-        status.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
-        return;
-      }
-
-      // Fill hero + credit
-      const hero = pick(data,"hero_image");
-      if (hero) { $("hero").src = hero; } else { $(".hero")?.remove?.(); }
-      const creditName = pick(data,"image_credit");
-      const creditLink = pick(data,"image_link");
-      if(creditName){
-        $("credit").innerHTML = creditLink
-          ? `Photo: <a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-          : `Photo: ${creditName}`;
-      } else {
-        $("credit").remove();
-      }
-
-      // Title + pills
-      setText("title", pick(data,"title"));
-      setText("category", pick(data,"category"));
-      setText("season", pick(data,"season"));
-      setText("location", pick(data,"location"));
-      setText("date", pick(data,"date"));
-
-      // Mission (preserve line breaks)
-      const missionText = pick(data,"mission_text");
-      setHTML("mission", missionText ? missionText.replace(/\n/g,"<br/>") : "");
-
-      // Google Map
-      const mapURL = pick(data,"map_embed_url") || pick(data,"map_embed");
-      if (mapURL) { $("map").src = mapURL; } else { $("mapCard").remove(); }
-
-      // GPX
-      const gpxURL = pick(data,"gpx_download_link") || pick(data,"gpx_url");
-      if (gpxURL){
-        $("gpxBtn").href = gpxURL;
-        $("gpxBtn").download = (slug || "route") + ".gpx";
-        const startTH = pick(data,"start_trailhead");
-        const endTH   = pick(data,"end_trailhead");
-        const thText = [startTH, endTH].filter(Boolean).join(" → ");
-        if (thText) { $("trailheads").textContent = thText; } else { $("trailheads").remove(); }
-        $("gpxStudio").src = gpxStudioURL(gpxURL);
-      } else {
-        $("gpxCard").remove();
-      }
-
-      status.textContent = "Loaded ✓";
-      setTimeout(()=> status.remove(), 1200);
+    // GPX (multi-key support)
+    const gpxURL = firstDefined(data, [
+      "gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"
+    ]);
+    if (gpxURL){
+      const btn = byId("gpxBtn");
+      btn.href = gpxURL;
+      btn.download = (slug || "route") + ".gpx";
+      setText("trailheads", [firstDefined(data,["start_trailhead","start"]), firstDefined(data,["end_trailhead","end"])].filter(Boolean).join(" → "));
+      setSrc("gpxStudio", gpxStudioURL(gpxURL));
+    } else {
+      byId("gpxBtn").style.display = "none";
+      byId("gpxStudio")?.closest(".embed")?.remove();
     }
 
-    if (typeof window !== "undefined") { main(); }
+    statusEl.textContent = "Loaded ✓";
+    setTimeout(()=> statusEl.style.display = "none", 1200);
+  }
+
+  if (typeof window !== "undefined") main();
   </script>
 </body>
 </html>
