@@ -5,117 +5,183 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
+  <!-- Your exported font faces (the big Poppins/Inter block you pasted) -->
+  <link rel="stylesheet" href="/fonts.css" />
+
   <style>
-    /* === 1) FONTS (inlined so you DON’T need fonts.css) === */
-    /* --- Poppins + Inter blocks from your paste (trimmed to fit) --- */
-    /* If you want every single weight/locale, you can paste the full set you sent.
-       These cover normal + italic for common weights so it matches your Framer look. */
-
-    /* Poppins (normal) */
-    @font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiByp8kv8JHgFVrLDz8Z1xlFQ.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiEyp8kv8JHgFVrJJfecg.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2) format("woff2")}
-    /* Poppins (italic) */
-    @font-face{font-family:Poppins;font-style:italic;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiDyp8kv8JHgFVrJJLm21lVF9eO.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:italic;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiGyp8kv8JHgFVrJJLucHtA.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:italic;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiDyp8kv8JHgFVrJJLmg1hVF9eO.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:italic;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiDyp8kv8JHgFVrJJLmr19VF9eO.woff2) format("woff2")}
-    @font-face{font-family:Poppins;font-style:italic;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v23/pxiDyp8kv8JHgFVrJJLmy15VF9eO.woff2) format("woff2")}
-
-    /* Inter (regular + 600/700 commonly used) */
-    @font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(https://framerusercontent.com/assets/vQyevYAyHtARFwPqUzQGpnDs.woff2) format("woff2")}
-    @font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(https://framerusercontent.com/assets/1ZFS7N918ojhhd0nQWdj3jz4w.woff2) format("woff2")}
-    @font-face{font-family:Inter;font-style:normal;font-weight:700;font-display:swap;src:url(https://framerusercontent.com/assets/DXD0Q7LSl7HEvDzucnyLnGBHM.woff2) format("woff2")}
-
-    /* === 2) TOKENS + GLOBALS === */
+    /* === TOKENS (using your values) ======================================= */
     :root{
-      /* Your Framer-ish tokens */
-      --ink: rgb(30, 30, 30);
-      --paper: rgb(255, 255, 255);
-      --accent: rgb(254, 87, 51);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    *{ box-sizing:border-box; -webkit-font-smoothing:inherit }
+    h1,h2,h3,h4,h5,h6,p,figure{ margin:0 }
+    body,input,textarea,select,button{ font-size:12px; font-family:sans-serif }
 
-      /* IMPORTANT: define bg so Netlify matches your design */
-      --bg: rgb(232, 229, 226); /* this was missing before */
+    /* Colors from the snippet you provided + a bg alias so the body matches */
+    body{
+      --token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232, 229, 226); /* sand bg */
+      --token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30, 30, 30);    /* ink */
+      --token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255, 255, 255); /* paper */
+      --token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254, 87, 51);   /* accent */
+    }
 
-      --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    /* Aliases so CSS stays readable */
+    :root{
+      --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
+      --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
+      --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
+      --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
+
+      /* Typography: point to your loaded families */
+      --font-sans: "Poppins", "Inter", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+
+      /* Radii & spacing tuned to your screenshots */
+      --radius-xl: 20px;
       --radius-l: 16px;
       --radius-m: 12px;
       --radius-s: 8px;
 
+      /* Type scale (close to Framer defaults you showed) */
       --h1: clamp(28px, 3vw, 44px);
-      --h2: clamp(22px, 2.2vw, 32px);
-      --h3: clamp(18px, 1.8vw, 24px);
+      --h2: clamp(20px, 2.2vw, 32px);
+      --h3: clamp(17px, 1.6vw, 22px);
       --body: 16px;
       --small: 13px;
     }
 
-    *{box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    /* === Base ============================================================= */
     html, body { height: 100%; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
       font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     img { display:block; max-width:100%; height:auto; }
     a { color: inherit; text-underline-offset: 2px; }
 
-    /* Layout wrapper */
+    /* === Page grid ======================================================== */
     .page {
       display: grid;
       grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
       grid-auto-rows: min-content;
-      row-gap: 24px;
+      row-gap: 20px;
+      padding: 20px 0 40px;
     }
     .page > * { grid-column: 2; }
 
-    /* Hero */
-    .hero { position: relative; border-radius: var(--radius-l); overflow: hidden; background: var(--paper); }
-    .hero img { width: 100%; height: auto; }
+    /* Status (during load) */
+    .status { font-size: 12px; opacity: .65; text-align:center; padding: 6px 0; }
+
+    /* === Hero ============================================================= */
+    .hero {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid rgba(0,0,0,.06);
+      /* Framer-like full bleed card look */
+      aspect-ratio: 16/9;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* ensures full-bleed visual like your live page */
+    }
     .credit {
-      position: absolute; right: 12px; bottom: 12px;
-      background: rgba(0,0,0,.6); color: white; padding: 6px 10px;
-      border-radius: 999px; font-size: var(--small);
+      position: absolute;
+      right: 12px; bottom: 12px;
+      background: rgba(0,0,0,.64);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: var(--small);
+      line-height: 1;
     }
 
-    /* Title block */
-    .title-wrap { padding: 8px 4px 0 4px; }
-    .title { font-size: var(--h1); line-height: 1.1; font-weight: 600; }
-    .meta { margin-top: 8px; font-size: var(--small); opacity: .8; display:flex; gap:12px; flex-wrap:wrap; }
-    .pill { padding: 6px 10px; border-radius: 999px; background: var(--paper); border: 1px solid rgba(0,0,0,.08); }
-
-    /* Content cards */
-    .card { background: var(--paper); border-radius: var(--radius-l); border: 1px solid rgba(0,0,0,.08); padding: 16px; }
-    .card h2 { font-size: var(--h2); margin: 0 0 12px; }
-    .card h3 { font-size: var(--h3); margin: 16px 0 8px; }
+    /* === Title & Meta pills ============================================== */
+    .title-wrap { padding: 8px 2px 0 2px; }
+    .title { font-size: var(--h1); line-height: 1.08; font-weight: 700; }
+    .meta {
+      margin-top: 10px;
+      font-size: var(--small);
+      opacity: .9;
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .pill {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--paper);
+      border: 1px solid rgba(0,0,0,.08);
+      line-height: 1;
+    }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .pre { white-space: pre-wrap; line-height: 1.55; font-size: var(--body); }
 
-    /* Embeds */
-    .embed { background: #000; border-radius: var(--radius-l); overflow: hidden; border: 1px solid rgba(0,0,0,.08); aspect-ratio: 16/9; }
-    .embed iframe { width: 100%; height: 100%; border: 0; display: block; }
+    /* === Content cards (Mission / Map / GPX) ============================= */
+    .card {
+      background: var(--paper);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(0,0,0,.06);
+      padding: 18px;
+    }
+    .card h2 { font-size: var(--h2); margin: 4px 0 12px; font-weight: 700; }
+    .card h3 { font-size: var(--h3); margin: 16px 0 8px; font-weight: 600; }
 
-    /* GPX */
-    .gpx-row { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap: wrap; }
-    .btn { display:inline-flex; align-items:center; gap:8px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,.1); background: var(--paper); cursor: pointer; font-weight: 600; }
-    .btn:hover { border-color: rgba(0,0,0,.18); }
+    .pre {
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: var(--body);
+    }
 
-    /* Responsive */
-    @media (max-width: 810px) {
-      .page { grid-template-columns: 12px minmax(0, 810px) 12px; }
-      .title { font-size: clamp(24px, 4.2vw, 36px); }
-      .embed { aspect-ratio: 16/10; }
+    /* Embeds (Google Map + GPX Studio) */
+    .embed {
+      background: #000;
+      border-radius: var(--radius-l);
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,.06);
+      aspect-ratio: 16/9;
+    }
+    .embed iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    /* GPX row */
+    .gpx-row {
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: var(--paper);
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration:none;
+    }
+    .btn:hover { border-color: rgba(0,0,0,.2); }
+
+    /* === Tablet & Mobile ================================================== */
+    @media (max-width: 1120px) {
+      .page { grid-template-columns: 12px minmax(0, 1fr) 12px; }
+    }
+    /* Your “fixed 810” view: we center a max-width 810 look below this */
+    @media (max-width: 1024px) {
+      .page { grid-template-columns: minmax(12px, 1fr) minmax(0, 810px) minmax(12px, 1fr); }
     }
     @media (max-width: 480px) {
       .page { grid-template-columns: 8px minmax(0, 1fr) 8px; }
       .title { font-size: clamp(22px, 7vw, 30px); }
       .credit { font-size: 12px; }
+      .card { border-radius: var(--radius-l); }
+      .hero { border-radius: var(--radius-l); }
     }
-
-    /* Status strip */
-    .status { font-size: 12px; opacity: .7; text-align:center; padding: 6px 0; }
   </style>
 </head>
 <body>
@@ -130,59 +196,62 @@
 
     <!-- Title + meta -->
     <section class="title-wrap">
-      <h1 id="title" class="title"></h1>
+      <h1 id="title" class="title"> </h1>
       <div class="meta">
-        <span id="category" class="pill"></span>
-        <span id="season" class="pill"></span>
-        <span id="location" class="pill"></span>
-        <span id="date" class="pill mono"></span>
+        <span id="category" class="pill"> </span>
+        <span id="season" class="pill"> </span>
+        <span id="location" class="pill"> </span>
+        <span id="date" class="pill mono"> </span>
       </div>
     </section>
 
-    <!-- Mission -->
-    <section class="card">
+    <!-- Mission Brief -->
+    <section class="card" id="missionCard">
       <h2>Mission Brief</h2>
-      <div id="mission" class="pre"></div>
+      <div id="mission" class="pre"> </div>
     </section>
 
     <!-- Google Map -->
-    <section class="card">
+    <section class="card" id="mapCard">
       <h2>Route Map (Google)</h2>
-      <div class="embed"><iframe id="map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div class="embed">
+        <iframe id="map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
     </section>
 
-    <!-- GPX -->
-    <section class="card">
+    <!-- GPX Studio -->
+    <section class="card" id="gpxCard">
       <h2>Interactive GPX</h2>
       <div class="gpx-row">
-        <a id="gpxBtn" class="btn" href="#" download><span>⬇️ Download GPX</span></a>
-        <span class="mono" id="trailheads"></span>
+        <a id="gpxBtn" class="btn" href="#" download>⬇️ Download GPX</a>
+        <span class="mono" id="trailheads"> </span>
       </div>
-      <div class="embed" style="margin-top:12px"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div class="embed" style="margin-top:12px">
+        <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
     </section>
   </div>
 
   <script>
-    // Helpers
-    const $ = (id)=>document.getElementById(id);
-    const q = (obj, path)=>path.split('.').reduce((o,k)=>o?.[k], obj);
-
-    function setText(id, val){ const el=$(id); if(!val){el.style.display='none';return;} el.textContent=val; }
-    function setHTML(id, val){ const el=$(id); if(!val){el.style.display='none';return;} el.innerHTML=val; }
-    function setSrc(id, val){ const el=$(id); if(!val){el.closest('.hero,.embed')?.classList.add('hidden');return;} el.src=val; }
+    // ---------------- Helpers ----------------
+    const $ = id => document.getElementById(id);
+    const pick = (o, path) => path.split('.').reduce((a,k)=>a && a[k], o);
+    const setText = (id, val) => { const el=$(id); if(!val){el?.remove();return} el.textContent = val; };
+    const setHTML = (id, val) => { const el=$(id); if(!val){el?.remove();return} el.innerHTML = val; };
+    const setSrc = (id, val) => { const el=$(id); const wrap=el?.closest('.hero,.embed'); if(!val){wrap?.remove();return} el.src = val; };
 
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
-      const state = { traces: [{ url: gpxUrl }], settings: { units: "imperial" } };
+      const state = { traces:[{ url:gpxUrl }], settings:{ units:"imperial" } };
       return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
     }
 
-    // Get slug from either /expedition/{slug} or ?slug=
+    // /expedition/{slug} or ?slug= fallback
     function getSlug(){
-      const u = new URL(location.href);
-      const qslug = u.searchParams.get("slug");
-      if (qslug) return qslug;
-      const parts = u.pathname.split("/").filter(Boolean);
+      const url = new URL(location.href);
+      const q = url.searchParams.get("slug");
+      if (q) return q;
+      const parts = (location.pathname||"/").split("/").filter(Boolean);
       const idx = parts.findIndex(p => p.toLowerCase() === "expedition");
       return idx > -1 ? parts[idx+1] : null;
     }
@@ -190,60 +259,73 @@
     async function main(){
       const status = $("status");
       const slug = getSlug();
-      if(!slug){ status.textContent="Missing slug. Use /expedition/{slug} or ?slug=…"; return; }
 
+      if(!slug){
+        status.textContent = "Missing slug. Use /expedition/{slug} or ?slug={slug}";
+        return;
+      }
+
+      // Your Supabase JSON (bucket: expedition — singular)
       const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
 
       status.textContent = "Fetching expedition…";
       let data;
       try{
-        const res = await fetch(jsonURL, { cache:"no-store" });
+        const res = await fetch(jsonURL, { cache: "no-store" });
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         data = await res.json();
-      }catch(e){
-        status.textContent = `Failed to fetch ${jsonURL}: ${e.message}`;
+      }catch(err){
+        status.textContent = `Failed to fetch ${jsonURL}: ${err.message}`;
         return;
       }
 
       // Fill hero + credit
-      setSrc("hero", q(data,"hero_image"));
-      const creditName = q(data,"image_credit");
-      const creditLink = q(data,"image_link");
-      if(creditName){ $("credit").innerHTML = creditLink ? `Photo: <a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : `Photo: ${creditName}`; }
-      else { $("credit").style.display="none"; }
+      const hero = pick(data,"hero_image");
+      if (hero) { $("hero").src = hero; } else { $(".hero")?.remove?.(); }
+      const creditName = pick(data,"image_credit");
+      const creditLink = pick(data,"image_link");
+      if(creditName){
+        $("credit").innerHTML = creditLink
+          ? `Photo: <a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
+          : `Photo: ${creditName}`;
+      } else {
+        $("credit").remove();
+      }
 
-      // Title + meta
-      setText("title", q(data,"title"));
-      setText("category", q(data,"category"));
-      setText("season", q(data,"season"));
-      setText("location", q(data,"location"));
-      setText("date", q(data,"date"));
+      // Title + pills
+      setText("title", pick(data,"title"));
+      setText("category", pick(data,"category"));
+      setText("season", pick(data,"season"));
+      setText("location", pick(data,"location"));
+      setText("date", pick(data,"date"));
 
       // Mission (preserve line breaks)
-      const missionText = q(data,"mission_text") || "";
-      setHTML("mission", missionText.replace(/\n/g,"<br/>"));
+      const missionText = pick(data,"mission_text");
+      setHTML("mission", missionText ? missionText.replace(/\n/g,"<br/>") : "");
 
-      // Map (JSON key supports map_embed_url or map_embed)
-      setSrc("map", q(data,"map_embed_url") || q(data,"map_embed") || "");
+      // Google Map
+      const mapURL = pick(data,"map_embed_url") || pick(data,"map_embed");
+      if (mapURL) { $("map").src = mapURL; } else { $("mapCard").remove(); }
 
       // GPX
-      const gpxURL = q(data,"gpx_download_link") || q(data,"gpx_url") || "";
-      if(gpxURL){
-        const btn = $("gpxBtn");
-        btn.href = gpxURL;
-        btn.download = (slug||"route") + ".gpx";
-        setText("trailheads", [q(data,"start_trailhead"), q(data,"end_trailhead")].filter(Boolean).join(" → "));
-        setSrc("gpxStudio", gpxStudioURL(gpxURL));
-      }else{
-        $("gpxBtn").style.display="none";
-        $("gpxStudio").closest(".embed").style.display="none";
+      const gpxURL = pick(data,"gpx_download_link") || pick(data,"gpx_url");
+      if (gpxURL){
+        $("gpxBtn").href = gpxURL;
+        $("gpxBtn").download = (slug || "route") + ".gpx";
+        const startTH = pick(data,"start_trailhead");
+        const endTH   = pick(data,"end_trailhead");
+        const thText = [startTH, endTH].filter(Boolean).join(" → ");
+        if (thText) { $("trailheads").textContent = thText; } else { $("trailheads").remove(); }
+        $("gpxStudio").src = gpxStudioURL(gpxURL);
+      } else {
+        $("gpxCard").remove();
       }
 
       status.textContent = "Loaded ✓";
-      setTimeout(()=>status.style.display="none", 1200);
+      setTimeout(()=> status.remove(), 1200);
     }
 
-    main();
+    if (typeof window !== "undefined") { main(); }
   </script>
 </body>
 </html>
