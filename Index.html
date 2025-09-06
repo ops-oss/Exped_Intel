@@ -18,7 +18,6 @@
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
-      --radius: 0px;
     }
 
     *{ box-sizing: border-box }
@@ -63,30 +62,25 @@
     }
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
-    /* FULL BLEED hero */
-    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
-    .fullbleed img{ display:block; position: relative; z-index: 1; }
+    /* FULL BLEED hero (edge-to-edge) */
+    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
+    .fullbleed img{ display:block; } /* keep in normal flow (no positioning) */
 
-    /* Credit must be clickable and above the image */
+    /* Credit directly under image; clickable link from image_link */
     .credit{
       text-align: right;
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
       padding-right: 16px;
-      position: relative;
-      z-index: 3;               /* above the hero image */
-      pointer-events: auto;
     }
     .credit a{
       text-decoration: underline;
       cursor: pointer;
-      position: relative;
-      z-index: 4;
-      pointer-events: auto;
       display: inline-block;
     }
 
+    /* mission text block */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
@@ -139,6 +133,7 @@
       <div><div class="label">Date</div><div id="date" class="value"></div></div>
     </div>
 
+    <!-- FULL-BLEED Hero -->
     <div class="fullbleed">
       <img id="hero" alt="Expedition hero" />
     </div>
@@ -209,12 +204,12 @@
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
 
-      // Credit (ALWAYS use image_link for href)
+      // Credit — always link to image_link (no fallback to the hero image)
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      const creditLink = first(data,["image_link"]);  // <- do not fall back to hero_image
+      const creditLink = first(data,["image_link"]); // must exist in JSON
       $("credit").innerHTML = creditName
         ? (creditLink
-            ? `<a id="creditLink" href="${creditLink}" target="_blank" rel="noopener noreferrer" aria-label="Image credit link">${creditName}</a>`
+            ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
             : creditName)
         : "";
 
