@@ -68,23 +68,23 @@
       padding-right: 16px; /* align with page padding visually */
     }
 
-/* mission text block (no borders) */
-.mission{
-  font-size: var(--body);
-  line-height: 1.6;
-  margin-top: 8px;
-  white-space: pre-wrap;
-}
-
-/* center block on page but keep text left-aligned */
-.mission,
-#mission,
-#status {
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
-}
+    /* mission text block (no borders) */
+    .mission{
+      font-size: var(--body);
+      line-height: 1.6;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    /* center block on page but keep text left-aligned */
+    .mission,
+    #mission,
+    #status {
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    .mission strong{ font-weight: 700; }
 
     /* embeds (no borders/radius) */
     .embed{ aspect-ratio: 16 / 9 }
@@ -233,9 +233,14 @@
       if(!creditLink && unsplashish(hero)) creditLink = hero;
       $("credit").innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName) : "";
 
-      // Mission
-      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-      $("mission").innerHTML = mission.replace(/\n/g,"<br/>");
+      // Mission — auto-bold headers, then render with <br/>
+      const missionRaw = first(data,["mission_text","mission","brief","summary"]) || "";
+      // Bold any line that looks like a section header:
+      //  • all-caps (3+ chars), OR
+      //  • starts with DAY / PERMITS / SHUTTLE / WEATHER / GEAR / OPTIONAL / FINAL, etc.
+      const headerPattern = /(^|\n)((?:DAY\s*\d+|PERMITS|SHUTTLE|TRANSPORTATION|CAMPSITE|WEATHER|ALTITUDE|GEAR|CHECKLIST|OPTIONAL|UPGRADES|FINAL|SUMMARY|RISKS|TRAINING|NUTRITION|EXPERIENCE|ITINERARY|PRIMARY OBJECTIVE|TRIP DURATION|TOTAL ESTIMATED MILEAGE|EXPERIENCE LEVEL|TERRAIN TYPE|[A-Z][A-Z0-9 ’'&:/\-().,]{3,}))(?=\n|$)/g;
+      const missionBolded = missionRaw.replace(headerPattern, (m, pre, head) => `${pre}<strong>${head}</strong>`);
+      $("mission").innerHTML = missionBolded.replace(/\n/g,"<br/>");
 
       // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
