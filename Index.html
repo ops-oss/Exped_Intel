@@ -10,17 +10,17 @@
 
   <style>
     :root{
-      /* tokens you provided / used so far */
       --bg: rgb(232, 229, 226);
       --ink: rgb(30, 30, 30);
       --paper: rgb(255, 255, 255);
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      --h1: clamp(28px, 8vw, 64px);
+      /* Bigger headline like your screenshot */
+      --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
-      --radius: 0px; /* no rounded cards */
+      --radius: 0px;
     }
 
     /* global */
@@ -46,20 +46,32 @@
       row-gap: 20px;
     }
 
-    /* title + meta (top) */
-    .title{ font-size: var(--h1); line-height: 1.08; font-weight: 700; letter-spacing: -0.02em }
+    /* title + meta */
+    .title{
+      font-size: var(--h1);
+      line-height: 1.02;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
     .label{ font-size: var(--label); letter-spacing: .18em; text-transform: uppercase; opacity:.7 }
+
+    /* Meta row that becomes 4-in-a-row when there's room */
     .grid2{
-      display:grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; align-items: start;
+      display: grid;
+      grid-template-columns: 1fr 1fr;   /* phones & small tablets: 2 columns */
+      gap: 16px 28px;
+      align-items: start;
       margin-top: 8px;
+    }
+    /* wider screens: one line across (4 columns) */
+    @media (min-width: 960px){
+      .grid2{ grid-template-columns: repeat(4, 1fr); }
     }
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
     /* FULL BLEED hero (edge-to-edge) */
-    .fullbleed{
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-    }
+    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
     .credit{
       text-align: right;
       font-size: 14px;
@@ -68,23 +80,17 @@
       padding-right: 16px; /* align with page padding visually */
     }
 
-    /* mission text block (no borders) */
+    /* mission text block (centered, left-aligned) */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
       margin-top: 8px;
       white-space: pre-wrap;
-    }
-    /* center block on page but keep text left-aligned */
-    .mission,
-    #mission,
-    #status {
-      max-width: 720px;
+      max-width: 720px;            /* keep a readable column width */
       margin-left: auto;
       margin-right: auto;
       text-align: left;
     }
-    .mission strong{ font-weight: 700; }
 
     /* embeds (no borders/radius) */
     .embed{ aspect-ratio: 16 / 9 }
@@ -100,25 +106,22 @@
       padding: 12px 18px; font-weight: 700; border-radius: 28px; text-decoration: none;
       border: 1px solid rgba(0,0,0,.12); background: var(--paper);
     }
-    #gpxBtn{
-      background: #000; color:#fff; border-color: #000;
-    }
+    #gpxBtn{ background:#000; color:#fff; border-color:#000; }
 
-    /* responsive */
+    /* responsive fine-tuning */
     @media (max-width: 810px){
-      .grid2{ grid-template-columns: 1fr 1fr; gap: 10px 18px }
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
     @media (max-width: 480px){
-      .page{ padding: 20px 12px 32px }
-      .grid2{ grid-template-columns: 1fr 1fr }
-      /* make maps read vertically on phones */
-      .embed{ aspect-ratio: 3 / 4; }
-      .credit{ font-size: 13px; }
+      .page{ padding: 20px 20px 32px }  /* extra side padding on phones */
+      .grid2{ grid-template-columns: 1fr 1fr }  /* still two columns; will wrap */
+      .embed{ aspect-ratio: 3 / 4 }            /* taller maps on phones */
+      .credit{ font-size: 13px }
+      .mission{ padding: 0 12px }              /* additional breathing room */
     }
 
     /* load status (debug only) */
-    #status{ font-size:12px; opacity:.7 }
+    #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
   </style>
 </head>
 <body>
@@ -188,14 +191,10 @@
     function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
 
     // Mapbox GPX Studio embed
-    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // <-- replace with your public token (pk.XXXX)
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // your public token
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
-      const options = {
-        token: MAPBOX_TOKEN,
-        files: [ gpxUrl ],
-        distanceUnits: "imperial"
-      };
+      const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
       return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
     }
 
@@ -223,7 +222,9 @@
       $("season").textContent = first(data,["season"]) || "";
       $("location").textContent = first(data,["location","place"]) || "";
       const d = first(data,["date","when"]);
-      $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : (d||"");
+      $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d)
+        ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
+        : (d||"");
 
       // Hero + credit
       const hero = first(data,["hero_image","hero.url","image"]);
@@ -231,16 +232,13 @@
       const creditName = first(data,["image_credit","credit","photo_credit"]);
       let creditLink = first(data,["image_link","credit_link","image_credit_link"]);
       if(!creditLink && unsplashish(hero)) creditLink = hero;
-      $("credit").innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName) : "";
+      $("credit").innerHTML = creditName
+        ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
+        : "";
 
-      // Mission — auto-bold headers, then render with <br/>
-      const missionRaw = first(data,["mission_text","mission","brief","summary"]) || "";
-      // Bold any line that looks like a section header:
-      //  • all-caps (3+ chars), OR
-      //  • starts with DAY / PERMITS / SHUTTLE / WEATHER / GEAR / OPTIONAL / FINAL, etc.
-      const headerPattern = /(^|\n)((?:DAY\s*\d+|PERMITS|SHUTTLE|TRANSPORTATION|CAMPSITE|WEATHER|ALTITUDE|GEAR|CHECKLIST|OPTIONAL|UPGRADES|FINAL|SUMMARY|RISKS|TRAINING|NUTRITION|EXPERIENCE|ITINERARY|PRIMARY OBJECTIVE|TRIP DURATION|TOTAL ESTIMATED MILEAGE|EXPERIENCE LEVEL|TERRAIN TYPE|[A-Z][A-Z0-9 ’'&:/\-().,]{3,}))(?=\n|$)/g;
-      const missionBolded = missionRaw.replace(headerPattern, (m, pre, head) => `${pre}<strong>${head}</strong>`);
-      $("mission").innerHTML = missionBolded.replace(/\n/g,"<br/>");
+      // Mission
+      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
+      $("mission").innerHTML = mission.replace(/\n/g,"<br/>");
 
       // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
