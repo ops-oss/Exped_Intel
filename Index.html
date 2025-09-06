@@ -5,220 +5,235 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your exported @font-face CSS -->
+  <!-- Your font-face bundle -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
-    /* Framer tokens you pasted earlier */
-    :root{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}*{box-sizing:border-box;-webkit-font-smoothing:inherit}h1,h2,h3,h4,h5,h6,p,figure{margin:0}body,input,textarea,select,button{font-size:12px;font-family:sans-serif}body{--token-1f6852e9-1497-4551-bef7-299f387d8f98: rgb(232, 229, 226);--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25: rgb(30, 30, 30);--token-35c36f3c-8523-4623-83f9-76c6f492ff46: rgb(255, 255, 255);--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff: rgb(254, 87, 51)}
-
-    /* aliases */
     :root{
-      --bg: var(--token-1f6852e9-1497-4551-bef7-299f387d8f98);
-      --ink: var(--token-7712de8b-cd5c-4040-8ffb-91f4bea9bb25);
-      --paper: var(--token-35c36f3c-8523-4623-83f9-76c6f492ff46);
-      --accent: var(--token-427ec4a1-6126-417a-9822-7f4f7c9d8aff);
+      /* from your tokens */
+      --bg: rgb(232, 229, 226);
+      --ink: rgb(30, 30, 30);
+      --paper: rgb(255, 255, 255);
+      --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      --h1: clamp(32px, 7vw, 56px);
-      --body: 16px;
-      --small: 13px;
+      --h1: clamp(28px, 8vw, 64px);
+      --label: 14px;
+      --body: 18px;
     }
 
-    html, body { height: 100%; }
-    body {
-      margin: 0;
+    /* global */
+    *{ box-sizing: border-box }
+    html, body { height: 100% }
+    body{
+      margin:0;
       background: var(--bg);
       color: var(--ink);
       font-family: var(--font-sans);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    img { display:block; max-width:100%; height:auto; }
-    a { color: inherit; text-underline-offset: 2px; }
+    img{ display:block; width:100%; height:auto }
+    a{ color: inherit; text-underline-offset:2px }
 
-    /* centered content grid */
-    .page {
+    /* layout */
+    .page{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
       display: grid;
-      grid-template-columns: minmax(16px, 1fr) minmax(0, 1120px) minmax(16px, 1fr);
-      grid-auto-rows: min-content;
-      row-gap: 24px;
+      row-gap: 20px;
     }
-    .page > * { grid-column: 2; }
 
-    /* title + meta */
-    .title-wrap { padding-top: 8px; }
-    .title { font-size: var(--h1); line-height: 1.05; font-weight: 700; }
-    .meta {
-      margin-top: 16px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px 32px;
-      font-size: clamp(14px, 1.6vw, 18px);
-    }
-    .meta .label { letter-spacing: .18em; font-size: var(--small); opacity: .6; }
-    .meta .value { font-weight: 500; }
-
-    /* FULL BLEED hero below the meta */
-    .hero-bleed { grid-column: 1 / -1; }
-    .hero-bleed img{
-      /* true edge-to-edge */
-      width: 100vw;
-      max-width: 100vw;
-      margin-left: 50%;
-      transform: translateX(-50%);
-    }
-    .credit {
-      grid-column: 2;
-      text-align: right;
-      font-size: var(--small);
+    /* title + meta (top) */
+    .title{ font-size: var(--h1); line-height: 1.08; font-weight: 700; letter-spacing: -0.02em }
+    .label{ font-size: var(--label); letter-spacing: .18em; text-transform: uppercase; opacity:.7 }
+    .grid2{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; align-items: start;
       margin-top: 8px;
     }
-    .credit a { color: var(--accent); text-decoration: underline; }
+    .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
-    /* mission text */
-    .pre { white-space: pre-wrap; line-height: 1.55; font-size: clamp(16px, 1.6vw, 18px); }
-
-    /* embeds (no borders / radius) */
-    .embed { aspect-ratio: 16/9; }
-    .embed iframe { width: 100%; height: 100%; border: 0; display:block; }
-
-    /* gpx block */
-    .gpx { display:grid; row-gap: 12px; }
-    .btn {
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:8px; padding: 12px 18px; border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.12); background: var(--paper);
-      font-weight: 600; width:max-content; margin: 0 auto; /* centered */
+    /* hero image comes AFTER title/meta */
+    .credit{
+      text-align: right;
+      font-size: 14px;
+      margin-top: 8px;
+      color: var(--accent);
     }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .status { font-size:12px; opacity:.7; text-align:center; padding:6px 0; }
 
-    @media (max-width: 810px){ .page{ grid-template-columns: 12px minmax(0,1fr) 12px; } }
-    @media (max-width: 480px){ .page{ grid-template-columns: 8px minmax(0,1fr) 8px; } .title{ font-size: clamp(28px, 9vw, 40px); } }
+    /* mission text block (no borders) */
+    .mission{
+      font-size: var(--body);
+      line-height: 1.6;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+
+    /* embeds (no borders/radius) */
+    .embed{ aspect-ratio: 16/9 }
+    .embed iframe{ width:100%; height:100%; border:0; display:block }
+
+    /* GPX area: map first, then button */
+    .gpx-actions{
+      margin-top: 14px;
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+    }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 12px 18px; font-weight: 700; border: 1px solid rgba(0,0,0,.12);
+      background: var(--paper); border-radius: 28px; text-decoration: none;
+    }
+
+    /* responsive */
+    @media (max-width: 810px){
+      .grid2{ grid-template-columns: 1fr 1fr; gap: 10px 18px }
+      .value{ font-size: clamp(18px, 4.6vw, 24px) }
+    }
+    @media (max-width: 480px){
+      .page{ padding: 20px 12px 32px }
+      .grid2{ grid-template-columns: 1fr 1fr }
+    }
+
+    /* load status (debug only) */
+    #status{ font-size:12px; opacity:.7 }
   </style>
 </head>
 <body>
   <div class="page">
-    <div id="status" class="status">Loading…</div>
+    <div id="status">Loading…</div>
 
-    <!-- Title & meta -->
-    <section class="title-wrap">
-      <h1 id="title" class="title"></h1>
-      <div class="meta">
-        <div><div class="label">CATEGORY</div><div id="category" class="value"></div></div>
-        <div><div class="label">SEASON</div><div id="season" class="value"></div></div>
-        <div><div class="label">LOCATION</div><div id="location" class="value"></div></div>
-        <div><div class="label">DATE</div><div id="date" class="value mono"></div></div>
+    <!-- Title & meta FIRST -->
+    <h1 id="title" class="title"></h1>
+
+    <div class="grid2">
+      <div>
+        <div class="label">Category</div>
+        <div id="category" class="value"></div>
       </div>
-    </section>
+      <div>
+        <div class="label">Season</div>
+        <div id="season" class="value"></div>
+      </div>
+      <div>
+        <div class="label">Location</div>
+        <div id="location" class="value"></div>
+      </div>
+      <div>
+        <div class="label">Date</div>
+        <div id="date" class="value"></div>
+      </div>
+    </div>
 
-    <!-- Full-bleed hero -->
-    <figure class="hero-bleed">
-      <img id="hero" alt="Expedition hero image" />
-    </figure>
+    <!-- Hero image SECOND -->
+    <img id="hero" alt="Expedition hero" />
     <div id="credit" class="credit"></div>
 
     <!-- Mission -->
-    <section><div id="mission" class="pre"></div></section>
+    <div id="mission" class="mission"></div>
 
     <!-- Google Map (no header) -->
-    <section><div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></section>
+    <div class="embed">
+      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
 
-    <!-- GPX Studio (embed first, centered download btn below) -->
-    <section class="gpx">
-      <div class="embed"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-      <a id="gpxBtn" class="btn" href="#" download><span>⬇️ Download GPX</span></a>
-      <div class="mono" id="trailheads" style="text-align:center;"></div>
-      <div id="gpxError" class="mono" style="display:none;text-align:center;opacity:.7;">GPX preview couldn’t load. The file is still downloadable above.</div>
-    </section>
+    <!-- GPX Studio (map first, then button) -->
+    <div class="embed" id="gpxEmbedWrap">
+      <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <div class="gpx-actions" id="gpxActions">
+      <a id="gpxBtn" class="btn" href="#" download>⬇️ Download GPX</a>
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
+      <span id="trailheads" style="opacity:.7"></span>
+    </div>
   </div>
 
   <script>
-    // helpers
+    // ------------ small helpers ------------
     const $ = (id) => document.getElementById(id);
-    const get = (o,p)=>p.split('.').reduce((x,k)=>x?.[k], o);
-    const first = (o,keys)=>keys.map(k=>get(o,k)).find(v=>v!==undefined && v!==null && v!=="");
-    const setText=(id,v)=>{const el=$(id); if(!v){el?.remove();return;} el.textContent=v;};
-    const setHTML=(id,v)=>{const el=$(id); if(!v){el?.remove();return;} el.innerHTML=v;};
-    const setSrc=(id,v)=>{const el=$(id); if(!v){el?.closest('section,figure,div')?.remove();return;} el.src=v;};
-
-    // GPX Studio state from a public GPX URL
-    const gpxStudioURL=(gpxUrl)=>{
-      if(!gpxUrl) return "";
-      const dl = gpxUrl + (gpxUrl.includes("?") ? "&" : "?") + "download=1"; // helps some CDNs
-      const state = { traces:[{ url: dl }], settings:{ units:"imperial" } };
-      return "https://gpx.studio/?state=" + encodeURIComponent(JSON.stringify(state));
-    };
+    const qp = (k) => new URL(location.href).searchParams.get(k);
+    const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
+    const first = (o,keys)=>{ for(const k of keys){ const v=get(o,k); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
 
     function getSlug(){
-      const u=new URL(location.href);
-      const qs=u.searchParams.get("slug");
-      if(qs) return qs;
-      const parts=u.pathname.split("/").filter(Boolean);
-      const ix=parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
-      return ix>-1 ? parts[ix+1] : parts[parts.length-1];
+      const q = qp("slug"); if (q) return q;
+      const parts = (location.pathname||"/").split("/").filter(Boolean);
+      const i = parts.findIndex(p=>p.toLowerCase()==="expedition");
+      return i>-1 ? parts[i+1] : null;
+    }
+    function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
+    function gpxStudioURL(gpxUrl){
+      if(!gpxUrl) return "";
+      const u = new URL(gpxUrl);
+      u.searchParams.set("_t", Date.now().toString());
+      return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify({
+        traces:[{url:u.toString()}],
+        settings:{units:"imperial"}
+      }));
     }
 
     async function main(){
-      const status=$("status");
-      const slug=getSlug();
-      if(!slug){ status.textContent="Missing slug (?slug= or /trip/{slug})"; return; }
+      const status = $("status");
+      const slug = getSlug();
+      if(!slug){ status.textContent="Missing slug (?slug= or /expedition/{slug})"; return; }
 
-      const jsonURL=`https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json`;
-      status.textContent="Fetching expedition…";
+      const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
+      status.textContent = "Fetching…";
 
       let data;
       try{
-        const res=await fetch(jsonURL,{cache:"no-store"});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        data=await res.json();
-      }catch(e){ status.textContent=`Failed to fetch ${jsonURL}: ${e.message}`; return; }
-
-      // title/meta
-      setText("title",first(data,["title"]));
-      setText("category",first(data,["category"]));
-      setText("season",first(data,["season"]));
-      setText("location",first(data,["location"]));
-      setText("date",first(data,["date"]));
-
-      // hero + credit (link uses image_link)
-      const hero=first(data,["hero_image","image"]);
-      setSrc("hero",hero);
-
-      const creditName = first(data,["image_credit","credit_name"]);
-      const creditHref = first(data,["image_link","image_credit_link","credit_link","unsplash_link","unsplash_url"])
-                        || (hero && /images\.unsplash\.com/i.test(hero) ? hero : "");
-      if(creditName){
-        $("credit").innerHTML = creditHref
-          ? `<a href="${creditHref}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-          : creditName;
-      }else{$("credit")?.remove();}
-
-      // mission
-      setHTML("mission",(first(data,["mission_text","brief","content"])||"").replace(/\\n/g,"<br/>"));
-
-      // google map
-      setSrc("map", first(data,["map_embed_url","map_embed"]));
-
-      // gpx embed + download
-      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx"]);
-      if(gpxURL){
-        $("gpxBtn").href=gpxURL;
-        $("gpxBtn").download=(slug||"route")+".gpx";
-        $("gpxStudio").src = gpxStudioURL(gpxURL);
-        $("gpxStudio").addEventListener("error", ()=>{ $("gpxError").style.display="block"; });
-        const start=first(data,["start_trailhead"]), end=first(data,["end_trailhead"]);
-        setText("trailheads",[start,end].filter(Boolean).join(" → "));
-      } else {
-        $("gpxStudio")?.closest("section")?.remove();
+        const res = await fetch(jsonURL, { cache:"no-store" });
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        data = await res.json();
+      }catch(e){
+        status.textContent = "Fetch failed: "+e.message;
+        return;
       }
 
-      status.textContent="Loaded ✓";
-      setTimeout(()=>status.remove(),1000);
+      // Title + meta
+      $("title").textContent = first(data,["title","name"]) || "";
+      $("category").textContent = first(data,["category","type"]) || "";
+      $("season").textContent = first(data,["season"]) || "";
+      $("location").textContent = first(data,["location","place"]) || "";
+      const d = first(data,["date","when"]);
+      $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : (d||"");
+
+      // Hero + credit (credit is a link)
+      const hero = first(data,["hero_image","hero.url","image"]);
+      if(hero) $("hero").src = hero;
+      const creditName = first(data,["image_credit","credit","photo_credit"]);
+      let creditLink = first(data,["image_link","credit_link","image_credit_link"]);
+      if(!creditLink && unsplashish(hero)) creditLink = hero;
+      $("credit").innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName) : "";
+
+      // Mission
+      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
+      $("mission").innerHTML = mission.replace(/\n/g,"<br/>");
+
+      // Google Map (expect full embed URL in JSON)
+      const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
+      if(mapURL) $("map").src = mapURL;
+
+      // GPX embed + button
+      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
+      if(gpxURL){
+        const studio = gpxStudioURL(gpxURL);
+        $("gpxStudio").src = studio;
+        $("gpxStudioLink").href = studio;
+        $("gpxBtn").href = gpxURL;
+        $("gpxBtn").download = (slug||"route") + ".gpx";
+        const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
+        if(th) $("trailheads").textContent = th;
+      }else{
+        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
+        $("gpxActions").style.display = "none";
+      }
+
+      status.textContent = "";
+      setTimeout(()=>status.remove(), 10);
     }
 
-    if(typeof window!=="undefined") main();
+    if (typeof window !== "undefined") main();
   </script>
 </body>
 </html>
