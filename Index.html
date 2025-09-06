@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your font-face bundle -->
+  <!-- Your font-face bundle (from Framer export) -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
     :root{
-      /* from your tokens */
+      /* tokens you provided / used so far */
       --bg: rgb(232, 229, 226);
       --ink: rgb(30, 30, 30);
       --paper: rgb(255, 255, 255);
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      /* desktop / tablet title scale */
       --h1: clamp(28px, 8vw, 64px);
       --label: 14px;
       --body: 18px;
+      --radius: 0px; /* no rounded cards */
     }
 
     /* global */
@@ -55,44 +55,44 @@
     }
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
-    /* hero image comes AFTER title/meta */
+    /* FULL BLEED hero (edge-to-edge) */
+    .fullbleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+    }
     .credit{
       text-align: right;
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
+      padding-right: 16px; /* align with page padding visually */
     }
 
-    /* mission text block (no borders) */
+    /* mission text — centered */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
       margin-top: 8px;
       white-space: pre-wrap;
+      text-align: center;
     }
 
     /* embeds (no borders/radius) */
-    .embed{ aspect-ratio: 16/9 }
+    .embed{ aspect-ratio: 16 / 9 }
     .embed iframe{ width:100%; height:100%; border:0; display:block }
 
-    /* GPX area: map first, then button */
+    /* GPX actions: center the button and make it solid black */
     .gpx-actions{
       margin-top: 14px;
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:center;           /* center the button */
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
     }
     .btn{
       display:inline-flex; align-items:center; gap:8px;
-      padding: 14px 22px;
-      font-weight: 700;
-      background: #000;                 /* solid black */
-      color: #fff;                      /* white text */
-      border: 0;
-      border-radius: 999px;             /* pill */
-      text-decoration: none;
+      padding: 12px 18px; font-weight: 700; border-radius: 28px; text-decoration: none;
+      border: 1px solid rgba(0,0,0,.12); background: var(--paper);
+    }
+    #gpxBtn{
+      background: #000; color:#fff; border-color: #000;
     }
 
     /* responsive */
@@ -100,19 +100,12 @@
       .grid2{ grid-template-columns: 1fr 1fr; gap: 10px 18px }
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
-
-    /* phone tweaks to match your screenshots */
     @media (max-width: 480px){
       .page{ padding: 20px 12px 32px }
-
-      /* title size: push larger on phones to match your design */
-      .title{ font-size: clamp(34px, 16vw, 64px); line-height: 1.06 }
-
-      /* taller, “portrait-ish” iframes on mobile */
-      .embed{ aspect-ratio: 4 / 5; }   /* ~vertical for Google Map & GPX */
-
-      /* hero credit stays subtle but readable under image */
-      .credit{ font-size: 14px; }
+      .grid2{ grid-template-columns: 1fr 1fr }
+      /* make maps read vertically on phones */
+      .embed{ aspect-ratio: 3 / 4; }
+      .credit{ font-size: 13px; }
     }
 
     /* load status (debug only) */
@@ -145,9 +138,11 @@
       </div>
     </div>
 
-    <!-- Hero image SECOND -->
-    <img id="hero" alt="Expedition hero" />
-    <div id="credit" class="credit"></div>
+    <!-- FULL-BLEED Hero image SECOND -->
+    <div class="fullbleed">
+      <img id="hero" alt="Expedition hero" />
+      <div id="credit" class="credit"></div>
+    </div>
 
     <!-- Mission -->
     <div id="mission" class="mission"></div>
@@ -157,20 +152,19 @@
       <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 
-    <!-- GPX Studio (map first, then button) -->
+    <!-- GPX Studio (Mapbox embed) -->
     <div class="embed" id="gpxEmbedWrap">
       <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
     <div class="gpx-actions" id="gpxActions">
       <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
-      <!-- keep the “Open in GPX Studio” action available but hidden per your request -->
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener" style="display:none">Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.7; display:none"></span>
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
+      <span id="trailheads" style="opacity:.7"></span>
     </div>
   </div>
 
   <script>
-    // ------------ small helpers ------------
+    // ------------ helpers ------------
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
     const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
@@ -179,19 +173,21 @@
     function getSlug(){
       const q = qp("slug"); if (q) return q;
       const parts = (location.pathname||"/").split("/").filter(Boolean);
-      const i = parts.findIndex(p=>p.toLowerCase()==="expedition");
+      const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
       return i>-1 ? parts[i+1] : null;
     }
     function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
+
+    // Mapbox GPX Studio embed
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // <-- replace with your public token (pk.XXXX)
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
-      // add a tiny cache-buster so GPX Studio always re-pulls the file
-      const u = new URL(gpxUrl);
-      u.searchParams.set("_t", Date.now().toString());
-      return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify({
-        traces:[{url:u.toString()}],
-        settings:{units:"imperial"}
-      }));
+      const options = {
+        token: MAPBOX_TOKEN,
+        files: [ gpxUrl ],
+        distanceUnits: "imperial"
+      };
+      return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
     }
 
     async function main(){
@@ -220,7 +216,7 @@
       const d = first(data,["date","when"]);
       $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : (d||"");
 
-      // Hero + credit (credit is a link to image_link if present; fallback to hero if Unsplash)
+      // Hero + credit
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
       const creditName = first(data,["image_credit","credit","photo_credit"]);
@@ -232,18 +228,20 @@
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       $("mission").innerHTML = mission.replace(/\n/g,"<br/>");
 
-      // Google Map (expect full embed URL in JSON)
+      // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX embed + button (uses gpx_download_link / gpx_url)
+      // GPX embed + actions (Mapbox token required)
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
-        $("gpxStudio").src = studio;           // the iframe
-        $("gpxStudioLink").href = studio;      // (hidden) direct link
-        $("gpxBtn").href = gpxURL;             // download button
+        $("gpxStudio").src = studio;
+        $("gpxStudioLink").href = studio;
+        $("gpxBtn").href = gpxURL;
         $("gpxBtn").download = (slug||"route") + ".gpx";
+        const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
+        if(th) $("trailheads").textContent = th;
       }else{
         $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
         $("gpxActions").style.display = "none";
