@@ -236,57 +236,34 @@
         ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
         : "";
 
-// Mission
-const mission = first(data,["mission_text","mission","brief","summary"]) || "";
+      // -------- Mission (bold headings) --------
+      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
 
-// Bold rules:
-// 1) ALL-CAPS labels followed by a colon
-// 2) Standalone ALL-CAPS lines
-// 3) Lines starting with "DAY X:" (case-insensitive, with mixed text after)
-const formatted = mission
-  .split(/\r?\n/)
-  .map(line => {
-    const t = line.trim();
+      const formatted = mission
+        .split(/\r?\n/)
+        .map(line => {
+          const t = line.trim();
+          if (!t) return "";                 // keep blank lines
+          if (/^-{3,}$/.test(t)) return t;   // don't bold separators like '---'
 
-    // Case 1: ALL-CAPS label followed by a colon
-    const m = t.match(/^([^:]+):\s*(.*)$/);
-    if (m && !/[a-z]/.test(m[1])) {
-      return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
-    }
+          // Case 3: lines starting with "DAY <number>:"
+          if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
 
-    // Case 2: Standalone ALL-CAPS heading
-    if (t && !/[a-z]/.test(t)) {
-      return `<strong>${t}</strong>`;
-    }
+          // Case 1: ALL-CAPS label before a colon => bold the label only
+          const m = t.match(/^([^:]+):\s*(.*)$/);
+          if (m && !/[a-z]/.test(m[1])) {
+            return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
+          }
 
-    // Case 3: Lines starting with "DAY <number>:"
-    const dayMatch = t.match(/^(DAY\s*\d+:)(.*)$/i);
-    if (dayMatch) {
-      return `<strong>${dayMatch[1]}</strong>${dayMatch[2]}`;
-    }
+          // Case 2: standalone ALL-CAPS line
+          if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
 
-    return t;
-  })
-  .join("<br/>");
+          return t;
+        })
+        .join("<br/>");
 
-$("mission").innerHTML = formatted;
-
-    // Case 1: ALL-CAPS label followed by a colon
-    const m = t.match(/^([^:]+):\s*(.*)$/);
-    if (m && !/[a-z]/.test(m[1])) {
-      return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
-    }
-
-    // Case 2: standalone ALL-CAPS heading (no lowercase letters)
-    if (t && !/[a-z]/.test(t)) {
-      return `<strong>${t}</strong>`;
-    }
-
-    return t;
-  })
-  .join("<br/>");
-
-$("mission").innerHTML = formatted;
+      $("mission").innerHTML = formatted;
+      // ----------------------------------------
 
       // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
