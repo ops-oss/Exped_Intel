@@ -68,14 +68,23 @@
       padding-right: 16px; /* align with page padding visually */
     }
 
-    /* mission text — centered */
-    .mission{
-      font-size: var(--body);
-      line-height: 1.6;
-      margin-top: 8px;
-      white-space: pre-wrap;
-      text-align: center;
-    }
+/* mission text block (no borders) */
+.mission{
+  font-size: var(--body);
+  line-height: 1.6;
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
+/* center block on page but keep text left-aligned */
+.mission,
+#mission,
+#status {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
 
     /* embeds (no borders/radius) */
     .embed{ aspect-ratio: 16 / 9 }
