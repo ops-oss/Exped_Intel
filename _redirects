@@ -1,3 +1,8 @@
-/expedition/*   /index.html   200
-/trip/*         /index.html   200
-/*              /index.html   200
+# Canonical route
+/trip/*          /index.html   200
+
+# Optional alias (also works)
+/expedition/*    /index.html   200
+
+# Catch-all (single page app)
+/*               /index.html   200
