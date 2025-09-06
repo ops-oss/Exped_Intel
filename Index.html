@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your font-face bundle (from Framer export) -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
@@ -16,7 +15,6 @@
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      /* Bigger headline like your screenshot */
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
@@ -67,7 +65,9 @@
 
     /* FULL BLEED hero */
     .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
-    .fullbleed img { position: relative; z-index: 1; }
+    .fullbleed img{ display:block; position: relative; z-index: 1; }
+
+    /* Credit must be clickable and above the image */
     .credit{
       text-align: right;
       font-size: 14px;
@@ -75,9 +75,17 @@
       color: var(--accent);
       padding-right: 16px;
       position: relative;
-      z-index: 2;
+      z-index: 3;               /* above the hero image */
+      pointer-events: auto;
     }
-    .credit a { text-decoration: underline; pointer-events: auto; }
+    .credit a{
+      text-decoration: underline;
+      cursor: pointer;
+      position: relative;
+      z-index: 4;
+      pointer-events: auto;
+      display: inline-block;
+    }
 
     .mission{
       font-size: var(--body);
@@ -133,8 +141,8 @@
 
     <div class="fullbleed">
       <img id="hero" alt="Expedition hero" />
-      <div id="credit" class="credit"></div>
     </div>
+    <div id="credit" class="credit"></div>
 
     <div id="mission" class="mission"></div>
 
@@ -197,16 +205,20 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero + credit (force image_link as the link target)
+      // Hero
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
+
+      // Credit (ALWAYS use image_link for href)
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      const creditLink = first(data,["image_link"]); // explicitly use only image_link
+      const creditLink = first(data,["image_link"]);  // <- do not fall back to hero_image
       $("credit").innerHTML = creditName
-        ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
+        ? (creditLink
+            ? `<a id="creditLink" href="${creditLink}" target="_blank" rel="noopener noreferrer" aria-label="Image credit link">${creditName}</a>`
+            : creditName)
         : "";
 
-      // Mission formatting (same as before)
+      // Mission (bold headings)
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -216,18 +228,18 @@
           if (/^-{3,}$/.test(t)) return t;
           if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
           const m = t.match(/^([^:]+):\s*(.*)$/);
-          if (m && !/[a-z]/.test(m[1])) {
-            return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
-          }
+          if (m && !/[a-z]/.test(m[1])) return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
           if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
           return t;
         })
         .join("<br/>");
       $("mission").innerHTML = formatted;
 
+      // Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
+      // GPX
       const gpxURL = first(data,["gpx_download_link","gpx_url"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
