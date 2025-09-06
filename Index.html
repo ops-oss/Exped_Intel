@@ -216,40 +216,6 @@
         return;
       }
 
-      <script>
-  // …existing helpers…
-
-  // Bold: (1) label before ":" and (2) any standalone ALL-CAPS line
-  function formatMission(raw = "") {
-    const lines = raw.split(/\r?\n/);
-
-    const isAllCapsHeading = (line) => {
-      const t = line.trim();
-      if (!t) return false;
-      if (/^[-•]/.test(t)) return false;             // skip bullets
-      if (/[a-z]/.test(t)) return false;             // any lowercase => not a caps heading
-      const letters = t.replace(/[^A-Za-z]/g, "");
-      if (letters.length < 3) return false;          // need some letters
-      return t.length <= 120;
-    };
-
-    return lines.map((line) => {
-      const t = line.trimEnd();
-
-      // Case A: "LABEL: value" → bold just the label
-      const m = t.match(/^([^:]+):\s*(.*)$/);
-      if (m) {
-        const [, left, right] = m;
-        // If left side has no lowercase (i.e., looks like a label), bold it
-        if (!/[a-z]/.test(left)) return `<strong>${left.trim()}:</strong> ${right}`;
-      }
-
-      // Case B: pure ALL-CAPS line (headings with &, /, (), digits allowed) → bold whole line
-      if (isAllCapsHeading(t)) return `<strong>${t}</strong>`;
-
-      return t;
-    }).join("<br/>");
-  }
       // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
       $("category").textContent = first(data,["category","type"]) || "";
@@ -276,7 +242,7 @@ const mission = first(data,["mission_text","mission","brief","summary"]) || "";
 const formatted = mission
   .replace(/\n/g,"<br/>")
   .replace(/(^|<br\s*\/?>)([A-Z0-9 &]+:)/g, (_, br, header) => `${br}<strong>${header}</strong>`);
-$("mission").innerHTML = formatMission(mission);
+$("mission").innerHTML = formatted;
 
       // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
