@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
+  <!-- Your font-face bundle (from Framer export) -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
@@ -15,11 +16,14 @@
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
+      /* Bigger headline like your screenshot */
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
+      --radius: 0px;
     }
 
+    /* global */
     *{ box-sizing: border-box }
     html, body { height: 100% }
     body{
@@ -33,6 +37,7 @@
     img{ display:block; width:100%; height:auto }
     a{ color: inherit; text-underline-offset:2px }
 
+    /* layout */
     .page{
       max-width: 1120px;
       margin: 0 auto;
@@ -41,6 +46,7 @@
       row-gap: 20px;
     }
 
+    /* title + meta */
     .title{
       font-size: var(--h1);
       line-height: 1.02;
@@ -50,51 +56,51 @@
 
     .label{ font-size: var(--label); letter-spacing: .18em; text-transform: uppercase; opacity:.7 }
 
+    /* Meta row that becomes 4-in-a-row when there's room */
     .grid2{
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr;   /* phones & small tablets: 2 columns */
       gap: 16px 28px;
       align-items: start;
       margin-top: 8px;
     }
+    /* wider screens: one line across (4 columns) */
     @media (min-width: 960px){
       .grid2{ grid-template-columns: repeat(4, 1fr); }
     }
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
     /* FULL BLEED hero (edge-to-edge) */
-    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
-    .fullbleed img{ display:block; } /* keep in normal flow (no positioning) */
-
-    /* Credit directly under image; clickable link from image_link */
+    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
+    /* credit sits OUTSIDE .fullbleed so it can't be covered by the image */
     .credit{
       text-align: right;
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
-      padding-right: 16px;
+      padding-right: 16px; /* align with page padding visually */
+      position: relative;
+      z-index: 2;
     }
-    .credit a{
-      text-decoration: underline;
-      cursor: pointer;
-      display: inline-block;
-    }
+    .credit a{ text-decoration: underline; }
 
-    /* mission text block */
+    /* mission text block (centered, left-aligned) */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
       margin-top: 8px;
       white-space: pre-wrap;
-      max-width: 720px;
+      max-width: 720px;            /* keep a readable column width */
       margin-left: auto;
       margin-right: auto;
       text-align: left;
     }
 
+    /* embeds (no borders/radius) */
     .embed{ aspect-ratio: 16 / 9 }
     .embed iframe{ width:100%; height:100%; border:0; display:block }
 
+    /* GPX actions: center the button and make it solid black */
     .gpx-actions{
       margin-top: 14px;
       display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
@@ -106,17 +112,19 @@
     }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
 
+    /* responsive fine-tuning */
     @media (max-width: 810px){
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
     @media (max-width: 480px){
-      .page{ padding: 20px 20px 32px }
-      .grid2{ grid-template-columns: 1fr 1fr }
-      .embed{ aspect-ratio: 3 / 4 }
+      .page{ padding: 20px 20px 32px }  /* extra side padding on phones */
+      .grid2{ grid-template-columns: 1fr 1fr }  /* still two columns; will wrap */
+      .embed{ aspect-ratio: 3 / 4 }            /* taller maps on phones */
       .credit{ font-size: 13px }
-      .mission{ padding: 0 12px }
+      .mission{ padding: 0 12px }              /* additional breathing room */
     }
 
+    /* load status (debug only) */
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
   </style>
 </head>
@@ -124,25 +132,44 @@
   <div class="page">
     <div id="status">Loading…</div>
 
+    <!-- Title & meta FIRST -->
     <h1 id="title" class="title"></h1>
 
     <div class="grid2">
-      <div><div class="label">Category</div><div id="category" class="value"></div></div>
-      <div><div class="label">Season</div><div id="season" class="value"></div></div>
-      <div><div class="label">Location</div><div id="location" class="value"></div></div>
-      <div><div class="label">Date</div><div id="date" class="value"></div></div>
+      <div>
+        <div class="label">Category</div>
+        <div id="category" class="value"></div>
+      </div>
+      <div>
+        <div class="label">Season</div>
+        <div id="season" class="value"></div>
+      </div>
+      <div>
+        <div class="label">Location</div>
+        <div id="location" class="value"></div>
+      </div>
+      <div>
+        <div class="label">Date</div>
+        <div id="date" class="value"></div>
+      </div>
     </div>
 
-    <!-- FULL-BLEED Hero -->
+    <!-- FULL-BLEED Hero image SECOND -->
     <div class="fullbleed">
       <img id="hero" alt="Expedition hero" />
     </div>
+    <!-- Credit is OUTSIDE .fullbleed -->
     <div id="credit" class="credit"></div>
 
+    <!-- Mission -->
     <div id="mission" class="mission"></div>
 
-    <div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <!-- Google Map (no header) -->
+    <div class="embed">
+      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
 
+    <!-- GPX Studio (Mapbox embed) -->
     <div class="embed" id="gpxEmbedWrap">
       <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
@@ -154,6 +181,7 @@
   </div>
 
   <script>
+    // ------------ helpers ------------
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
     const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
@@ -166,6 +194,7 @@
       return i>-1 ? parts[i+1] : null;
     }
 
+    // Mapbox GPX Studio embed
     const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
@@ -191,6 +220,7 @@
         return;
       }
 
+      // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
       $("category").textContent = first(data,["category","type"]) || "";
       $("season").textContent = first(data,["season"]) || "";
@@ -200,20 +230,18 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero
+      // Hero image (NOT clickable)
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
 
-      // Credit — always link to image_link (no fallback to the hero image)
+      // Credit text (clickable) — uses ONLY image_link
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      const creditLink = first(data,["image_link"]); // must exist in JSON
+      const creditLink = first(data,["image_link"]); // <- ONLY this, per your request
       $("credit").innerHTML = creditName
-        ? (creditLink
-            ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-            : creditName)
+        ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
         : "";
 
-      // Mission (bold headings)
+      // -------- Mission (bold headings) --------
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -229,13 +257,14 @@
         })
         .join("<br/>");
       $("mission").innerHTML = formatted;
+      // ----------------------------------------
 
-      // Map
+      // Google Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX
-      const gpxURL = first(data,["gpx_download_link","gpx_url"]);
+      // GPX embed + actions
+      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
         $("gpxStudio").src = studio;
@@ -245,7 +274,7 @@
         const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
         if(th) $("trailheads").textContent = th;
       }else{
-        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found.</div>`;
+        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
         $("gpxActions").style.display = "none";
       }
 
