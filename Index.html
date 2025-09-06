@@ -240,12 +240,36 @@
 const mission = first(data,["mission_text","mission","brief","summary"]) || "";
 
 // Bold rules:
-// 1) Lines like "LABEL: value" where LABEL is ALL-CAPS
-// 2) Standalone ALL-CAPS lines (no colon)
+// 1) ALL-CAPS labels followed by a colon
+// 2) Standalone ALL-CAPS lines
+// 3) Lines starting with "DAY X:" (case-insensitive, with mixed text after)
 const formatted = mission
   .split(/\r?\n/)
   .map(line => {
     const t = line.trim();
+
+    // Case 1: ALL-CAPS label followed by a colon
+    const m = t.match(/^([^:]+):\s*(.*)$/);
+    if (m && !/[a-z]/.test(m[1])) {
+      return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
+    }
+
+    // Case 2: Standalone ALL-CAPS heading
+    if (t && !/[a-z]/.test(t)) {
+      return `<strong>${t}</strong>`;
+    }
+
+    // Case 3: Lines starting with "DAY <number>:"
+    const dayMatch = t.match(/^(DAY\s*\d+:)(.*)$/i);
+    if (dayMatch) {
+      return `<strong>${dayMatch[1]}</strong>${dayMatch[2]}`;
+    }
+
+    return t;
+  })
+  .join("<br/>");
+
+$("mission").innerHTML = formatted;
 
     // Case 1: ALL-CAPS label followed by a colon
     const m = t.match(/^([^:]+):\s*(.*)$/);
