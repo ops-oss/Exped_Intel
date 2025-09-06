@@ -229,12 +229,18 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // -------- Hero + credit (Unsplash page URL only) --------
-      const hero = first(data,["hero_image","hero.url","image"]);
-      if(hero) $("hero").src = hero;
+// Hero + credit (credit text links to image_link, not the photo src)
+const hero = first(data,["hero_image","hero.url","image"]);
+if (hero) $("hero").src = hero;
 
-      const creditName = first(data,["image_credit","credit","photo_credit"]);
-      const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+const creditName = first(data,["image_credit","credit","photo_credit"]);
+const creditLink = first(data,["image_link","credit_link","image_credit_link"]);
+
+$("credit").innerHTML = creditName
+  ? (creditLink
+      ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" style="color:inherit; text-decoration:underline;">${creditName}</a>`
+      : creditName)
+  : "";
 
       // Click-through on hero image uses the page URL when present
       if (creditLink) {
