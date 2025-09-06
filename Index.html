@@ -236,9 +236,13 @@
         ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
         : "";
 
-      // Mission
-      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-      $("mission").innerHTML = mission.replace(/\n/g,"<br/>");
+// Mission
+const mission = first(data,["mission_text","mission","brief","summary"]) || "";
+// Bold any ALL-CAPS headers followed by a colon
+const formatted = mission
+  .replace(/\n/g,"<br/>")
+  .replace(/(^|<br\s*\/?>)([A-Z0-9 &]+:)/g, (_, br, header) => `${br}<strong>${header}</strong>`);
+$("mission").innerHTML = formatted;
 
       // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
