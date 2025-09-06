@@ -152,7 +152,10 @@
 
     <!-- FULL-BLEED Hero image SECOND -->
     <div class="fullbleed">
-      <img id="hero" alt="Expedition hero" />
+      <!-- NEW: wrap image in link so clicks go to the Unsplash PAGE URL -->
+      <a id="heroLink" target="_blank" rel="noopener noreferrer">
+        <img id="hero" alt="Expedition hero" />
+      </a>
       <div id="credit" class="credit"></div>
     </div>
 
@@ -226,15 +229,24 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero + credit
+      // -------- Hero + credit (Unsplash page URL only) --------
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
+
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      let creditLink = first(data,["image_link","credit_link","image_credit_link"]);
-      if(!creditLink && unsplashish(hero)) creditLink = hero;
+      const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+
+      // Click-through on hero image uses the page URL when present
+      if (creditLink) {
+        $("heroLink").href = creditLink;
+      } else {
+        $("heroLink").removeAttribute("href");
+      }
+
       $("credit").innerHTML = creditName
         ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
         : "";
+      // --------------------------------------------------------
 
       // -------- Mission (bold headings) --------
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
@@ -243,19 +255,16 @@
         .split(/\r?\n/)
         .map(line => {
           const t = line.trim();
-          if (!t) return "";                 // keep blank lines
-          if (/^-{3,}$/.test(t)) return t;   // don't bold separators like '---'
+          if (!t) return "";
+          if (/^-{3,}$/.test(t)) return t;
 
-          // Case 3: lines starting with "DAY <number>:"
           if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
 
-          // Case 1: ALL-CAPS label before a colon => bold the label only
           const m = t.match(/^([^:]+):\s*(.*)$/);
           if (m && !/[a-z]/.test(m[1])) {
             return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
           }
 
-          // Case 2: standalone ALL-CAPS line
           if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
 
           return t;
