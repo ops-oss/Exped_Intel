@@ -71,18 +71,19 @@
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
     /* FULL BLEED hero (edge-to-edge) */
-    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
-    /* credit sits OUTSIDE .fullbleed so it can't be covered by the image */
+    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
     .credit{
       text-align: right;
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
       padding-right: 16px; /* align with page padding visually */
-      position: relative;
-      z-index: 2;
     }
-    .credit a{ text-decoration: underline; }
+    /* make sure the credit text is obviously clickable */
+    .credit a{
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
     /* mission text block (centered, left-aligned) */
     .mission{
@@ -157,9 +158,8 @@
     <!-- FULL-BLEED Hero image SECOND -->
     <div class="fullbleed">
       <img id="hero" alt="Expedition hero" />
+      <div id="credit" class="credit"></div>
     </div>
-    <!-- Credit is OUTSIDE .fullbleed -->
-    <div id="credit" class="credit"></div>
 
     <!-- Mission -->
     <div id="mission" class="mission"></div>
@@ -193,9 +193,17 @@
       const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
       return i>-1 ? parts[i+1] : null;
     }
+    function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
+    function toUnsplashPageFromImage(u){
+      try{
+        const m = String(u||"").match(/[?&]ixid=([^&]+)/i);
+        // we can't reliably get the photo ID from the image CDN URL, so just fall back to the image URL if needed
+        return m ? u : u;
+      }catch{ return u; }
+    }
 
     // Mapbox GPX Studio embed
-    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // your public token
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
       const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
@@ -230,15 +238,20 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero image (NOT clickable)
+      // Hero + credit (CREDIT TEXT IS THE LINK, using image_link if present)
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
 
-      // Credit text (clickable) — uses ONLY image_link
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      const creditLink = first(data,["image_link"]); // <- ONLY this, per your request
+      let creditLink = first(data,["image_link","credit_link","image_credit_link"]);
+      // if no image_link in JSON, fall back to something sensible
+      if(!creditLink){
+        creditLink = unsplashish(hero) ? toUnsplashPageFromImage(hero) : "";
+      }
       $("credit").innerHTML = creditName
-        ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
+        ? (creditLink
+            ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
+            : creditName)
         : "";
 
       // -------- Mission (bold headings) --------
@@ -259,11 +272,11 @@
       $("mission").innerHTML = formatted;
       // ----------------------------------------
 
-      // Google Map
+      // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX embed + actions
+      // GPX embed + actions (Mapbox token required)
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
