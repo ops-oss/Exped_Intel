@@ -17,6 +17,7 @@
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
+      /* desktop / tablet title scale */
       --h1: clamp(28px, 8vw, 64px);
       --label: 14px;
       --body: 18px;
@@ -77,12 +78,21 @@
     /* GPX area: map first, then button */
     .gpx-actions{
       margin-top: 14px;
-      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;           /* center the button */
     }
     .btn{
       display:inline-flex; align-items:center; gap:8px;
-      padding: 12px 18px; font-weight: 700; border: 1px solid rgba(0,0,0,.12);
-      background: var(--paper); border-radius: 28px; text-decoration: none;
+      padding: 14px 22px;
+      font-weight: 700;
+      background: #000;                 /* solid black */
+      color: #fff;                      /* white text */
+      border: 0;
+      border-radius: 999px;             /* pill */
+      text-decoration: none;
     }
 
     /* responsive */
@@ -90,9 +100,19 @@
       .grid2{ grid-template-columns: 1fr 1fr; gap: 10px 18px }
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
+
+    /* phone tweaks to match your screenshots */
     @media (max-width: 480px){
       .page{ padding: 20px 12px 32px }
-      .grid2{ grid-template-columns: 1fr 1fr }
+
+      /* title size: push larger on phones to match your design */
+      .title{ font-size: clamp(34px, 16vw, 64px); line-height: 1.06 }
+
+      /* taller, “portrait-ish” iframes on mobile */
+      .embed{ aspect-ratio: 4 / 5; }   /* ~vertical for Google Map & GPX */
+
+      /* hero credit stays subtle but readable under image */
+      .credit{ font-size: 14px; }
     }
 
     /* load status (debug only) */
@@ -142,9 +162,10 @@
       <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
     <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download>⬇️ Download GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.7"></span>
+      <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
+      <!-- keep the “Open in GPX Studio” action available but hidden per your request -->
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener" style="display:none">Open in GPX Studio</a>
+      <span id="trailheads" style="opacity:.7; display:none"></span>
     </div>
   </div>
 
@@ -164,6 +185,7 @@
     function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
+      // add a tiny cache-buster so GPX Studio always re-pulls the file
       const u = new URL(gpxUrl);
       u.searchParams.set("_t", Date.now().toString());
       return "https://gpx.studio/?state="+encodeURIComponent(JSON.stringify({
@@ -198,7 +220,7 @@
       const d = first(data,["date","when"]);
       $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : (d||"");
 
-      // Hero + credit (credit is a link)
+      // Hero + credit (credit is a link to image_link if present; fallback to hero if Unsplash)
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
       const creditName = first(data,["image_credit","credit","photo_credit"]);
@@ -214,16 +236,14 @@
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX embed + button
+      // GPX embed + button (uses gpx_download_link / gpx_url)
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
-        $("gpxStudio").src = studio;
-        $("gpxStudioLink").href = studio;
-        $("gpxBtn").href = gpxURL;
+        $("gpxStudio").src = studio;           // the iframe
+        $("gpxStudioLink").href = studio;      // (hidden) direct link
+        $("gpxBtn").href = gpxURL;             // download button
         $("gpxBtn").download = (slug||"route") + ".gpx";
-        const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
-        if(th) $("trailheads").textContent = th;
       }else{
         $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
         $("gpxActions").style.display = "none";
