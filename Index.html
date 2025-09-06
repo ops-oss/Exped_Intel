@@ -23,7 +23,6 @@
       --radius: 0px;
     }
 
-    /* global */
     *{ box-sizing: border-box }
     html, body { height: 100% }
     body{
@@ -37,7 +36,6 @@
     img{ display:block; width:100%; height:auto }
     a{ color: inherit; text-underline-offset:2px }
 
-    /* layout */
     .page{
       max-width: 1120px;
       margin: 0 auto;
@@ -46,7 +44,6 @@
       row-gap: 20px;
     }
 
-    /* title + meta */
     .title{
       font-size: var(--h1);
       line-height: 1.02;
@@ -56,47 +53,46 @@
 
     .label{ font-size: var(--label); letter-spacing: .18em; text-transform: uppercase; opacity:.7 }
 
-    /* Meta row that becomes 4-in-a-row when there's room */
     .grid2{
       display: grid;
-      grid-template-columns: 1fr 1fr;   /* phones & small tablets: 2 columns */
+      grid-template-columns: 1fr 1fr;
       gap: 16px 28px;
       align-items: start;
       margin-top: 8px;
     }
-    /* wider screens: one line across (4 columns) */
     @media (min-width: 960px){
       .grid2{ grid-template-columns: repeat(4, 1fr); }
     }
     .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
 
-    /* FULL BLEED hero (edge-to-edge) */
-    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
+    /* FULL BLEED hero */
+    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
+    .fullbleed img { position: relative; z-index: 1; }
     .credit{
       text-align: right;
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
-      padding-right: 16px; /* align with page padding visually */
+      padding-right: 16px;
+      position: relative;
+      z-index: 2;
     }
+    .credit a { text-decoration: underline; pointer-events: auto; }
 
-    /* mission text block (centered, left-aligned) */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
       margin-top: 8px;
       white-space: pre-wrap;
-      max-width: 720px;            /* keep a readable column width */
+      max-width: 720px;
       margin-left: auto;
       margin-right: auto;
       text-align: left;
     }
 
-    /* embeds (no borders/radius) */
     .embed{ aspect-ratio: 16 / 9 }
     .embed iframe{ width:100%; height:100%; border:0; display:block }
 
-    /* GPX actions: center the button and make it solid black */
     .gpx-actions{
       margin-top: 14px;
       display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
@@ -108,19 +104,17 @@
     }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
 
-    /* responsive fine-tuning */
     @media (max-width: 810px){
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
     @media (max-width: 480px){
-      .page{ padding: 20px 20px 32px }  /* extra side padding on phones */
-      .grid2{ grid-template-columns: 1fr 1fr }  /* still two columns; will wrap */
-      .embed{ aspect-ratio: 3 / 4 }            /* taller maps on phones */
+      .page{ padding: 20px 20px 32px }
+      .grid2{ grid-template-columns: 1fr 1fr }
+      .embed{ aspect-ratio: 3 / 4 }
       .credit{ font-size: 13px }
-      .mission{ padding: 0 12px }              /* additional breathing room */
+      .mission{ padding: 0 12px }
     }
 
-    /* load status (debug only) */
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
   </style>
 </head>
@@ -128,46 +122,24 @@
   <div class="page">
     <div id="status">Loading…</div>
 
-    <!-- Title & meta FIRST -->
     <h1 id="title" class="title"></h1>
 
     <div class="grid2">
-      <div>
-        <div class="label">Category</div>
-        <div id="category" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Season</div>
-        <div id="season" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Location</div>
-        <div id="location" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Date</div>
-        <div id="date" class="value"></div>
-      </div>
+      <div><div class="label">Category</div><div id="category" class="value"></div></div>
+      <div><div class="label">Season</div><div id="season" class="value"></div></div>
+      <div><div class="label">Location</div><div id="location" class="value"></div></div>
+      <div><div class="label">Date</div><div id="date" class="value"></div></div>
     </div>
 
-    <!-- FULL-BLEED Hero image SECOND -->
     <div class="fullbleed">
-      <!-- NEW: wrap image in link so clicks go to the Unsplash PAGE URL -->
-      <a id="heroLink" target="_blank" rel="noopener noreferrer">
-        <img id="hero" alt="Expedition hero" />
-      </a>
+      <img id="hero" alt="Expedition hero" />
       <div id="credit" class="credit"></div>
     </div>
 
-    <!-- Mission -->
     <div id="mission" class="mission"></div>
 
-    <!-- Google Map (no header) -->
-    <div class="embed">
-      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
+    <div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
 
-    <!-- GPX Studio (Mapbox embed) -->
     <div class="embed" id="gpxEmbedWrap">
       <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
@@ -179,7 +151,6 @@
   </div>
 
   <script>
-    // ------------ helpers ------------
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
     const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
@@ -191,10 +162,8 @@
       const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
       return i>-1 ? parts[i+1] : null;
     }
-    function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
 
-    // Mapbox GPX Studio embed
-    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // your public token
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
       const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
@@ -219,7 +188,6 @@
         return;
       }
 
-      // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
       $("category").textContent = first(data,["category","type"]) || "";
       $("season").textContent = first(data,["season"]) || "";
@@ -229,63 +197,38 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-// Hero + credit (make credit text link to the JSON's image_link)
-const hero = first(data,["hero_image","hero.url","image"]);
-if (hero) $("hero").src = hero;
-
-const creditName = first(data,["image_credit","credit","photo_credit"]);
-const creditLink = first(data,["image_link","credit_link","image_credit_link"]); // <- only this
-
-$("credit").innerHTML = creditName
-  ? (creditLink
-      ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>`
-      : creditName)
-  : "";
-
-      // Click-through on hero image uses the page URL when present
-      if (creditLink) {
-        $("heroLink").href = creditLink;
-      } else {
-        $("heroLink").removeAttribute("href");
-      }
-
+      // Hero + credit (force image_link as the link target)
+      const hero = first(data,["hero_image","hero.url","image"]);
+      if(hero) $("hero").src = hero;
+      const creditName = first(data,["image_credit","credit","photo_credit"]);
+      const creditLink = first(data,["image_link"]); // explicitly use only image_link
       $("credit").innerHTML = creditName
         ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer">${creditName}</a>` : creditName)
         : "";
-      // --------------------------------------------------------
 
-      // -------- Mission (bold headings) --------
+      // Mission formatting (same as before)
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-
       const formatted = mission
         .split(/\r?\n/)
         .map(line => {
           const t = line.trim();
           if (!t) return "";
           if (/^-{3,}$/.test(t)) return t;
-
           if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
-
           const m = t.match(/^([^:]+):\s*(.*)$/);
           if (m && !/[a-z]/.test(m[1])) {
             return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
           }
-
           if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
-
           return t;
         })
         .join("<br/>");
-
       $("mission").innerHTML = formatted;
-      // ----------------------------------------
 
-      // Google Map (expects full embed URL in JSON)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX embed + actions (Mapbox token required)
-      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
+      const gpxURL = first(data,["gpx_download_link","gpx_url"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
         $("gpxStudio").src = studio;
@@ -295,7 +238,7 @@ $("credit").innerHTML = creditName
         const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
         if(th) $("trailheads").textContent = th;
       }else{
-        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
+        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found.</div>`;
         $("gpxActions").style.display = "none";
       }
 
