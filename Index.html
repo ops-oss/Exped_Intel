@@ -238,10 +238,30 @@
 
 // Mission
 const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-// Bold any ALL-CAPS headers followed by a colon
+
+// Bold rules:
+// 1) Lines like "LABEL: value" where LABEL is ALL-CAPS
+// 2) Standalone ALL-CAPS lines (no colon)
 const formatted = mission
-  .replace(/\n/g,"<br/>")
-  .replace(/(^|<br\s*\/?>)([A-Z0-9 &]+:)/g, (_, br, header) => `${br}<strong>${header}</strong>`);
+  .split(/\r?\n/)
+  .map(line => {
+    const t = line.trim();
+
+    // Case 1: ALL-CAPS label followed by a colon
+    const m = t.match(/^([^:]+):\s*(.*)$/);
+    if (m && !/[a-z]/.test(m[1])) {
+      return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
+    }
+
+    // Case 2: standalone ALL-CAPS heading (no lowercase letters)
+    if (t && !/[a-z]/.test(t)) {
+      return `<strong>${t}</strong>`;
+    }
+
+    return t;
+  })
+  .join("<br/>");
+
 $("mission").innerHTML = formatted;
 
       // Google Map (expects full embed URL in JSON)
