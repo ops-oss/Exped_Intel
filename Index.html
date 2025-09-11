@@ -57,7 +57,7 @@
     }
 
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
-    #debug{ font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity:.7; background:#fff; border:1px solid #eee; padding:8px; border-radius:8px; max-width:720px; margin:0 auto; }
+    #debug{ font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity:.75; background:#fff; border:1px solid #eee; padding:8px; border-radius:8px; max-width:720px; margin:0 auto; }
   </style>
 </head>
 <body>
@@ -115,6 +115,7 @@
       return i>-1 ? parts[i+1] : null;
     }
 
+    // Mapbox (for GPX Studio)
     const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
@@ -135,12 +136,10 @@
 
     // ---- Normalize wrapper → full object; map casing variants ----
     function normalizeData(raw){
-      // If raw is a string (some pipelines save a quoted JSON blob)
       if (typeof raw === "string") {
         const again = safeParse(raw);
         if (again) raw = again;
       }
-
       // Already full?
       if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
 
@@ -152,10 +151,9 @@
       if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
       else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
 
-      // Merge (flat fields on top for convenience)
       let out = { ...(full || {}), ...(flat || {}) };
 
-      // Map common casing/alias variants into snake_case the rest of code expects
+      // Map common casing variants
       if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
       if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
       if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
@@ -163,16 +161,25 @@
       return Object.keys(out).length ? out : raw;
     }
 
-    function printDebug(obj){
+    // ---- Derive Unsplash photo page URL from CDN (fallback if image_link missing) ----
+    function deriveUnsplashPageFromCdn(url){
+      try{
+        const u = new URL(url);
+        if (!/images\.unsplash\.com$/i.test(u.hostname)) return "";
+        const m = u.pathname.match(/\/photo-([A-Za-z0-9_-]+)/);
+        return m ? `https://unsplash.com/photos/${m[1]}` : "";
+      }catch{ return ""; }
+    }
+
+    function printDebug(obj, fetchedUrl){
       const dbg = $("dbg");
       try{
         const view = {
+          fetched: fetchedUrl || null,
           keys: Object.keys(obj || {}),
           hero_image: obj?.hero_image || null,
           image_credit: obj?.image_credit || null,
-          image_link: obj?.image_link || null,
-          has_index_json: !!obj?.index_json,
-          has_flat_json: !!obj?.flat_json,
+          image_link: obj?.image_link || null
         };
         dbg.textContent = JSON.stringify(view, null, 2);
       }catch(e){
@@ -187,28 +194,27 @@
 
       const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
       status.textContent = "Fetching…";
+      console.log("🔎 Fetching JSON from:", jsonURL);
 
       let data;
       try{
         const res = await fetch(jsonURL, { cache:"no-store" });
         if(!res.ok) throw new Error("HTTP "+res.status);
 
-        // Read as text first to handle double-encoded payloads
-        const text = await res.text();
+        const text = await res.text();              // read as text to handle double-encoding
         let raw = safeParse(text);
-        if (raw === null) {
-          // not valid JSON? fall back to empty object so we still render debug
-          raw = {};
-        }
+        if (raw === null) raw = {};                 // keep rendering/debug even if parse fails
         data = normalizeData(raw);
       }catch(e){
         status.textContent = "Fetch failed: "+e.message;
-        printDebug(null);
+        printDebug(null, jsonURL);
         return;
       }
 
       // DEBUG snapshot
-      printDebug(data);
+      console.log("🧾 Keys:", Object.keys(data||{}));
+      console.log("🧾 image_link:", data?.image_link, "hero_image:", data?.hero_image);
+      printDebug(data, jsonURL);
 
       // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
@@ -220,12 +226,13 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero + credit (strict: no guessing Unsplash page from CDN)
+      // ---- Hero + credit (use image_link; fallback derive from hero CDN) ----
       const hero = first(data,["hero_image","hero.url","image"]);
       if (hero) $("hero").src = hero;
 
       const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
-      const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+      let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+      if (!creditLink && hero) creditLink = deriveUnsplashPageFromCdn(hero);
 
       $("credit").innerHTML = creditName
         ? (creditLink
@@ -261,11 +268,11 @@
         .join("<br/>");
       $("mission").innerHTML = formatted;
 
-      // Map
+      // Google Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if (mapURL) $("map").src = mapURL;
 
-      // GPX
+      // GPX embed + actions
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if (gpxURL) {
         const studio = gpxStudioURL(gpxURL);
