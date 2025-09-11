@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
-  <!-- Your font-face bundle (from Framer export) -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
@@ -15,146 +14,65 @@
       --paper: rgb(255, 255, 255);
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
-
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
-      --radius: 0px;
     }
-
-    /* global */
-    *{ box-sizing: border-box }
-    html, body { height: 100% }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
     body{
-      margin:0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: var(--font-sans);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-sans);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
     img{ display:block; width:100%; height:auto }
-    a{ color: inherit; text-underline-offset:2px }
+    a{ color:inherit; text-underline-offset:2px }
 
-    /* layout */
-    .page{
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-      display: grid;
-      row-gap: 20px;
-    }
+    .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
+    .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
+    .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
+    @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
+    .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
 
-    /* title + meta */
-    .title{
-      font-size: var(--h1);
-      line-height: 1.02;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .label{ font-size: var(--label); letter-spacing: .18em; text-transform: uppercase; opacity:.7 }
-
-    /* Meta row that becomes 4-in-a-row when there's room */
-    .grid2{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 28px;
-      align-items: start;
-      margin-top: 8px;
-    }
-    @media (min-width: 960px){
-      .grid2{ grid-template-columns: repeat(4, 1fr); }
-    }
-    .value{ font-size: clamp(18px, 2.6vw, 28px); line-height: 1.28 }
-
-    /* FULL BLEED hero (edge-to-edge) */
-    .fullbleed{ width: 100vw; margin-left: calc(50% - 50vw); }
-    .credit{
-      text-align: right;
-      font-size: 14px;
-      margin-top: 8px;
-      color: var(--accent);
-      padding-right: 16px;
-    }
-    .credit a{
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    /* make the hero anchor act like a block */
+    .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); }
     #heroLink{ display:block; }
+    .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
+    .credit a{ text-decoration:underline; cursor:pointer; }
 
-    /* mission text block */
-    .mission{
-      font-size: var(--body);
-      line-height: 1.6;
-      margin-top: 8px;
-      white-space: pre-wrap;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: left;
-    }
+    .mission{ font-size:var(--body); line-height:1.6; margin-top:8px; white-space:pre-wrap; max-width:720px; margin-left:auto; margin-right:auto; text-align:left; }
 
-    /* embeds */
-    .embed{ aspect-ratio: 16 / 9 }
-    .embed iframe{ width:100%; height:100%; border:0; display:block }
+    .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
 
-    /* GPX actions */
-    .gpx-actions{
-      margin-top: 14px;
-      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
-    }
-    .btn{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 12px 18px; font-weight: 700; border-radius: 28px; text-decoration: none;
-      border: 1px solid rgba(0,0,0,.12); background: var(--paper);
-    }
+    .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:var(--paper); }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
 
-    /* responsive */
-    @media (max-width: 810px){
-      .value{ font-size: clamp(18px, 4.6vw, 24px) }
-    }
-    @media (max-width: 480px){
-      .page{ padding: 20px 20px 32px }
-      .grid2{ grid-template-columns: 1fr 1fr }
-      .embed{ aspect-ratio: 3 / 4 }
-      .credit{ font-size: 13px }
-      .mission{ padding: 0 12px }
+    @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
+    @media (max-width:480px){
+      .page{ padding:20px 20px 32px }
+      .grid2{ grid-template-columns:1fr 1fr }
+      .embed{ aspect-ratio:3/4 }
+      .credit{ font-size:13px }
+      .mission{ padding:0 12px }
     }
 
-    /* load status (debug only) */
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
+    #debug{ font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity:.7; background:#fff; border:1px solid #eee; padding:8px; border-radius:8px; max-width:720px; margin:0 auto; }
   </style>
 </head>
 <body>
   <div class="page">
     <div id="status">Loading…</div>
 
-    <!-- Title & meta FIRST -->
     <h1 id="title" class="title"></h1>
 
     <div class="grid2">
-      <div>
-        <div class="label">Category</div>
-        <div id="category" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Season</div>
-        <div id="season" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Location</div>
-        <div id="location" class="value"></div>
-      </div>
-      <div>
-        <div class="label">Date</div>
-        <div id="date" class="value"></div>
-      </div>
+      <div><div class="label">Category</div><div id="category" class="value"></div></div>
+      <div><div class="label">Season</div><div id="season" class="value"></div></div>
+      <div><div class="label">Location</div><div id="location" class="value"></div></div>
+      <div><div class="label">Date</div><div id="date" class="value"></div></div>
     </div>
 
-    <!-- FULL-BLEED Hero image SECOND (hero is clickable) -->
     <div class="fullbleed">
       <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
         <img id="hero" alt="Expedition hero" />
@@ -162,15 +80,12 @@
       <div id="credit" class="credit"></div>
     </div>
 
-    <!-- Mission -->
     <div id="mission" class="mission"></div>
 
-    <!-- Google Map (no header) -->
     <div class="embed">
       <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 
-    <!-- GPX Studio (Mapbox embed) -->
     <div class="embed" id="gpxEmbedWrap">
       <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
@@ -179,6 +94,11 @@
       <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
       <span id="trailheads" style="opacity:.7"></span>
     </div>
+
+    <details id="debug" open>
+      <summary>Debug</summary>
+      <div id="dbg"></div>
+    </details>
   </div>
 
   <script>
@@ -195,7 +115,6 @@
       return i>-1 ? parts[i+1] : null;
     }
 
-    // GPX Studio embed
     const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
@@ -203,20 +122,62 @@
       return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
     }
 
-    // ---- NEW: Normalize wrapper → full object (handles index_json/flat_json cases) ----
+    // ---- Safe parse: handles plain JSON or JSON stringified twice ----
+    function safeParse(text){
+      try{
+        let x = JSON.parse(text);
+        if (typeof x === "string") {
+          try { x = JSON.parse(x); } catch {}
+        }
+        return x;
+      }catch{ return null; }
+    }
+
+    // ---- Normalize wrapper → full object; map casing variants ----
     function normalizeData(raw){
-      if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) {
-        return raw;
+      // If raw is a string (some pipelines save a quoted JSON blob)
+      if (typeof raw === "string") {
+        const again = safeParse(raw);
+        if (again) raw = again;
       }
+
+      // Already full?
+      if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
+
+      // Wrapper with index_json / flat_json (string or object)
       let full = null, flat = null;
-      if (typeof raw?.index_json === "string") { try { full = JSON.parse(raw.index_json); } catch{} }
+      if (typeof raw?.index_json === "string") { full = safeParse(raw.index_json); }
       else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
 
-      if (typeof raw?.flat_json === "string") { try { flat = JSON.parse(raw.flat_json); } catch{} }
+      if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
       else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
 
-      const out = { ...(full || {}), ...(flat || {}) };
+      // Merge (flat fields on top for convenience)
+      let out = { ...(full || {}), ...(flat || {}) };
+
+      // Map common casing/alias variants into snake_case the rest of code expects
+      if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
+      if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
+      if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
+
       return Object.keys(out).length ? out : raw;
+    }
+
+    function printDebug(obj){
+      const dbg = $("dbg");
+      try{
+        const view = {
+          keys: Object.keys(obj || {}),
+          hero_image: obj?.hero_image || null,
+          image_credit: obj?.image_credit || null,
+          image_link: obj?.image_link || null,
+          has_index_json: !!obj?.index_json,
+          has_flat_json: !!obj?.flat_json,
+        };
+        dbg.textContent = JSON.stringify(view, null, 2);
+      }catch(e){
+        dbg.textContent = "debug error: " + e.message;
+      }
     }
 
     async function main(){
@@ -231,12 +192,23 @@
       try{
         const res = await fetch(jsonURL, { cache:"no-store" });
         if(!res.ok) throw new Error("HTTP "+res.status);
-        const raw = await res.json();
-        data = normalizeData(raw);     // <— use normalized object from here on
+
+        // Read as text first to handle double-encoded payloads
+        const text = await res.text();
+        let raw = safeParse(text);
+        if (raw === null) {
+          // not valid JSON? fall back to empty object so we still render debug
+          raw = {};
+        }
+        data = normalizeData(raw);
       }catch(e){
         status.textContent = "Fetch failed: "+e.message;
+        printDebug(null);
         return;
       }
+
+      // DEBUG snapshot
+      printDebug(data);
 
       // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
@@ -248,21 +220,19 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero + credit (strict Unsplash compliance: no guessing from hero_image)
+      // Hero + credit (strict: no guessing Unsplash page from CDN)
       const hero = first(data,["hero_image","hero.url","image"]);
-      if(hero) $("hero").src = hero;
+      if (hero) $("hero").src = hero;
 
-      const creditName = first(data,["image_credit","credit","photo_credit"]);
+      const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
       const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
 
-      // Credit text (linked only if image_link exists)
       $("credit").innerHTML = creditName
         ? (creditLink
             ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
             : creditName)
         : "";
 
-      // Make the hero itself clickable to the same image_link (if present)
       const heroLinkEl = $("heroLink");
       if (heroLinkEl) {
         if (creditLink) {
@@ -274,7 +244,7 @@
         }
       }
 
-      // -------- Mission (bold headings) --------
+      // Mission
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -290,23 +260,22 @@
         })
         .join("<br/>");
       $("mission").innerHTML = formatted;
-      // ----------------------------------------
 
-      // Google Map (expects full embed URL in JSON)
+      // Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
-      if(mapURL) $("map").src = mapURL;
+      if (mapURL) $("map").src = mapURL;
 
-      // GPX embed + actions
+      // GPX
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
-      if(gpxURL){
+      if (gpxURL) {
         const studio = gpxStudioURL(gpxURL);
         $("gpxStudio").src = studio;
         $("gpxStudioLink").href = studio;
         $("gpxBtn").href = gpxURL;
         $("gpxBtn").download = (slug||"route") + ".gpx";
         const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
-        if(th) $("trailheads").textContent = th;
-      }else{
+        if (th) $("trailheads").textContent = th;
+      } else {
         $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
         $("gpxActions").style.display = "none";
       }
