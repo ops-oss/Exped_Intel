@@ -16,7 +16,6 @@
       --accent: rgb(254, 87, 51);
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
 
-      /* Bigger headline like your screenshot */
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
@@ -59,12 +58,11 @@
     /* Meta row that becomes 4-in-a-row when there's room */
     .grid2{
       display: grid;
-      grid-template-columns: 1fr 1fr;   /* phones & small tablets: 2 columns */
+      grid-template-columns: 1fr 1fr;
       gap: 16px 28px;
       align-items: start;
       margin-top: 8px;
     }
-    /* wider screens: one line across (4 columns) */
     @media (min-width: 960px){
       .grid2{ grid-template-columns: repeat(4, 1fr); }
     }
@@ -77,31 +75,32 @@
       font-size: 14px;
       margin-top: 8px;
       color: var(--accent);
-      padding-right: 16px; /* align with page padding visually */
+      padding-right: 16px;
     }
-    /* make sure the credit text is obviously clickable */
     .credit a{
       text-decoration: underline;
       cursor: pointer;
     }
+    /* make the hero anchor act like a block */
+    #heroLink{ display:block; }
 
-    /* mission text block (centered, left-aligned) */
+    /* mission text block */
     .mission{
       font-size: var(--body);
       line-height: 1.6;
       margin-top: 8px;
       white-space: pre-wrap;
-      max-width: 720px;            /* keep a readable column width */
+      max-width: 720px;
       margin-left: auto;
       margin-right: auto;
       text-align: left;
     }
 
-    /* embeds (no borders/radius) */
+    /* embeds */
     .embed{ aspect-ratio: 16 / 9 }
     .embed iframe{ width:100%; height:100%; border:0; display:block }
 
-    /* GPX actions: center the button and make it solid black */
+    /* GPX actions */
     .gpx-actions{
       margin-top: 14px;
       display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
@@ -113,16 +112,16 @@
     }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
 
-    /* responsive fine-tuning */
+    /* responsive */
     @media (max-width: 810px){
       .value{ font-size: clamp(18px, 4.6vw, 24px) }
     }
     @media (max-width: 480px){
-      .page{ padding: 20px 20px 32px }  /* extra side padding on phones */
-      .grid2{ grid-template-columns: 1fr 1fr }  /* still two columns; will wrap */
-      .embed{ aspect-ratio: 3 / 4 }            /* taller maps on phones */
+      .page{ padding: 20px 20px 32px }
+      .grid2{ grid-template-columns: 1fr 1fr }
+      .embed{ aspect-ratio: 3 / 4 }
       .credit{ font-size: 13px }
-      .mission{ padding: 0 12px }              /* additional breathing room */
+      .mission{ padding: 0 12px }
     }
 
     /* load status (debug only) */
@@ -155,9 +154,11 @@
       </div>
     </div>
 
-    <!-- FULL-BLEED Hero image SECOND -->
+    <!-- FULL-BLEED Hero image SECOND (hero is clickable) -->
     <div class="fullbleed">
-      <img id="hero" alt="Expedition hero" />
+      <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
+        <img id="hero" alt="Expedition hero" />
+      </a>
       <div id="credit" class="credit"></div>
     </div>
 
@@ -193,21 +194,29 @@
       const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
       return i>-1 ? parts[i+1] : null;
     }
-    function unsplashish(u){ return typeof u==="string" && /images\.unsplash\.com/i.test(u); }
-    function toUnsplashPageFromImage(u){
-      try{
-        const m = String(u||"").match(/[?&]ixid=([^&]+)/i);
-        // we can't reliably get the photo ID from the image CDN URL, so just fall back to the image URL if needed
-        return m ? u : u;
-      }catch{ return u; }
-    }
 
-    // Mapbox GPX Studio embed
-    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg"; // your public token
+    // GPX Studio embed
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
       const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
       return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
+    }
+
+    // ---- NEW: Normalize wrapper → full object (handles index_json/flat_json cases) ----
+    function normalizeData(raw){
+      if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) {
+        return raw;
+      }
+      let full = null, flat = null;
+      if (typeof raw?.index_json === "string") { try { full = JSON.parse(raw.index_json); } catch{} }
+      else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
+
+      if (typeof raw?.flat_json === "string") { try { flat = JSON.parse(raw.flat_json); } catch{} }
+      else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
+
+      const out = { ...(full || {}), ...(flat || {}) };
+      return Object.keys(out).length ? out : raw;
     }
 
     async function main(){
@@ -222,7 +231,8 @@
       try{
         const res = await fetch(jsonURL, { cache:"no-store" });
         if(!res.ok) throw new Error("HTTP "+res.status);
-        data = await res.json();
+        const raw = await res.json();
+        data = normalizeData(raw);     // <— use normalized object from here on
       }catch(e){
         status.textContent = "Fetch failed: "+e.message;
         return;
@@ -238,21 +248,31 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // Hero + credit (CREDIT TEXT IS THE LINK, using image_link if present)
+      // Hero + credit (strict Unsplash compliance: no guessing from hero_image)
       const hero = first(data,["hero_image","hero.url","image"]);
       if(hero) $("hero").src = hero;
 
       const creditName = first(data,["image_credit","credit","photo_credit"]);
-      let creditLink = first(data,["image_link","credit_link","image_credit_link"]);
-      // if no image_link in JSON, fall back to something sensible
-      if(!creditLink){
-        creditLink = unsplashish(hero) ? toUnsplashPageFromImage(hero) : "";
-      }
+      const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+
+      // Credit text (linked only if image_link exists)
       $("credit").innerHTML = creditName
         ? (creditLink
             ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
             : creditName)
         : "";
+
+      // Make the hero itself clickable to the same image_link (if present)
+      const heroLinkEl = $("heroLink");
+      if (heroLinkEl) {
+        if (creditLink) {
+          heroLinkEl.href = creditLink;
+          heroLinkEl.style.pointerEvents = "auto";
+        } else {
+          heroLinkEl.removeAttribute("href");
+          heroLinkEl.style.pointerEvents = "none";
+        }
+      }
 
       // -------- Mission (bold headings) --------
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
@@ -276,7 +296,7 @@
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if(mapURL) $("map").src = mapURL;
 
-      // GPX embed + actions (Mapbox token required)
+      // GPX embed + actions
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if(gpxURL){
         const studio = gpxStudioURL(gpxURL);
