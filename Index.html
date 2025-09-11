@@ -57,7 +57,6 @@
     }
 
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
-    #debug{ font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity:.75; background:#fff; border:1px solid #eee; padding:8px; border-radius:8px; max-width:720px; margin:0 auto; }
   </style>
 </head>
 <body>
@@ -94,15 +93,9 @@
       <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
       <span id="trailheads" style="opacity:.7"></span>
     </div>
-
-    <details id="debug" open>
-      <summary>Debug</summary>
-      <div id="dbg"></div>
-    </details>
   </div>
 
   <script>
-    // ------------ helpers ------------
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
     const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
@@ -115,7 +108,6 @@
       return i>-1 ? parts[i+1] : null;
     }
 
-    // Mapbox (for GPX Studio)
     const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
     function gpxStudioURL(gpxUrl){
       if(!gpxUrl) return "";
@@ -123,7 +115,6 @@
       return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
     }
 
-    // ---- Safe parse: handles plain JSON or JSON stringified twice ----
     function safeParse(text){
       try{
         let x = JSON.parse(text);
@@ -134,58 +125,30 @@
       }catch{ return null; }
     }
 
-    // ---- Normalize wrapper → full object; map casing variants ----
     function normalizeData(raw){
       if (typeof raw === "string") {
         const again = safeParse(raw);
         if (again) raw = again;
       }
-      // Already full?
       if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
-
-      // Wrapper with index_json / flat_json (string or object)
       let full = null, flat = null;
       if (typeof raw?.index_json === "string") { full = safeParse(raw.index_json); }
       else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
-
       if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
       else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
-
       let out = { ...(full || {}), ...(flat || {}) };
-
-      // Map common casing variants
       if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
       if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
       if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
-
       return Object.keys(out).length ? out : raw;
     }
 
-    // ---- Derive Unsplash photo page URL from CDN (fallback if image_link missing) ----
-    function deriveUnsplashPageFromCdn(url){
+    const isValidUnsplashPhoto = (u)=>{
       try{
-        const u = new URL(url);
-        if (!/images\.unsplash\.com$/i.test(u.hostname)) return "";
-        const m = u.pathname.match(/\/photo-([A-Za-z0-9_-]+)/);
-        return m ? `https://unsplash.com/photos/${m[1]}` : "";
-      }catch{ return ""; }
-    }
-
-    function printDebug(obj, fetchedUrl){
-      const dbg = $("dbg");
-      try{
-        const view = {
-          fetched: fetchedUrl || null,
-          keys: Object.keys(obj || {}),
-          hero_image: obj?.hero_image || null,
-          image_credit: obj?.image_credit || null,
-          image_link: obj?.image_link || null
-        };
-        dbg.textContent = JSON.stringify(view, null, 2);
-      }catch(e){
-        dbg.textContent = "debug error: " + e.message;
-      }
-    }
+        const x = new URL(u);
+        return x.hostname === "unsplash.com" && /^\/photos\/[A-Za-z0-9_-]+/.test(x.pathname);
+      }catch{ return false; }
+    };
 
     async function main(){
       const status = $("status");
@@ -194,29 +157,20 @@
 
       const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
       status.textContent = "Fetching…";
-      console.log("🔎 Fetching JSON from:", jsonURL);
 
       let data;
       try{
         const res = await fetch(jsonURL, { cache:"no-store" });
         if(!res.ok) throw new Error("HTTP "+res.status);
-
-        const text = await res.text();              // read as text to handle double-encoding
+        const text = await res.text();
         let raw = safeParse(text);
-        if (raw === null) raw = {};                 // keep rendering/debug even if parse fails
+        if (raw === null) raw = {};
         data = normalizeData(raw);
       }catch(e){
         status.textContent = "Fetch failed: "+e.message;
-        printDebug(null, jsonURL);
         return;
       }
 
-      // DEBUG snapshot
-      console.log("🧾 Keys:", Object.keys(data||{}));
-      console.log("🧾 image_link:", data?.image_link, "hero_image:", data?.hero_image);
-      printDebug(data, jsonURL);
-
-      // Title + meta
       $("title").textContent = first(data,["title","name"]) || "";
       $("category").textContent = first(data,["category","type"]) || "";
       $("season").textContent = first(data,["season"]) || "";
@@ -226,13 +180,12 @@
         ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
         : (d||"");
 
-      // ---- Hero + credit (use image_link; fallback derive from hero CDN) ----
       const hero = first(data,["hero_image","hero.url","image"]);
       if (hero) $("hero").src = hero;
 
       const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
       let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
-      if (!creditLink && hero) creditLink = deriveUnsplashPageFromCdn(hero);
+      if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
 
       $("credit").innerHTML = creditName
         ? (creditLink
@@ -251,7 +204,6 @@
         }
       }
 
-      // Mission
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -268,11 +220,9 @@
         .join("<br/>");
       $("mission").innerHTML = formatted;
 
-      // Google Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if (mapURL) $("map").src = mapURL;
 
-      // GPX embed + actions
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if (gpxURL) {
         const studio = gpxStudioURL(gpxURL);
