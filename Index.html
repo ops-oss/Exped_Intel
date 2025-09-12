@@ -17,6 +17,7 @@
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
+      --border: rgba(0,0,0,.12);
     }
     *{ box-sizing:border-box }
     html,body{ height:100% }
@@ -30,6 +31,18 @@
     .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
     .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
     .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
+
+    /* Header icons — subtle */
+    .label.with-icon{ display:flex; align-items:center; gap:.45rem; }
+    .label .ico{
+      width: clamp(16px, 1.6vw, 20px);
+      height: clamp(16px, 1.6vw, 20px);
+      stroke: currentColor;
+      vertical-align: -0.15em;
+      opacity: .9;
+      flex: 0 0 auto;
+    }
+
     .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
     @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
     .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
@@ -44,8 +57,46 @@
     .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
 
     .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:var(--paper); }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid var(--border); background:var(--paper); }
+    .btn .ico{ width:20px; height:20px; }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
+
+    /* Actions row (Bookmark / Endorse) */
+    .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .action-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px; background:var(--paper); color:var(--ink);
+      border:1px solid var(--border); font-weight:600; cursor:pointer;
+    }
+    .action-btn .ico{ width:18px; height:18px; stroke:currentColor; }
+    .action-btn[aria-pressed="true"]{ background:#000; color:#fff; border-color:#000; }
+
+    /* GPX note */
+    .gpx-note{ font-size:14px; opacity:.8; text-align:center; max-width:720px; margin:6px auto 0; }
+
+    /* Sections + chips */
+    .section{ margin-top:26px; }
+    .section h3{ display:flex; align-items:center; gap:.6rem; font-size:clamp(18px,2.2vw,22px); margin:0 0 10px; }
+    .section h3 .ico{ width:22px; height:22px; color:inherit; }
+    .muted{ opacity:.8 }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:.5rem; padding:0; margin:8px 0 0; list-style:none; }
+    .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--paper); font-size:.9rem; }
+    .chip .ico{ width:18px; height:18px; }
+
+    .two-col{ display:grid; grid-template-columns:1fr; gap:16px 28px; }
+    @media (min-width:960px){ .two-col{ grid-template-columns:1fr 1fr; } }
+
+    .kv{ display:grid; grid-template-columns:auto 1fr; gap:.5rem .8rem; align-items:start; }
+    .kv .k{ font-weight:600 }
+    .kv .v{ opacity:.9 }
+
+    /* Day blocks */
+    .day{ border-top:1px solid var(--border); padding-top:16px; margin-top:12px; }
+    .day h4{ display:flex; align-items:center; gap:.6rem; margin:0 0 6px; font-size:clamp(18px,2.2vw,22px); }
+    .day h4 .ico{ width:22px; height:22px; }
+    .day .sub{ font-size:14px; opacity:.8; margin-bottom:10px; }
+    .day .meta{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0; }
 
     @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
     @media (max-width:480px){
@@ -60,18 +111,157 @@
   </style>
 </head>
 <body>
+
+  <!-- ICON SPRITE -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <!-- Header icons -->
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"></path>
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/>
+      <circle cx="12" cy="11.2" r="2.4"/>
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+      <path d="M16 3v4M8 3v4M3 11h18"></path>
+    </symbol>
+
+    <!-- Actions -->
+    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </symbol>
+    <symbol id="i-thumbs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 10V4a2 2 0 0 0-2-2l-3 6H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h7l5-7V8a2 2 0 0 0-2-2h-1"/>
+    </symbol>
+
+    <!-- Sections / chips icons -->
+    <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/>
+    </symbol>
+    <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 0 4 4h0"/>
+    </symbol>
+    <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21v-2M16 21v-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+    </symbol>
+    <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12l2-5h14l2 5v6a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2H8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>
+    </symbol>
+    <symbol id="i-signpost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v18"/><path d="M4 6h10l3 3H7z"/><path d="M20 14H10l-3-3h10z"/>
+    </symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M21 21H3"/>
+    </symbol>
+    <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/>
+    </symbol>
+    <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 21l9-18 9 18H3z"/><path d="M12 9l2 4h-4l2-4z"/>
+    </symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v12M11 6v12M15 6v12"/>
+    </symbol>
+    <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/>
+    </symbol>
+    <symbol id="i-tent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20l9-16 9 16H3z"/><path d="M12 4v16"/>
+    </symbol>
+    <symbol id="i-droplets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 3c4 5 4 7 4 8a4 4 0 1 1-8 0c0-1 0-3 4-8z"/><path d="M17 9c3 4 3 6 3 7a3 3 0 1 1-6 0c0-1 0-3 3-7z"/>
+    </symbol>
+    <symbol id="i-shield-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M12 8v5"/><path d="M12 16h.01"/>
+    </symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/>
+    </symbol>
+    <symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.3 4.3L2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v5"/><path d="M12 18h.01"/>
+    </symbol>
+    <symbol id="i-door-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 21h18"/><path d="M14 3h-6v18h6V3z"/><circle cx="12" cy="12" r="1"/>
+    </symbol>
+    <symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 10h.01M15 10h.01"/>
+    </symbol>
+    <symbol id="i-octagon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7.86 2h8.28l5.86 5.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"/><path d="M12 8v5"/><path d="M12 16h.01"/>
+    </symbol>
+    <symbol id="i-calendar-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="14" height="14" rx="2"/><path d="M3 11h14M11 3v4M7 3v4"/><circle cx="19" cy="19" r="3"/><path d="M19 17v2l1 1"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>
+    </symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V2h6v2"/>
+    </symbol>
+    <symbol id="i-file-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v4"/><path d="M12 18h.01"/>
+    </symbol>
+    <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/>
+    </symbol>
+  </svg>
+
   <div class="page">
     <div id="status">Loading…</div>
 
     <h1 id="title" class="title"></h1>
 
-    <div class="grid2">
-      <div><div class="label">Category</div><div id="category" class="value"></div></div>
-      <div><div class="label">Season</div><div id="season" class="value"></div></div>
-      <div><div class="label">Location</div><div id="location" class="value"></div></div>
-      <div><div class="label">Date</div><div id="date" class="value"></div></div>
+    <!-- Bookmark / Endorse -->
+    <div class="actions" id="pageActions" hidden>
+      <button id="bookmarkBtn" class="action-btn" type="button" aria-pressed="false">
+        <svg class="ico" aria-hidden="true"><use href="#i-bookmark"/></svg>
+        <span>Bookmark</span>
+      </button>
+      <button id="endorseBtn" class="action-btn" type="button" aria-pressed="false">
+        <svg class="ico" aria-hidden="true"><use href="#i-thumbs"/></svg>
+        <span>Endorse</span>
+      </button>
     </div>
 
+    <!-- Header grid -->
+    <div class="grid2">
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-compass"/></svg>
+          <span>Category</span>
+        </div>
+        <div id="category" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg>
+          <span>Season</span>
+        </div>
+        <div id="season" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg>
+          <span>Location</span>
+        </div>
+        <div id="location" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>
+          <span>Date</span>
+        </div>
+        <div id="date" class="value"></div>
+      </div>
+    </div>
+
+    <!-- Hero -->
     <div class="fullbleed">
       <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
         <img id="hero" alt="Expedition hero" />
@@ -79,19 +269,96 @@
       <div id="credit" class="credit"></div>
     </div>
 
+    <!-- Mission (raw GPT output; we also parse it for visuals below) -->
     <div id="mission" class="mission"></div>
 
-    <div class="embed">
-      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <!-- Shuttle / Map -->
+    <div class="section" id="sec-shuttle" hidden>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-bus"/></svg> Shuttle / Transportation</h3>
+      <div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <ul class="chips" id="shuttleChips"></ul>
     </div>
 
-    <div class="embed" id="gpxEmbedWrap">
-      <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <!-- GPX Route -->
+    <div class="section" id="sec-gpx" hidden>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-map"/></svg> GPX Route & Elevation</h3>
+      <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div class="gpx-actions" id="gpxActions">
+        <a id="gpxBtn" class="btn" href="#" download>
+          <svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>
+          DOWNLOAD GPX
+        </a>
+        <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">
+          <svg class="ico" aria-hidden="true"><use href="#i-external"/></svg>
+          Open in GPX Studio
+        </a>
+        <span id="trailheads" style="opacity:.7"></span>
+      </div>
+      <div id="gpxNote" class="gpx-note" hidden>
+        Starter GPX — review and adjust in your mapping app.<br/>
+        <strong>Do not rely on it as your only navigation source.</strong>
+      </div>
+      <ul class="chips" id="gpxChips"></ul>
     </div>
-    <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.7"></span>
+
+    <!-- Visual Itinerary (parsed from text; non-destructive) -->
+    <div class="section" id="sec-itin" hidden>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-signpost"/></svg> Itinerary Overview</h3>
+      <div id="itineraryVisual"></div>
+    </div>
+
+    <!-- Permits & Timeline -->
+    <div class="section two-col" id="sec-permits" hidden>
+      <div>
+        <h3><svg class="ico"><use href="#i-clipboard"/></svg> Permits & Entry</h3>
+        <div class="kv" id="permitsKV"></div>
+      </div>
+      <div>
+        <h3><svg class="ico"><use href="#i-calendar-clock"/></svg> Permit & Shuttle Timeline</h3>
+        <div class="kv" id="timelineKV"></div>
+      </div>
+    </div>
+
+    <!-- Closures / Conditions -->
+    <div class="section" id="sec-closures" hidden>
+      <h3><svg class="ico"><use href="#i-octagon-alert"/></svg> Closures & Conditions</h3>
+      <div class="muted" id="closuresText"></div>
+    </div>
+
+    <!-- Campsite & Water -->
+    <div class="section two-col" id="sec-camps" hidden>
+      <div>
+        <h3><svg class="ico"><use href="#i-tent"/></svg> Campsite Intel</h3>
+        <ul class="chips" id="campsChips"></ul>
+      </div>
+      <div>
+        <h3><svg class="ico"><use href="#i-droplets"/></svg> Water & Resupply</h3>
+        <div class="muted" id="waterText"></div>
+      </div>
+    </div>
+
+    <!-- Risk -->
+    <div class="section" id="sec-risk" hidden>
+      <h3><svg class="ico"><use href="#i-shield-alert"/></svg> Risk Matrix & Hazard Timeline</h3>
+      <ul class="chips" id="riskChips"></ul>
+    </div>
+
+    <!-- Contacts & Final -->
+    <div class="section two-col" id="sec-contacts" hidden>
+      <div>
+        <h3><svg class="ico"><use href="#i-phone"/></svg> Emergency Contacts</h3>
+        <div class="kv" id="contactsKV"></div>
+      </div>
+      <div>
+        <h3><svg class="ico"><use href="#i-clipboard"/></svg> Final Brief Summary</h3>
+        <div class="kv" id="finalKV"></div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="section" id="sec-disclaimer" hidden>
+      <h3><svg class="ico"><use href="#i-file-warning"/></svg> Field Disclaimer</h3>
+      <div class="muted" id="disclaimerText"></div>
     </div>
   </div>
 
@@ -150,6 +417,192 @@
       }catch{ return false; }
     };
 
+    /* Actions helpers */
+    function togglePressed(el){
+      const now = el.getAttribute("aria-pressed") === "true" ? "false" : "true";
+      el.setAttribute("aria-pressed", now);
+      return now === "true";
+    }
+    function storeState(key, value){ try{ localStorage.setItem(key, JSON.stringify(value)); }catch{} }
+    function readState(key){ try{ return JSON.parse(localStorage.getItem(key) || "null"); }catch{ return null; } }
+
+    /* ---------- PARSER: non-destructive visuals from mission text ---------- */
+    function parseSectionsFromMission(text){
+      const lines = text.split(/\r?\n/).map(s=>s.trim());
+      const sections = {};
+      let current = "_root";
+      sections[current] = [];
+      const titleRe = /^(?:[A-Z][A-Z &\/’'\-]+|DAY\s*\d+:.*)$/;
+      for(const line of lines){
+        if(!line){ continue; }
+        if (titleRe.test(line)) {
+          current = line.replace(/\s+/g,' ').trim();
+          sections[current] = [];
+        } else {
+          sections[current].push(line);
+        }
+      }
+      return sections;
+    }
+
+    function kvPush(el, k, v){
+      if(!v) return;
+      el.insertAdjacentHTML("beforeend", `<div class="k">${k}</div><div class="v">${v}</div>`);
+    }
+    function chip(el, icon, text){
+      if(!text) return;
+      el.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico" aria-hidden="true"><use href="#${icon}"/></svg> ${text}</li>`);
+    }
+
+    function renderVisualsFromSections(sections){
+      // Itinerary days
+      const itin = $("itineraryVisual");
+      const secItin = $("sec-itin");
+      const dayKeys = Object.keys(sections).filter(k=>/^DAY\s*\d+:/i.test(k));
+      if (dayKeys.length) {
+        secItin.hidden = false;
+        for(const k of dayKeys){
+          const title = k.replace(/^DAY\s*/i, "DAY ");
+          const body = sections[k].join(" ");
+          const dist = (body.match(/(\d+\s*(?:miles?|mi)\b)/i)||[])[1] || "";
+          const gain = (body.match(/\+(\d{3,5})\s*ft/i)||[])[1];
+          const loss = (body.match(/\-(\d{3,5})\s*ft/i)||[])[1];
+          const sub = sections[k].slice(0,2).join(" ");
+          const findLine = (prefix)=>{
+            const row = (sections[k]||[]).find(s=>s.toLowerCase().startsWith(prefix));
+            return row ? row.split(":").slice(1).join(":").trim() : "";
+          };
+          const water = findLine("key water sources") || findLine("water") || (body.match(/water (?:available|sources|scarce)[^.]*\.?/i)||[])[0] || "";
+          const safety = findLine("safety");
+          const tip = findLine("trail tip") || findLine("tip");
+          const bailout = findLine("bailout");
+          const decision = findLine("decision point");
+          const morale = findLine("morale marker");
+
+          const html = `
+            <div class="day">
+              <h4><svg class="ico" aria-hidden="true"><use href="#i-signpost"/></svg> ${title}</h4>
+              ${sub ? `<div class="sub">${sub}</div>` : ""}
+              <div class="meta">
+                ${dist ? `<span class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ${dist}</span>` : ""}
+                ${(gain||loss) ? `<span class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${gain?`+${gain}`:""}${(gain&&loss)?" / ":""}${loss?`-${loss}`:""} ft</span>` : ""}
+                ${water ? `<span class="chip"><svg class="ico"><use href="#i-droplets"/></svg> ${water}</span>` : ""}
+                ${safety ? `<span class="chip"><svg class="ico"><use href="#i-shield-alert"/></svg> ${safety}</span>` : ""}
+                ${tip ? `<span class="chip"><svg class="ico"><use href="#i-lightbulb"/></svg> ${tip}</span>` : ""}
+                ${bailout ? `<span class="chip"><svg class="ico"><use href="#i-door-open"/></svg> ${bailout}</span>` : ""}
+                ${decision ? `<span class="chip"><svg class="ico"><use href="#i-triangle-alert"/></svg> ${decision}</span>` : ""}
+                ${morale ? `<span class="chip"><svg class="ico"><use href="#i-smile"/></svg> ${morale}</span>` : ""}
+              </div>
+            </div>`;
+          itin.insertAdjacentHTML("beforeend", html);
+        }
+      }
+
+      // Permits block
+      const permitsKV = $("permitsKV");
+      const secPermits = $("sec-permits");
+      const permitsKey = Object.keys(sections).find(k=>/^PERMITS?\s*&\s*ENTRY/i.test(k));
+      if (permitsKey && permitsKV) {
+        secPermits.hidden = false;
+        const lines = sections[permitsKey];
+        for(const ln of lines){
+          const m = ln.match(/^([^:]+):\s*(.*)$/);
+          if(!m) continue;
+          kvPush(permitsKV, m[1].trim(), m[2].trim());
+        }
+      }
+
+      // Timeline
+      const timelineKV = $("timelineKV");
+      const tlKey = Object.keys(sections).find(k=>/PERMIT\s*&\s*SHUTTLE\s*TIMELINE/i.test(k));
+      if (tlKey && timelineKV) {
+        const lines = sections[tlKey];
+        for(const ln of lines){
+          const m = ln.match(/^([^:]+):\s*(.*)$/);
+          if(!m) continue;
+          kvPush(timelineKV, m[1].trim(), m[2].trim());
+        }
+        secPermits.hidden = false;
+      }
+
+      // Closures
+      const closures = $("closuresText");
+      const secClosures = $("sec-closures");
+      const clKey = Object.keys(sections).find(k=>/CLOSURES|CONDITIONS\s*WATCH/i.test(k));
+      if (clKey && closures) {
+        closures.textContent = sections[clKey].join(" ");
+        secClosures.hidden = false;
+      }
+
+      // Campsites + Water
+      const camps = $("campsChips");
+      const waterText = $("waterText");
+      const secCamps = $("sec-camps");
+      const campKey = Object.keys(sections).find(k=>/CAMPSITE\s*INTEL/i.test(k));
+      if (campKey && camps) {
+        secCamps.hidden = false;
+        for(const ln of sections[campKey]){
+          const m = ln.match(/([A-Za-z0-9 .\-()']+\(\d[,.\d]*\s*ft\))/);
+          chip(camps, "i-tent", m ? m[1] : ln);
+        }
+      }
+      const waterKey = Object.keys(sections).find(k=>/WATER\s*&\s*ALTITUDE|WATER\s*&\s*RESUPPLY/i.test(k));
+      if (waterKey && waterText) {
+        waterText.textContent = sections[waterKey].join(" ");
+        secCamps.hidden = false;
+      }
+
+      // Risk
+      const riskChips = $("riskChips");
+      const secRisk = $("sec-risk");
+      const riskKey = Object.keys(sections).find(k=>/RISK\s*MATRIX/i.test(k));
+      if (riskKey && riskChips) {
+        secRisk.hidden = false;
+        const body = sections[riskKey].join(" ");
+        const hazards = [];
+        const tstorm = (body.match(/thunderstorms?[^.]*\.?/i)||[])[0];
+        if (tstorm) hazards.push(["i-cloudsun", tstorm]);
+        const exposure = (body.match(/exposure[^.]*\.?/i)||[])[0];
+        if (exposure) hazards.push(["i-mountain", exposure]);
+        const bail = (body.match(/bailouts?[^.]*\.?/i)||[])[0];
+        if (bail) hazards.push(["i-route", bail]);
+        hazards.forEach(([ico,txt])=>chip(riskChips, ico, txt));
+      }
+
+      // Contacts
+      const contactsKV = $("contactsKV");
+      const secContacts = $("sec-contacts");
+      const contactsKey = Object.keys(sections).find(k=>/EMERGENCY\s*CONTACTS/i.test(k));
+      if (contactsKey && contactsKV) {
+        secContacts.hidden = false;
+        for(const ln of sections[contactsKey]){
+          const m = ln.match(/^([^:]+):\s*(.*)$/);
+          if(!m) continue;
+          kvPush(contactsKV, m[1].trim(), m[2].trim());
+        }
+      }
+      // Final Summary
+      const finalKV = $("finalKV");
+      const finalKey = Object.keys(sections).find(k=>/FINAL\s*BRIEF\s*SUMMARY/i.test(k));
+      if (finalKey && finalKV) {
+        for(const ln of sections[finalKey]){
+          const m = ln.match(/^([^:]+):\s*(.*)$/);
+          if(!m) continue;
+          kvPush(finalKV, m[1].trim(), m[2].trim());
+        }
+        secContacts.hidden = false;
+      }
+
+      // Disclaimer
+      const discText = $("disclaimerText");
+      const secDisc = $("sec-disclaimer");
+      const discKey = Object.keys(sections).find(k=>/FIELD\s*DISCLAIMER/i.test(k));
+      if (discKey && discText) {
+        discText.textContent = sections[discKey].join(" ");
+        secDisc.hidden = false;
+      }
+    }
+
     async function main(){
       const status = $("status");
       const slug = getSlug();
@@ -204,6 +657,7 @@
         }
       }
 
+      // Mission: render raw text with light formatting
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -220,11 +674,23 @@
         .join("<br/>");
       $("mission").innerHTML = formatted;
 
+      // Shuttle section (map + chips if found)
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
-      if (mapURL) $("map").src = mapURL;
+      if (mapURL) {
+        $("map").src = mapURL;
+        $("sec-shuttle").hidden = false;
+        const sh = $("shuttleChips");
+        const ttype = /point[- ]to[- ]point|loop|out[- ]and[- ]back/i.exec(mission);
+        if (ttype) chip(sh, "i-route", ttype[0].replace(/-/g,"-"));
+        if (/parking/i.test(mission)) chip(sh, "i-parking", "Overnight parking");
+        if (/shuttle|taxi|rideshare/i.test(mission)) chip(sh, "i-bus", "Local shuttle / rideshare");
+        if (/passenger vehicle|car|paved/i.test(mission)) chip(sh, "i-car", "Passenger vehicle");
+      }
 
+      // GPX section
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if (gpxURL) {
+        $("sec-gpx").hidden = false;
         const studio = gpxStudioURL(gpxURL);
         $("gpxStudio").src = studio;
         $("gpxStudioLink").href = studio;
@@ -232,9 +698,45 @@
         $("gpxBtn").download = (slug||"route") + ".gpx";
         const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
         if (th) $("trailheads").textContent = th;
-      } else {
-        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
-        $("gpxActions").style.display = "none";
+        $("gpxNote").hidden = false;
+        // GPX chips (best-effort)
+        const gpxChips = $("gpxChips");
+        const miles = (mission.match(/~?(\d{1,3})\s*(?:miles?|mi)\b/i)||[])[1];
+        if (miles) chip(gpxChips, "i-ruler", `~${miles} mi`);
+        const gain = (mission.match(/\+(\d{3,5})\s*ft/i)||[])[1];
+        const loss = (mission.match(/\-(\d{3,5})\s*ft/i)||[])[1];
+        if (gain || loss) chip(gpxChips, "i-mountain", `${gain?`+${gain}`:""}${(gain&&loss)?" / ":""}${loss?`-${loss}`:""} ft`);
+        const days = (mission.match(/TRIP DURATION:\s*([0-9]+)\s*days?/i)||[])[1];
+        if (days) chip(gpxChips, "i-cloudsun", `${days} days`);
+      }
+
+      // Parse mission -> sections & visuals
+      if (mission) {
+        const sections = parseSectionsFromMission(mission);
+        renderVisualsFromSections(sections);
+      }
+
+      // Actions: Bookmark / Endorse (persist per slug)
+      const actions = $("pageActions");
+      const bookmarkBtn = $("bookmarkBtn");
+      const endorseBtn = $("endorseBtn");
+      if (actions && bookmarkBtn && endorseBtn && slug) {
+        actions.hidden = false;
+        const bkKey = `ei:${slug}:bookmark`;
+        const enKey = `ei:${slug}:endorse`;
+        const bk = readState(bkKey) === true;
+        const en = readState(enKey) === true;
+        bookmarkBtn.setAttribute("aria-pressed", bk ? "true" : "false");
+        endorseBtn.setAttribute("aria-pressed", en ? "true" : "false");
+
+        bookmarkBtn.addEventListener("click", () => {
+          const on = togglePressed(bookmarkBtn);
+          storeState(bkKey, on);
+        });
+        endorseBtn.addEventListener("click", () => {
+          const on = togglePressed(endorseBtn);
+          storeState(enKey, on);
+        });
       }
 
       status.textContent = "";
