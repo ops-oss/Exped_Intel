@@ -1,184 +1,175 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Expedition</title>
-<link rel="stylesheet" href="/fonts.css" />
+
+<link rel="stylesheet" href="/fonts.css"/>
+
 <style>
   :root{
-    --bg: rgb(232,229,226);
-    --ink: rgb(30,30,30);
-    --accent: rgb(254,87,51);
-    --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
-    --h1: clamp(40px, 18vw, 88px);
-    --label: 14px;
+    --bg:#e8e5e2; --ink:#1e1e1e; --paper:#fff; --accent:#fe5733;
+    --font: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --h1: clamp(44px,18vw,86px);
     --body: 18px;
-    --border: rgba(0,0,0,.12);
-    --tint: rgba(0,0,0,.06);
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
-  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
   img{ display:block; width:100%; height:auto }
   a{ color:inherit; text-underline-offset:2px }
-
-  .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
-  .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
-
-  .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
-  .label.with-icon{ display:flex; align-items:center; gap:.45rem; }
-  .label .ico{ width:clamp(16px,1.6vw,20px); height:clamp(16px,1.6vw,20px); stroke:currentColor; vertical-align:-0.15em; opacity:.9; flex:0 0 auto; }
-
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
+  .page{ max-width:1120px; margin:0 auto; padding:24px 16px 48px; display:grid; row-gap:22px }
+  .title{ font-size:var(--h1); line-height:1.02; font-weight:900; letter-spacing:-.02em; margin:.2em 0 .1em }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px 28px; align-items:start }
   @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
+  .label{ font-size:13px; letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
   .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
 
-  .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); }
-  #heroLink{ display:block; }
+  .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); overflow:hidden }
+  .fullbleed img{ width:100vw; max-width:100vw; height:auto }
+
   .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
   .credit a{ text-decoration:underline; cursor:pointer; }
 
-  .embed{ aspect-ratio:16/9 } 
-  .embed iframe{ width:100%; height:100%; border:0; display:block }
-  /* Taller GPX + Shuttle maps on phones */
-  .embed.gpx, .embed.map { aspect-ratio: 4 / 5; }
-  @media (min-width:700px){
-    .embed.gpx, .embed.map { aspect-ratio: 16 / 9; }
+  .actions{ display:flex; gap:10px; flex-wrap:wrap; margin:.5rem 0 .75rem }
+  .btn{ display:inline-flex; align-items:center; gap:.6rem; padding:.6rem 1rem; font-weight:700;
+        border-radius:999px; text-decoration:none; border:1px solid rgba(0,0,0,.12);
+        background:rgba(0,0,0,.06); color:inherit; cursor:pointer }
+  .btn:focus-visible{ outline:2px solid rgba(0,0,0,.35); outline-offset:2px }
+
+  .section{ padding:16px 0 6px; border-bottom:1px solid rgba(0,0,0,.06) }
+  .section:last-child{ border-bottom:0 }
+  .section h3{
+    display:flex; align-items:center; gap:.6rem;
+    font-weight:800; letter-spacing:-.01em;
+    font-size:clamp(21px,6vw,26px);
+    margin:24px 0 12px;
   }
+  .section p{ font-size:clamp(16px,4.6vw,18px); line-height:1.55; margin:0 0 .6rem }
 
-  /* Actions */
-  .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-  .action-btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:var(--tint); color:var(--ink); border:1px solid var(--border); font-weight:600; cursor:pointer; }
-  .action-btn .ico{ width:18px; height:18px; stroke:currentColor; }
-  .action-btn[aria-pressed="true"]{ background:#000; color:#fff; border-color:#000; }
-
-  /* Sections */
-  .section{ margin-top:26px; }
-  .section h3{ display:flex; align-items:center; gap:.6rem; font-size:clamp(18px,2.2vw,22px); margin:0 0 10px; font-weight:700; letter-spacing:-0.01em; }
-  .section h3 .ico{ width:18px; height:18px; opacity:.9; }
-
-  .day h4{ margin:0 0 6px; font-weight:700; font-size:clamp(17px,2vw,20px); }
-  .day h4 .ico{ width:16px; height:16px; opacity:.9; }
-
-  /* KV grid (bold left column, mobile-safe wrapping) */
   .kv{
     display:grid;
-    grid-template-columns: minmax(14ch,1fr) minmax(0,2fr);
-    row-gap:.75rem;
-    column-gap:1rem;
-    align-items:start;
-    grid-auto-rows:minmax(1.6em,auto);
+    grid-template-columns:minmax(14ch,1fr) minmax(0,2fr);
+    row-gap:.75rem; column-gap:1rem; align-items:start;
   }
-  .kv .k,.kv .v{ line-height:1.45; }
-  .kv .k{ font-weight:700; white-space:normal; word-break:keep-all; overflow-wrap:normal; }
-  .kv .v{ overflow-wrap:anywhere; word-break:break-word; hyphens:auto; }
+  .kv .k,.kv .v{ line-height:1.5; font-size:clamp(17px,4.6vw,18.5px) }
+  .kv .k{
+    font-weight:800; display:inline-block; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; hyphens:none; word-break:normal; overflow-wrap:normal;
+  }
+  .kv .v{ overflow-wrap:anywhere; word-break:break-word; hyphens:auto }
 
-  /* Chips */
-  .chips{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0 0; padding:0; list-style:none; align-items:stretch; }
-  .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; white-space:nowrap; }
-  .chip .ico{ width:18px; height:18px; }
+  /* Day blocks */
+  .day{
+    background:var(--bg);
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:14px; padding:14px 14px 12px; margin:14px 0;
+  }
+  .day h4{ margin:0 0 .4rem; font-size:clamp(18px,5vw,22px); letter-spacing:-.01em }
+  .pillbar{ display:flex; gap:8px; flex-wrap:wrap; margin:.4rem 0 .5rem }
+  .pill{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.45rem .7rem; border-radius:999px; background:rgba(0,0,0,.06); border:1px solid rgba(0,0,0,.10);
+    font-weight:700; font-size:15px;
+  }
+  .pill:empty{ display:none }
 
-  /* Day cards (page bg, subtle spine) */
-  .day{ margin-top:14px; padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--bg); position:relative; }
-  .day::before{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px; border-radius:12px 0 0 12px; background:rgba(0,0,0,.25); }
-  .day .meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:6px 0 0; }
+  .meta{ background:rgba(0,0,0,.06); border:1px solid rgba(0,0,0,.10); border-radius:12px; padding:.75rem .85rem; }
+  .meta p{ margin:.4rem 0 }
 
-  /* Soft callout (only if section has chips/icons) */
-  .callout{ background:var(--tint); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-top:8px; }
+  /* Timeline grid */
+  .timeline{
+    display:grid; grid-template-columns:minmax(11ch,1fr) 2fr; gap:.55rem 1rem;
+  }
+  .timeline .when{ font-weight:800 }
 
-  /* Subtle single-line note (no box) */
-  .note{ margin-top:8px; font-size:0.95rem; opacity:.9; }
-
-  /* GPX */
+  /* GPX area */
+  .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
   .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-  .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid var(--border); background:#000; color:#fff; }
-  .btn .ico{ width:20px; height:20px; }
-  .gpx-note{ font-size:14px; text-align:center; max-width:720px; margin:6px auto 0; opacity:.95; }
+  #gpxBtn{ background:#000; color:#fff; border-color:#000; }
+  .gpx-note{ text-align:center; max-width:34rem; margin:8px auto 0; opacity:.9 }
+  .gpx-note b{ display:block; margin-top:.2rem }
 
-  #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
-
-  /* Mobile refinements */
-  @media (max-width:640px){
-    .kv{ grid-template-columns:minmax(16ch,1fr) minmax(0,2.5fr); }
-    .kv .k{ font-size:0.98rem; opacity:1; font-weight:700; }
-    .kv .v{ font-size:0.98rem; }
+  @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
+  @supports (-webkit-touch-callout:none){
+    @media (max-width:420px){ .kv .k{ white-space:normal } }
   }
-  @supports (-webkit-touch-callout:none){ .kv .k{ white-space:normal; } }
+
+  /* Print */
+  @media print{
+    body{ background:#fff; color:#000 }
+    .actions, .gpx-actions, .credit a::after{ display:none !important }
+    .page{ max-width:720px; padding:0 }
+    h1{ font-size:42px; line-height:1.1 }
+    .section, .day{ page-break-inside:avoid; break-inside:avoid }
+    .fullbleed{ margin:0; width:auto }
+    .fullbleed img{ width:100%; max-width:100%; height:auto }
+    a[href^="http"]:after{ content:" <" attr(href) ">"; font-weight:400 }
+  }
 </style>
 </head>
 <body>
+  <div class="page">
+    <div id="status" style="opacity:.6;font-size:14px">Loading…</div>
 
-<!-- ICONS -->
-<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
-  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
+    <h1 id="title" class="title"></h1>
 
-  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
-  <symbol id="i-thumbs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10V4a2 2 0 0 0-2-2l-3 6H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h7l5-7V8a2 2 0 0 0-2-2h-1"/></symbol>
+    <div class="actions">
+      <button class="btn" data-action="bookmark">Bookmark</button>
+      <button class="btn" data-action="endorse">Endorse</button>
+      <button class="btn" id="printBtn" title="Print or save to PDF">🖨️ Print</button>
+    </div>
 
-  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
-  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 0 4 4h0"/></symbol>
-  <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21v-2M16 21v-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
-  <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-5h14l2 5v6a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2H8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
-  <symbol id="i-signpost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M4 6h10l3 3H7z"/><path d="M20 14H10l-3-3h10z"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M21 21H3"/></symbol>
-  <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/></symbol>
-  <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-18 9 18H3z"/><path d="M12 9l2 4h-4l2-4z"/></symbol>
-  <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M7 6v12M11 6v12M15 6v12"/></symbol>
-  <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/></symbol>
-  <symbol id="i-shield-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M12 8v5"/><path d="M12 16h.01"/></symbol>
-  <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/></symbol>
-  <symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3L2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v5"/><path d="M12 18h.01"/></symbol>
-  <symbol id="i-door-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M14 3h-6v18h6V3z"/><circle cx="12" cy="12" r="1"/></symbol>
-  <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V2h6v2"/></symbol>
-  <symbol id="i-file-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v4"/><path d="M12 18h.01"/></symbol>
-  <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/></symbol>
-  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12 0 .32 1.7.6 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.12a2 2 0 0 1 2.11-.45c.8.28 1.64.48 2.5.6A2 2 0 0 1 22 16.92z"/></symbol>
-</svg>
+    <div class="grid2">
+      <div><div class="label">Category</div><div id="category" class="value"></div></div>
+      <div><div class="label">Season</div><div id="season" class="value"></div></div>
+      <div><div class="label">Location</div><div id="location" class="value"></div></div>
+      <div><div class="label">Date</div><div id="date" class="value"></div></div>
+    </div>
 
-<div class="page">
-  <div id="status">Loading…</div>
+    <div class="fullbleed">
+      <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
+        <img id="hero" alt="Expedition hero"/>
+      </a>
+      <div id="credit" class="credit"></div>
+    </div>
 
-  <h1 id="title" class="title"></h1>
+    <!-- Sections mount here -->
+    <div id="sections"></div>
 
-  <!-- Bookmark / Endorse -->
-  <div class="actions" id="pageActions" hidden>
-    <button id="bookmarkBtn" class="action-btn" type="button" aria-pressed="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-bookmark"/></svg>
-      <span>Bookmark</span>
-    </button>
-    <button id="endorseBtn" class="action-btn" type="button" aria-pressed="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-thumbs"/></svg>
-      <span>Endorse</span>
-    </button>
+    <!-- Shuttle map -->
+    <div class="section" id="shuttleSection" style="display:none">
+      <h3>Shuttle / Transportation</h3>
+      <div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div id="shuttleChips" class="pillbar"></div>
+    </div>
+
+    <!-- GPX block -->
+    <div class="section" id="gpxSection" style="display:none">
+      <h3>GPX Route & Elevation</h3>
+      <div class="embed" id="gpxEmbedWrap">
+        <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="gpx-actions" id="gpxActions">
+        <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
+        <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
+        <span id="trailheads" style="opacity:.7"></span>
+      </div>
+      <p class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><b>Do not rely on it as your only navigation source.</b></p>
+    </div>
+
+    <!-- Field Disclaimer moves to bottom inherently -->
+    <div id="disclaimerMount"></div>
   </div>
-
-  <!-- Header grid -->
-  <div class="grid2">
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-pin"/></svg><span>Location</span></div><div id="location" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
-  </div>
-
-  <!-- Hero -->
-  <div class="fullbleed">
-    <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
-      <img id="hero" alt="Expedition hero" />
-    </a>
-    <div id="credit" class="credit"></div>
-  </div>
-
-  <!-- Dynamic content -->
-  <div id="flow"></div>
-</div>
 
 <script>
-  const $ = id => document.getElementById(id);
-  const qp = k => new URL(location.href).searchParams.get(k);
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const qp = (k) => new URL(location.href).searchParams.get(k);
   const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
   const first = (o,keys)=>{ for(const k of keys){ const v=get(o,k); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
 
@@ -192,352 +183,160 @@
   const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
   function gpxStudioURL(gpxUrl){
     if(!gpxUrl) return "";
-    const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
+    const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial", centerOnRoutes:true };
     return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
   }
 
   function safeParse(text){
     try{
       let x = JSON.parse(text);
-      if (typeof x === "string") { try { x = JSON.parse(x); } catch {} }
+      if (typeof x === "string") {
+        try { x = JSON.parse(x); } catch {}
+      }
       return x;
     }catch{ return null; }
   }
+
   function normalizeData(raw){
-    if (typeof raw === "string") { const again = safeParse(raw); if (again) raw = again; }
+    if (typeof raw === "string") {
+      const again = safeParse(raw);
+      if (again) raw = again;
+    }
     if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
     let full = null, flat = null;
-    if (typeof raw?.index_json === "string") full = safeParse(raw.index_json);
-    else if (raw?.index_json && typeof raw.index_json === "object") full = raw.index_json;
-    if (typeof raw?.flat_json === "string") flat = safeParse(raw.flat_json);
-    else if (raw?.flat_json && typeof raw.flat_json === "object") flat = raw.flat_json;
+    if (typeof raw?.index_json === "string") { full = safeParse(raw.index_json); }
+    else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
+    if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
+    else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
     let out = { ...(full || {}), ...(flat || {}) };
     if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
     if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
     if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
     return Object.keys(out).length ? out : raw;
   }
-  const isValidUnsplashPhoto = (u)=>{ try{ const x = new URL(u); return x.hostname==="unsplash.com" && /^\/photos\/[A-Za-z0-9_-]+/.test(x.pathname); }catch{ return false; } };
 
-  /* Helpers / cleaners */
-  const isDivider = (s) => /^[\s—–\-•]+$/.test(s || "");
-  const cleanLine  = (s) => (s || "").replace(/^[•\-–—]\s*/, "").trim();
-  const isMeaningful = (s) => /\p{L}|\p{N}/u.test((s || "").trim());
+  const isValidUnsplashPhoto = (u)=>{
+    try{
+      const x = new URL(u);
+      return x.hostname === "unsplash.com" && /^\/photos\/[A-Za-z0-9_-]+/.test(x.pathname);
+    }catch{ return false; }
+  };
 
-  // Split "… Key: Value Key: Value …" living on one physical line
-  function expandInlineKVs(line){
-    const parts = line
-      .split(/(?=\s*[A-Z][A-Za-z ()/'&\-]*:\s)/)
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (parts.length <= 1) return [line];
-    const out = [];
-    for (const p of parts){
-      if (/^[A-Z][A-Za-z ()/'&\-]*:\s/.test(p)) out.push(p);
-      else if (p) out.push(p);
-    }
-    return out.length ? out : [line];
+  // ---------- header detection that won't eat "GPS coordinates:" ----------
+  function isHeaderLine(line){
+    const L = (line||"").trim();
+    if (/^DAY\s*\d+\s*:/i.test(L)) return true;                   // DAY blocks
+    if (/^EXPEDITION ITINERARY\s*:/i.test(L)) return true;        // special top line
+    if (!/[:]/.test(L) && /^[^a-z]+$/.test(L)) return true;       // all-caps w/o colon
+    return false;
   }
 
   function parseSections(text){
     const lines = (text || "").split(/\r?\n/).map(s=>s.trim());
     const sections = [];
-    const titleRe = /^(?:DAY\s*\d+:.*|[A-Z][A-Z &\/’'–—\-]+(?::.*)?)+$/;
     let current = null;
-    const push = ()=>{ if(current) sections.push(current); current = null; };
-    for(const line of lines){
-      if(!line) continue;
-      if (titleRe.test(line)) { push(); current = { title: line.replace(/\s+/g,' ').trim(), lines: [] }; }
-      else {
-        if(!current){ current = { title:"UNSECTIONED", lines:[] }; }
-        expandInlineKVs(line).forEach(part => current.lines.push(part));
+
+    const push = ()=>{ if(current){ sections.push(current); current=null; } };
+
+    for(const raw of lines){
+      const line = raw.trim();
+      if (!line) continue;
+      if (/^[-–—]{2,}$/.test(line)) continue; // ignore rule-only lines
+      if (/^[•*]\s*$/.test(line)) continue;   // ignore stray bullets
+
+      if (isHeaderLine(line)) {
+        push();
+        current = { title: line, lines: [] };
+      } else {
+        if(!current) current = { title:"UNSECTIONED", lines:[] };
+        // Expand the "a: b — c: d" style content into separate lines when detected
+        const expanded = expandInlineKVs(line);
+        expanded.forEach(x => current.lines.push(x));
       }
     }
     push();
     return sections;
   }
 
-  /* KV rows with robust timeline handling */
-  function kvRows(lines){
-    return (lines || [])
-      .map(cleanLine).filter(l => !isDivider(l))
-      .map(ln => {
-        const s = ln.replace(/^\s*[—–-]\s*/, '');
-        const t = s.match(/^\s*(\d+)\s*(Days|Hours)\s*Out\s*:\s*(.*)$/i);
-        if (t) return { k: `${t[1]} ${t[2]} Out`, v: t[3].trim() };
-        const m = s.match(/^([^:]+):\s*(.*)$/);
-        return m ? {k:m[1].trim(), v:m[2].trim()} : null;
-      })
-      .filter(Boolean);
-  }
-  function nonKV(lines){
-    return (lines || []).map(cleanLine).filter(l => !isDivider(l))
-      .filter(ln => !/^([^:]+):\s+/.test(ln));
-  }
-
-  const ICON_FOR = [
-    [/^EXPEDITION ITINERARY/i, "i-clipboard", "Expedition Itinerary"],
-    [/^PRIMARY OBJECTIVE/i,      "i-signpost", "Primary Objective"],
-    [/^TRIP DURATION/i,          "i-cloudsun", "Trip Duration"],
-    [/^TOTAL ESTIMATED MILEAGE/i,"i-ruler",    "Total Estimated Mileage"],
-    [/^EXPERIENCE LEVEL/i,       "i-mountain", "Experience Level"],
-    [/^TERRAIN TYPE/i,           "i-mountain", "Terrain Type"],
-    [/^PERMITS?\s*&\s*ENTRY/i,   "i-clipboard","Permits & Entry"],
-    [/^SHUTTLE\s*\/\s*TRANSPORTATION/i, "i-bus","Shuttle / Transportation"],
-    [/^MULTI\-TRAILHEAD LOGISTICS/i, "i-route","Multi-Trailhead Logistics"],
-    [/^KEY CONSIDERATIONS/i,     "i-lightbulb","Key Considerations"],
-    [/^PERMIT\s*&\s*SHUTTLE\s*TIMELINE/i, "i-calendar", "Permit & Shuttle Timeline"],
-    [/^WEATHER\s*&\s*ALTITUDE NOTES/i, "i-cloudsun", "Weather & Altitude Notes"],
-    [/^GEAR CHECKLIST/i,         "i-clipboard","Gear Checklist"],
-    [/^OPTIONAL MODIFICATION/i,  "i-signpost","Optional Modification"],
-    [/^RISK MATRIX/i,            "i-shield-alert","Risk Matrix & Hazard Timeline"],
-    [/^CONDITIONS WATCH/i,       "i-triangle-alert","Conditions Watch"],
-    [/^BAILOUT SUMMARY/i,        "i-door-open","Bailout Summary"],
-    [/^EMERGENCY CONTACTS/i,     "i-phone","Emergency Contacts & Numbers"],
-    [/^FINAL BRIEF SUMMARY/i,    "i-clipboard","Final Brief Summary"],
-    [/^FIELD DISCLAIMER/i,       "i-file-warning","Field Disclaimer"],
-    [/^DAY\s*\d+:/i,             "i-signpost","Itinerary Overview"]
-  ];
-  function labelFor(title){
-    for (const [re, icon, label] of ICON_FOR){ if (re.test(title)) return {icon, label}; }
-    return {icon: "i-clipboard", label: title.replace(/\s*:\s*$/,'')};
-  }
-
-  function renderFlow(sections, mission, data){
-    const flow = $("flow");
-    let insertedItin = false, itinHost = null;
-    let disclaimerEl = null;
-
-    for (const sec of sections){
-
-      /* DAY cards */
-      if (/^DAY\s*\d+:/i.test(sec.title)){
-        if (!insertedItin){
-          const wrap = document.createElement("div");
-          wrap.className = "section";
-          wrap.innerHTML = `<h3><svg class="ico"><use href="#i-signpost"/></svg> Itinerary Overview</h3><div id="itineraryVisual"></div>`;
-          flow.appendChild(wrap);
-          itinHost = wrap.querySelector("#itineraryVisual");
-          insertedItin = true;
-        }
-        const title = sec.title.replace(/^DAY\s*/i, "DAY ");
-        const sub = sec.lines[0] || "";
-        const all = sec.lines.join(" ");
-
-        // tolerant parsing for chips
-        const dist = (all.match(/(\d+(?:\.\d+)?)\s*(?:miles?|mi)\b/i)||[])[1] || "";
-        const g = (all.match(/\+(\d{1,3}(?:,\d{3})*)\s*ft/i)||[])[1];
-        const l = (all.match(/\-(\d{1,3}(?:,\d{3})*)\s*ft/i)||[])[1];
-
-        const card = document.createElement("div");
-        card.className = "day";
-        card.innerHTML = `
-          <h4><svg class="ico"><use href="#i-signpost"/></svg> ${title}</h4>
-          ${isMeaningful(sub) ? `<div class="sub">${sub}</div>` : ""}
-          <div class="meta">
-            ${isMeaningful(dist) ? `<span class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ${dist} mi</span>` : ""}
-            ${(g||l) ? `<span class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${g?`+${g}`:""}${(g&&l)?" / ":""}${l?`-${l}`:""} ft</span>` : ""}
-          </div>
-        `;
-
-        const extra = (sec.lines.slice(1) || [])
-          .map(cleanLine).filter(l => !isDivider(l) && isMeaningful(l));
-        if (extra.length){
-          const c = document.createElement("div");
-          c.className = "callout";
-          c.textContent = extra.join(" ");
-          card.appendChild(c);
-        }
-        itinHost.appendChild(card);
-        continue;
-      }
-
-      const {icon, label} = labelFor(sec.title);
-      const wrap = document.createElement("div");
-      wrap.className = "section";
-      wrap.innerHTML = `<h3><svg class="ico"><use href="#${icon}"/></svg> ${label}</h3>`;
-      const kv = kvRows(sec.lines);
-      const rest = nonKV(sec.lines);
-
-      /* Expedition Itinerary meta */
-      if (/^EXPEDITION ITINERARY/i.test(sec.title)){
-        const metaKV = document.createElement("div"); metaKV.className = "kv";
-        const route = sec.title.split(":").slice(1).join(":").trim();
-        if (isMeaningful(route)) metaKV.insertAdjacentHTML("beforeend",
-          `<div class="k">Route</div><div class="v">${route}</div>`);
-
-        const byKey = new Map(kv.map(r => [r.k.toLowerCase(), r.v]));
-        const ordered = [
-          "PRIMARY OBJECTIVE","TRIP DURATION","TOTAL ESTIMATED MILEAGE",
-          "EXPERIENCE LEVEL","TERRAIN TYPE",
-          "Cumulative elevation gain/loss (ft)","Start and end trailhead","GPS coordinates"
-        ];
-        ordered.forEach(key => {
-          const v = byKey.get(key.toLowerCase());
-          if (isMeaningful(v)) metaKV.insertAdjacentHTML("beforeend",
-            `<div class="k">${key}</div><div class="v">${v}</div>`);
-        });
-        kv.forEach(r=>{
-          if (!ordered.some(k => k.toLowerCase() === r.k.toLowerCase())){
-            metaKV.insertAdjacentHTML("beforeend",
-              `<div class="k">${r.k}</div><div class="v">${r.v}</div>`);
-          }
-        });
-        wrap.appendChild(metaKV);
-
-        const extras = rest.filter(isMeaningful);
-        if (extras.length){
-          const n = document.createElement("div"); n.className="note";
-          n.textContent = extras.join(" ");
-          wrap.appendChild(n);
-        }
-        flow.appendChild(wrap);
-        continue;
-      }
-
-      /* Shuttle / Transportation */
-      if (/^SHUTTLE\s*\/\s*TRANSPORTATION/i.test(sec.title)){
-        let madeChips = false;
-
-        const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
-        if (mapURL){
-          const embed = document.createElement("div");
-          embed.className = "embed map";
-          embed.innerHTML = `<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${mapURL}"></iframe>`;
-          wrap.appendChild(embed);
-        }
-        if (sec.lines.length){
-          const chips = document.createElement("ul"); chips.className = "chips";
-          sec.lines.forEach(ln=>{
-            const clean = cleanLine(ln);
-            if (!isMeaningful(clean) || isDivider(clean)) return;
-            let ico = "i-route";
-            if (/parking/i.test(clean)) ico = "i-parking";
-            else if (/shuttle|taxi|rideshare/i.test(clean)) ico = "i-bus";
-            else if (/car|vehicle/i.test(clean)) ico = "i-car";
-            chips.insertAdjacentHTML("beforeend",
-              `<li class="chip"><svg class="ico"><use href="#${ico}"/></svg> ${clean}</li>`);
-          });
-          if (chips.children.length){ wrap.appendChild(chips); madeChips = true; }
-        }
-
-        const textBits = [];
-        kv.forEach(r => textBits.push(`${r.k}: ${r.v}`));
-        const restBits = rest.filter(isMeaningful);
-        const extras = [...textBits, ...restBits];
-
-        if (extras.length){
-          const el = document.createElement("div");
-          el.className = madeChips ? "callout" : "note";
-          el.textContent = extras.join(" ");
-          wrap.appendChild(el);
-        }
-        flow.appendChild(wrap);
-        continue;
-      }
-
-      /* Field Disclaimer -> render last */
-      if (/^FIELD DISCLAIMER/i.test(sec.title)){
-        const el = document.createElement("div");
-        el.className = "section";
-        el.innerHTML = `<h3><svg class="ico"><use href="#i-file-warning"/></svg> Field Disclaimer</h3>`;
-        const kvd = kvRows(sec.lines);
-        const restd = nonKV(sec.lines);
-        if (kvd.length){
-          const grid = document.createElement("div"); grid.className="kv";
-          kvd.forEach(r => grid.insertAdjacentHTML("beforeend",
-            `<div class="k">${r.k}</div><div class="v">${r.v}</div>`));
-          el.appendChild(grid);
-        }
-        if (restd.length){
-          const n = document.createElement("div"); n.className="note";
-          n.textContent = restd.join(" ");
-          el.appendChild(n);
-        }
-        disclaimerEl = el;
-        continue;
-      }
-
-      /* Skip totally empty sections */
-      if (!kv.length && !rest.some(isMeaningful)) continue;
-
-      /* Generic section: rule = no callouts when no chips/icons */
-      let madeChips = false;
-      if (kv.length){
-        const grid = document.createElement("div"); grid.className = "kv";
-        kv.forEach(r => grid.insertAdjacentHTML("beforeend",
-          `<div class="k">${r.k}</div><div class="v">${r.v}</div>`));
-        wrap.appendChild(grid);
-      }
-      const restMeaningful = rest.filter(isMeaningful);
-      if (restMeaningful.length){
-        const el = document.createElement("div");
-        el.className = madeChips ? "callout" : "note";
-        el.textContent = restMeaningful.join(" ");
-        wrap.appendChild(el);
-      }
-      flow.appendChild(wrap);
+  // break "A: B — C: D — E: F" into ["A: B", "C: D", "E: F"]
+  function expandInlineKVs(line){
+    const chunks = [];
+    // split on emdash/endash hyphen separators
+    const parts = line.split(/\s+[—–-]\s+/);
+    for(const p of parts){
+      const m = p.match(/^([^:]+):\s*(.*)$/);
+      if(m) chunks.push(m[1].trim()+": "+m[2].trim());
+      else chunks.push(p);
     }
-
-    /* GPX block */
-    const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
-    if (gpxURL){
-      const sec = document.createElement("div");
-      sec.className = "section";
-      sec.innerHTML = `
-        <h3><svg class="ico"><use href="#i-map"/></svg> GPX Route & Elevation</h3>
-        <div class="embed gpx"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-        <div class="gpx-actions">
-          <a id="gpxBtn" class="btn" href="${gpxURL}" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
-          <a id="gpxStudioLink" class="btn" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
-          <span id="trailheads" style="opacity:.8"></span>
-        </div>
-        <div class="gpx-note">
-          Starter GPX — review and adjust in your mapping app.<br/>
-          <strong>Do not rely on it as your only navigation source.</strong>
-        </div>
-        <ul class="chips" id="gpxChips"></ul>
-      `;
-      $("flow").appendChild(sec);
-
-      const studio = gpxStudioURL(gpxURL);
-      const iframe = sec.querySelector("#gpxStudio");
-      iframe.src = studio;
-      iframe.addEventListener("load", () => {
-        setTimeout(() => {
-          try{
-            const s = new URL(iframe.src);
-            s.searchParams.set("cb", Date.now());
-            iframe.src = s.toString();
-          }catch{}
-        }, 150);
-      }, { once:true });
-
-      sec.querySelector("#gpxStudioLink").href = studio;
-
-      const start = first(data,["start_trailhead","start"]);
-      const end   = first(data,["end_trailhead","end"]);
-      if (start || end) sec.querySelector("#trailheads").textContent = [start,end].filter(Boolean).join(" → ");
-
-      const missionText = mission || "";
-      const miles = (missionText.match(/~?(\d{1,3}(?:\.\d+)?)\s*(?:miles?|mi)\b/i)||[])[1];
-      const gain = (missionText.match(/\+(\d{1,3}(?:,\d{3})*)\s*ft/i)||[])[1];
-      const loss = (missionText.match(/\-(\d{1,3}(?:,\d{3})*)\s*ft/i)||[])[1];
-      const days = (missionText.match(/TRIP DURATION:\s*([0-9]+)\s*days?/i)||[])[1];
-      const gpxChips = sec.querySelector("#gpxChips");
-      if (miles) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ~${miles} mi</li>`);
-      if (gain || loss) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${gain?`+${gain}`:""}${(gain&&loss)?" / ":""}${loss?`-${loss}`:""} ft</li>`);
-      if (days) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-cloudsun"/></svg> ${days} days</li>`);
-    }
-
-    // clean empties
-    document.querySelectorAll('.chip').forEach(ch=>{ const t=(ch.textContent||'').trim(); if(!t) ch.remove(); });
-    document.querySelectorAll('.callout,.note').forEach(c=>{ const t=(c.textContent||'').trim(); if(!t) c.remove(); });
-
-    // Disclaimer last
-    if (disclaimerEl) $("flow").appendChild(disclaimerEl);
+    return chunks;
   }
 
+  function renderKVRow(k, v){
+    const row = document.createElement("div");
+    row.className = "kv";
+    const kEl = document.createElement("div"); kEl.className="k"; kEl.textContent = k;
+    const vEl = document.createElement("div"); vEl.className="v"; vEl.textContent = v;
+    row.append(kEl, vEl);
+    return row;
+  }
+
+  function mountKVList(parent, pairs){
+    const wrap = document.createElement("div"); wrap.className="kv";
+    for(const [k,v] of pairs){ 
+      const kEl=document.createElement("div"); kEl.className="k"; kEl.textContent=k;
+      const vEl=document.createElement("div"); vEl.className="v"; vEl.textContent=v;
+      wrap.append(kEl,vEl);
+    }
+    parent.appendChild(wrap);
+  }
+
+  function pill(txt){
+    const el = document.createElement("span");
+    el.className = "pill";
+    el.textContent = txt;
+    return el;
+  }
+
+  function buildDayCard(title, lines){
+    const card = document.createElement("div");
+    card.className = "day";
+    const h = document.createElement("h4"); h.textContent = title.replace(/^DAY\s*\d+\s*:\s*/i,'DAY ').trim();
+    card.appendChild(h);
+
+    // first non-kv line as summary paragraph
+    const summary = lines.find(l => !/^[^:]+:\s*/.test(l));
+    if (summary) { const p=document.createElement("p"); p.textContent=summary; card.appendChild(p); }
+
+    // distance/elevation -> pillbar
+    const pb = document.createElement("div"); pb.className="pillbar";
+    const dist = lines.find(l=>/^Distance and elevation gain\/loss:/i.test(l));
+    if (dist){
+      const dm = dist.match(/(\d+(?:\.\d+)?)\s*(?:mi|miles)/i);
+      const up = dist.match(/[+]\s*([0-9,]+)\s*ft/i);
+      const dn = dist.match(/[-]\s*([0-9,]+)\s*ft/i);
+      if (dm) pb.appendChild(pill(`${dm[1]} mi`));
+      if (up || dn) pb.appendChild(pill(`${up?("+"+up[1]):""} ${dn?("/ -"+dn[1]):""} ft`.replace(/\s+/g,' ').trim()));
+    }
+    if (pb.children.length) card.appendChild(pb);
+
+    // The long detail line(s) -> meta box with hard returns for each "X: Y"
+    const restKVs = lines.filter(l=>/^[^:]+:\s*/.test(l));
+    if (restKVs.length){
+      const meta = document.createElement("div"); meta.className="meta";
+      restKVs.forEach(item=>{
+        const m=item.match(/^([^:]+):\s*(.*)$/);
+        if(m){
+          const P=document.createElement("p");
+          P.innerHTML = `<strong>${m[1]}:</strong> ${m[2]}`;
+          meta.appendChild(P);
+        }
+      });
+      card.appendChild(meta);
+    }
+    return card;
+  }
+
+  // ---------- main ----------
   async function main(){
     const status = $("status");
     const slug = getSlug();
@@ -559,22 +358,27 @@
       return;
     }
 
+    // Header fields
     $("title").textContent = first(data,["title","name"]) || "";
     $("category").textContent = first(data,["category","type"]) || "";
     $("season").textContent = first(data,["season"]) || "";
     $("location").textContent = first(data,["location","place"]) || "";
+
     const d = first(data,["date","when"]);
     $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d)
       ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
       : (d||"");
 
-    const hero = first(data,["hero_image","hero.url","image"]); if (hero) $("hero").src = hero;
+    const hero = first(data,["hero_image","hero.url","image"]);
+    if (hero) $("hero").src = hero;
 
     const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
     let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
     if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
     $("credit").innerHTML = creditName
-      ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>` : creditName)
+      ? (creditLink
+          ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
+          : creditName)
       : "";
     const heroLinkEl = $("heroLink");
     if (heroLinkEl) {
@@ -582,38 +386,102 @@
       else { heroLinkEl.removeAttribute("href"); heroLinkEl.style.pointerEvents = "none"; }
     }
 
-    // Actions per slug
-    const actions = $("pageActions");
-    const bookmarkBtn = $("bookmarkBtn");
-    const endorseBtn = $("endorseBtn");
-    if (actions && bookmarkBtn && endorseBtn && slug) {
-      actions.hidden = false;
-      const bkKey = `ei:${slug}:bookmark`;
-      const enKey = `ei:${slug}:endorse`;
-      const bk = localStorage.getItem(bkKey) === "true";
-      const en = localStorage.getItem(enKey) === "true";
-      bookmarkBtn.setAttribute("aria-pressed", bk ? "true" : "false");
-      endorseBtn.setAttribute("aria-pressed", en ? "true" : "false");
-      bookmarkBtn.addEventListener("click", () => {
-        const on = bookmarkBtn.getAttribute("aria-pressed") === "true" ? "false" : "true";
-        bookmarkBtn.setAttribute("aria-pressed", on);
-        localStorage.setItem(bkKey, on);
-      });
-      endorseBtn.addEventListener("click", () => {
-        const on = endorseBtn.getAttribute("aria-pressed") === "true" ? "false" : "true";
-        endorseBtn.setAttribute("aria-pressed", on);
-        localStorage.setItem(enKey, on);
-      });
-    }
-
-    // Build content
+    // Build sections from mission text
     const mission = first(data,["mission_text","mission","brief","summary"]) || "";
     const sections = parseSections(mission);
-    renderFlow(sections, mission, data);
+
+    const mount = $("sections");
+    const disclaimerMount = $("disclaimerMount");
+
+    sections.forEach(sec=>{
+      const title = (sec.title||"").trim();
+
+      // GPX & Map handled separately later; skip if empty
+      if (/^SHUTTLE\s*\/\s*TRANSPORTATION$/i.test(title)){
+        // We'll render chips after the map with shuttle text broken into pills
+        const chips = sec.lines
+          .filter(l=>/^[^:]+:\s*/.test(l))
+          .map(l=>l.replace(/\s+/g,' '));
+        const chipWrap = $("shuttleChips");
+        chips.forEach(t=>{ const el=document.createElement("span"); el.className="pill"; el.textContent=t; chipWrap.appendChild(el); });
+        $("shuttleSection").style.display="";
+        return;
+      }
+
+      if (/^FIELD DISCLAIMER/i.test(title)){
+        const s = document.createElement("div"); s.className="section";
+        const h = document.createElement("h3"); h.textContent = "Field Disclaimer";
+        s.appendChild(h);
+        (sec.lines.length?sec.lines:[title]).forEach(line=>{
+          const p=document.createElement("p"); p.textContent = line.replace(/^FIELD DISCLAIMER\s*:?\s*/i,'');
+          s.appendChild(p);
+        });
+        disclaimerMount.appendChild(s);
+        return;
+      }
+
+      // Day blocks
+      if (/^DAY\s*\d+\s*:/.test(title)){
+        const s = document.createElement("div"); s.className="section";
+        const card = buildDayCard(title, sec.lines);
+        const h = document.createElement("h3"); h.textContent = "Itinerary Overview";
+        // Only show the section header for the first day card; append cards after.
+        if (!mount.querySelector('.day')) s.appendChild(h);
+        s.appendChild(card);
+        mount.appendChild(s);
+        return;
+      }
+
+      // General section with KV rows (left bold)
+      const s = document.createElement("div"); s.className="section";
+      const h = document.createElement("h3"); h.textContent = title.replace(/:\s*$/, '');
+      s.appendChild(h);
+
+      const kvs = [];
+      let freeParas = [];
+
+      sec.lines.forEach(line=>{
+        const m = line.match(/^([^:]+):\s*(.*)$/);
+        if(m) kvs.push([m[1].trim(), m[2].trim()]);
+        else freeParas.push(line);
+      });
+
+      if (kvs.length) mountKVList(s, kvs);
+      freeParas.forEach(t=>{ const p=document.createElement("p"); p.textContent=t; s.appendChild(p); });
+
+      mount.appendChild(s);
+    });
+
+    // Shuttle map (Google embed URL from JSON)
+    const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
+    if (mapURL){ $("map").src = mapURL; $("shuttleSection").style.display=""; }
+
+    // GPX
+    const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
+    if (gpxURL) {
+      const studio = gpxStudioURL(gpxURL);
+      $("gpxStudio").src = studio;
+      $("gpxStudioLink").href = studio;
+      $("gpxBtn").href = gpxURL;
+      const slugVal = getSlug() || "route";
+      $("gpxBtn").download = slugVal + ".gpx";
+      const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
+      if (th) $("trailheads").textContent = th;
+      $("gpxSection").style.display="";
+    }
 
     status.textContent = "";
     setTimeout(()=>status.remove(), 10);
   }
+
+  // active print + simple toggles
+  document.getElementById('printBtn')?.addEventListener('click', ()=>window.print());
+  addEventListener('click', e=>{
+    const el = e.target.closest('[data-action]');
+    if(!el) return;
+    el.classList.toggle('is-on');
+  });
+
   if (typeof window !== "undefined") main();
 </script>
 </body>
