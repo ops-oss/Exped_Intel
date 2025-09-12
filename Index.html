@@ -15,7 +15,7 @@
     --label: 14px;
     --body: 18px;
     --border: rgba(0,0,0,.12);
-    --tint: rgba(0,0,0,.06); /* subtle tint (no white cards) */
+    --tint: rgba(0,0,0,.06); /* subtle tint (no stark white) */
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
@@ -48,8 +48,8 @@
 
   /* Sections (rendered IN ORDER, lossless) */
   .section{ margin-top:26px; }
-  .section h3{ display:flex; align-items:center; gap:.6rem; font-size:clamp(18px,2.2vw,22px); margin:0 0 10px; }
-  .section h3 .ico{ width:22px; height:22px; color:inherit; }
+  .section h3{ display:flex; align-items:center; gap:.6rem; font-size:clamp(18px,2.2vw,22px); margin:0 0 10px; font-weight:700; letter-spacing:-0.01em; }
+  .section h3 .ico{ width:18px; height:18px; opacity:.9; }
 
   .kv{ display:grid; grid-template-columns:auto 1fr; gap:.5rem .8rem; align-items:start; }
   .kv .k{ font-weight:600 }
@@ -60,11 +60,25 @@
   .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; }
   .chip .ico{ width:18px; height:18px; }
 
-  /* Itinerary */
-  .day{ border-top:1px solid var(--border); padding-top:12px; margin-top:10px; }
-  .day h4{ display:flex; align-items:center; gap:.6rem; margin:0 0 6px; font-size:clamp(18px,2.2vw,22px); }
-  .day .meta{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0; }
-  .day .sub{ font-size:14px; opacity:.85; }
+  /* Day blocks: compact card, no giant glyphs */
+  .day{
+    margin-top:14px;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--tint);
+    position:relative;
+  }
+  .day::before{
+    content:"";
+    position:absolute;
+    left:-1px; top:-1px; bottom:-1px; width:4px;
+    border-radius:12px 0 0 12px;
+    background: rgba(0,0,0,.25);
+  }
+  .day h4{ margin:0 0 6px; font-weight:700; }
+  .day h4 .ico{ width:16px; height:16px; opacity:.9; }
+  .day .meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:6px 0 0; }
 
   /* GPX */
   .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
@@ -104,7 +118,6 @@
   <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/>
   </symbol>
-  <symbol id="i-droplets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3c4 5 4 7 4 8a4 4 0 1 1-8 0c0-1 0-3 4-8z"/><path d="M17 9c3 4 3 6 3 7a3 3 0 1 1-6 0c0-1 0-3 3-7z"/></symbol>
   <symbol id="i-shield-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M12 8v5"/><path d="M12 16h.01"/></symbol>
   <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/></symbol>
   <symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3L2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v5"/><path d="M12 18h.01"/></symbol>
@@ -112,6 +125,7 @@
   <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V2h6v2"/></symbol>
   <symbol id="i-file-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v4"/><path d="M12 18h.01"/></symbol>
   <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.86.32 1.7.6 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.12a2 2 0 0 1 2.11-.45c.8.28 1.64.48 2.5.6A2 2 0 0 1 22 16.92z"/></symbol>
 </svg>
 
 <div class="page">
@@ -203,16 +217,18 @@
     }catch{ return false; }
   };
 
+  /* ---------- helpers to keep output clean ---------- */
+  const isDivider = (s) => /^[\s—–\-•]+$/.test(s || "");  // just dashes/bullets/whitespace
+  const cleanLine  = (s) => (s || "").replace(/^[•\-–—]\s*/, "").trim();
+  const isMeaningful = (s) => /\p{L}|\p{N}/u.test((s || "").trim()); // has any letter/number
+
   /* ============ LOSSLESS PARSER ============ */
-  // 1) Split into titled sections preserving order.
   function parseSections(text){
-    const lines = text.split(/\r?\n/).map(s=>s.trim());
+    const lines = (text || "").split(/\r?\n/).map(s=>s.trim());
     const sections = [];
     const titleRe = /^(?:DAY\s*\d+:.*|[A-Z][A-Z &\/’'–—\-]+(?::.*)?)+$/; // tolerant
     let current = null;
-
     const pushCurrent = ()=>{ if(current) sections.push(current); current = null; };
-
     for(const line of lines){
       if(!line) continue;
       if (titleRe.test(line)) {
@@ -227,11 +243,10 @@
     return sections;
   }
 
-  // 2) Helpers
   function kvRows(lines){
-    // Treat both "- Key: Value" and "Key: Value" as KV; keep order
-    return lines
-      .map(ln => ln.replace(/^[•\-–—]\s*/,''))
+    return (lines || [])
+      .map(cleanLine)
+      .filter(l => !isDivider(l))
       .map(ln => {
         const m = ln.match(/^([^:]+):\s*(.*)$/);
         return m ? {k:m[1].trim(), v:m[2].trim()} : null;
@@ -239,10 +254,12 @@
       .filter(Boolean);
   }
   function nonKV(lines){
-    return lines.filter(ln => !/^([•\-–—]?\s*)?[^:]+:\s+/.test(ln));
+    return (lines || [])
+      .map(cleanLine)
+      .filter(l => !isDivider(l))
+      .filter(ln => !/^([^:]+):\s+/.test(ln));
   }
 
-  // 3) Icon map for known headings
   const ICON_FOR = [
     [/^EXPEDITION ITINERARY/i, "i-clipboard", "Expedition Itinerary"],
     [/^PRIMARY OBJECTIVE/i,      "i-signpost", "Primary Objective"],
@@ -266,33 +283,27 @@
     [/^FIELD DISCLAIMER/i,       "i-file-warning","Field Disclaimer"],
     [/^DAY\s*\d+:/i,             "i-signpost","Itinerary Overview"]
   ];
-
   function labelFor(title){
-    for (const [re, icon, label] of ICON_FOR){
-      if (re.test(title)) return {icon, label};
-    }
+    for (const [re, icon, label] of ICON_FOR){ if (re.test(title)) return {icon, label}; }
     return {icon: "i-clipboard", label: title.replace(/\s*:\s*$/,'')};
   }
 
-  // 4) Renderer (lossless, in-order)
   function renderFlow(sections, mission, data){
     const flow = $("flow");
     let insertedItinContainer = false;
     let itinHost = null;
 
     for (const sec of sections){
-      // If this is the first DAY section, create an "Itinerary Overview" container here
+      // First DAY encountered => create itinerary container right here
       if (/^DAY\s*\d+:/i.test(sec.title)){
         if (!insertedItinContainer){
-          const {icon, label} = { icon: "i-signpost", label: "Itinerary Overview" };
           const wrap = document.createElement("div");
           wrap.className = "section";
-          wrap.innerHTML = `<h3><svg class="ico"><use href="#${icon}"/></svg> ${label}</h3><div id="itineraryVisual"></div>`;
+          wrap.innerHTML = `<h3><svg class="ico"><use href="#i-signpost"/></svg> Itinerary Overview</h3><div id="itineraryVisual"></div>`;
           flow.appendChild(wrap);
           itinHost = wrap.querySelector("#itineraryVisual");
           insertedItinContainer = true;
         }
-        // Render a day block (lossless where possible)
         const title = sec.title.replace(/^DAY\s*/i, "DAY ");
         const sub = sec.lines[0] || "";
         const all = sec.lines.join(" ");
@@ -304,14 +315,14 @@
         content.className = "day";
         content.innerHTML = `
           <h4><svg class="ico"><use href="#i-signpost"/></svg> ${title}</h4>
-          ${sub ? `<div class="sub">${sub}</div>` : ""}
+          ${isMeaningful(sub) ? `<div class="sub">${sub}</div>` : ""}
           <div class="meta">
-            ${dist ? `<span class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ${dist}</span>` : ""}
+            ${isMeaningful(dist) ? `<span class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ${dist}</span>` : ""}
             ${(g||l) ? `<span class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${g?`+${g}`:""}${(g&&l)?" / ":""}${l?`-${l}`:""} ft</span>` : ""}
           </div>
         `;
-        // Add a lossless callout with any lines that aren’t already represented
-        const extra = sec.lines.slice( dist||g||l ? 1 : 0 );
+        const extra = (sec.lines.slice(dist || g || l ? 1 : 0) || [])
+          .map(cleanLine).filter(l => !isDivider(l) && isMeaningful(l));
         if (extra.length){
           const c = document.createElement("div");
           c.className = "callout";
@@ -330,29 +341,44 @@
       const kv = kvRows(sec.lines);
       const rest = nonKV(sec.lines);
 
-      // SPECIAL: Expedition Itinerary meta — ordered keys + safety net
+      // EXPEDITION ITINERARY — full, ordered, lossless
       if (/^EXPEDITION ITINERARY/i.test(sec.title)){
         const metaKV = document.createElement("div"); metaKV.className = "kv";
-        const titlePart = sec.title.split(":").slice(1).join(":").trim();
-        if (titlePart) { metaKV.insertAdjacentHTML("beforeend", `<div class="k">Route</div><div class="v">${titlePart}</div>`); }
-        const order = ["PRIMARY OBJECTIVE","TRIP DURATION","TOTAL ESTIMATED MILEAGE","EXPERIENCE LEVEL","TERRAIN TYPE","Cumulative elevation gain/loss (ft)","Start and end trailhead","GPS coordinates"];
-        const seen = new Set();
-        // push in order if present
-        for (const key of order){
-          const row = kv.find(r => r.k.toLowerCase()===key.toLowerCase());
-          if (row){ metaKV.insertAdjacentHTML("beforeend", `<div class="k">${key}</div><div class="v">${row.v}</div>`); seen.add(row); }
-        }
-        // push remaining kv lines in their original order
-        for (const row of kv){ if (!seen.has(row)) metaKV.insertAdjacentHTML("beforeend", `<div class="k">${row.k}</div><div class="v">${row.v}</div>`); }
+        const route = sec.title.split(":").slice(1).join(":").trim();
+        if (isMeaningful(route)) metaKV.insertAdjacentHTML("beforeend",
+          `<div class="k">Route</div><div class="v">${route}</div>`);
+
+        const byKey = new Map(kv.map(r => [r.k.toLowerCase(), r.v]));
+        const ordered = [
+          "PRIMARY OBJECTIVE","TRIP DURATION","TOTAL ESTIMATED MILEAGE",
+          "EXPERIENCE LEVEL","TERRAIN TYPE",
+          "Cumulative elevation gain/loss (ft)","Start and end trailhead","GPS coordinates"
+        ];
+        ordered.forEach(key => {
+          const v = byKey.get(key.toLowerCase());
+          if (isMeaningful(v)) metaKV.insertAdjacentHTML("beforeend",
+            `<div class="k">${key}</div><div class="v">${v}</div>`);
+        });
+        // remaining KV (author order)
+        kv.forEach(r=>{
+          if (!ordered.some(k => k.toLowerCase() === r.k.toLowerCase())){
+            metaKV.insertAdjacentHTML("beforeend",
+              `<div class="k">${r.k}</div><div class="v">${r.v}</div>`);
+          }
+        });
         wrap.appendChild(metaKV);
-        if (rest.length){ const c = document.createElement("div"); c.className="callout"; c.textContent = rest.join(" "); wrap.appendChild(c); }
+        const extras = rest.filter(isMeaningful);
+        if (extras.length){
+          const c = document.createElement("div"); c.className="callout";
+          c.textContent = extras.join(" ");
+          wrap.appendChild(c);
+        }
         flow.appendChild(wrap);
         continue;
       }
 
-      // SPECIAL: Shuttle / Transportation — group map + transport text here
+      // Shuttle / Transportation — group map + chips + lossless text
       if (/^SHUTTLE\s*\/\s*TRANSPORTATION/i.test(sec.title)){
-        // map embed if available
         const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
         if (mapURL){
           const embed = document.createElement("div");
@@ -360,52 +386,52 @@
           embed.innerHTML = `<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${mapURL}"></iframe>`;
           wrap.appendChild(embed);
         }
-        // chips from each line (lossless copy also in callout below)
         if (sec.lines.length){
           const chips = document.createElement("ul"); chips.className = "chips";
           sec.lines.forEach(ln=>{
-            const clean = ln.replace(/^[•\-–—]\s*/,'');
+            const clean = cleanLine(ln);
+            if (!isMeaningful(clean) || isDivider(clean)) return;
             let ico = "i-route";
             if (/parking/i.test(clean)) ico = "i-parking";
             else if (/shuttle|taxi|rideshare/i.test(clean)) ico = "i-bus";
             else if (/car|vehicle/i.test(clean)) ico = "i-car";
-            chips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#${ico}"/></svg> ${clean}</li>`);
+            chips.insertAdjacentHTML("beforeend",
+              `<li class="chip"><svg class="ico"><use href="#${ico}"/></svg> ${clean}</li>`);
           });
-          wrap.appendChild(chips);
+          if (chips.children.length) wrap.appendChild(chips);
         }
-        // lossless callout (every line preserved)
-        if (rest.length || kv.length){
+        const textBits = [];
+        kv.forEach(r => textBits.push(`${r.k}: ${r.v}`));
+        const restBits = rest.filter(isMeaningful);
+        if (textBits.length || restBits.length){
           const c = document.createElement("div"); c.className = "callout";
-          const textBits = [];
-          kv.forEach(r => textBits.push(`${r.k}: ${r.v}`));
-          textBits.push(...rest);
-          c.textContent = textBits.join(" ");
+          c.textContent = [...textBits, ...restBits].join(" ");
           wrap.appendChild(c);
         }
         flow.appendChild(wrap);
         continue;
       }
 
-      // SPECIAL: GPX section (if gpx_url exists, we’ll inject this section after render)
-      if (/^GPX/i.test(sec.title)){
-        // Fall through to generic render; GPX widget is appended separately if data present
-      }
+      // Skip empty/orphan sections
+      if (!kv.length && !rest.some(isMeaningful)) continue;
 
       // Generic section: KV grid + callout (lossless)
       if (kv.length){
         const grid = document.createElement("div"); grid.className = "kv";
-        kv.forEach(r => grid.insertAdjacentHTML("beforeend", `<div class="k">${r.k}</div><div class="v">${r.v}</div>`));
+        kv.forEach(r => grid.insertAdjacentHTML("beforeend",
+          `<div class="k">${r.k}</div><div class="v">${r.v}</div>`));
         wrap.appendChild(grid);
       }
-      if (rest.length){
+      const restMeaningful = rest.filter(isMeaningful);
+      if (restMeaningful.length){
         const c = document.createElement("div"); c.className = "callout";
-        c.textContent = rest.join(" ");
+        c.textContent = restMeaningful.join(" ");
         wrap.appendChild(c);
       }
       flow.appendChild(wrap);
     }
 
-    // Append GPX section (if present in data), with note + chips from meta
+    // Append GPX section (if present)
     const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
     if (gpxURL){
       const sec = document.createElement("div");
@@ -434,17 +460,27 @@
       const end   = first(data,["end_trailhead","end"]);
       if (start || end) sec.querySelector("#trailheads").textContent = [start,end].filter(Boolean).join(" → ");
 
-      // Best-effort chips
+      // best-effort chips (guarded)
       const missionText = mission || "";
       const miles = (missionText.match(/~?(\d{1,3})\s*(?:miles?|mi)\b/i)||[])[1];
       const gain = (missionText.match(/\+(\d{3,5})\s*ft/i)||[])[1];
       const loss = (missionText.match(/\-(\d{3,5})\s*ft/i)||[])[1];
       const days = (missionText.match(/TRIP DURATION:\s*([0-9]+)\s*days?/i)||[])[1];
       const gpxChips = sec.querySelector("#gpxChips");
-      if (miles) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ~${miles} mi</li>`);
-      if (gain || loss) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${gain?`+${gain}`:""}${(gain&&loss)?" / ":""}${loss?`-${loss}`:""} ft</li>`);
-      if (days) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-cloudsun"/></svg> ${days} days</li>`);
+      if (miles && isMeaningful(miles)) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-ruler"/></svg> ~${miles} mi</li>`);
+      if ((gain || loss) && isMeaningful(`${gain||""}${loss||""}`)) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-mountain"/></svg> ${gain?`+${gain}`:""}${(gain&&loss)?" / ":""}${loss?`-${loss}`:""} ft</li>`);
+      if (days && isMeaningful(days)) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-cloudsun"/></svg> ${days} days</li>`);
     }
+
+    /* Safety sweeper: remove accidental empties (belt & suspenders) */
+    document.querySelectorAll('.chip').forEach(ch=>{
+      const t = (ch.textContent || '').trim();
+      if (!isMeaningful(t)) ch.remove();
+    });
+    document.querySelectorAll('.callout').forEach(c=>{
+      const t = (c.textContent || '').trim();
+      if (!isMeaningful(t)) c.remove();
+    });
   }
 
   /* ================= MAIN ================== */
