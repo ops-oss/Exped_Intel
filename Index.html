@@ -15,7 +15,7 @@
     --label: 14px;
     --body: 18px;
     --border: rgba(0,0,0,.12);
-    --tint: rgba(0,0,0,.06); /* subtle tint (no stark white) */
+    --tint: rgba(0,0,0,.06);
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
@@ -46,39 +46,44 @@
   .action-btn .ico{ width:18px; height:18px; stroke:currentColor; }
   .action-btn[aria-pressed="true"]{ background:#000; color:#fff; border-color:#000; }
 
-  /* Sections (rendered IN ORDER, lossless) */
+  /* Section headings: consistent hierarchy */
   .section{ margin-top:26px; }
   .section h3{ display:flex; align-items:center; gap:.6rem; font-size:clamp(18px,2.2vw,22px); margin:0 0 10px; font-weight:700; letter-spacing:-0.01em; }
   .section h3 .ico{ width:18px; height:18px; opacity:.9; }
+  .day h4{ margin:0 0 6px; font-weight:700; font-size:clamp(17px,2vw,20px); }
+  .day h4 .ico{ width:16px; height:16px; opacity:.9; }
 
-  .kv{ display:grid; grid-template-columns:auto 1fr; gap:.5rem .8rem; align-items:start; }
-  .kv .k{ font-weight:600 }
-  .kv .v{ opacity:.95 }
+  /* KV grid: robust on mobile */
+  .kv{
+    display:grid;
+    grid-template-columns:minmax(12ch, 1fr) minmax(0, 2fr);
+    gap:.55rem 1rem; align-items:start;
+  }
+  .kv .k{ font-weight:600; white-space:nowrap; }
+  .kv .v{ opacity:.95; min-width:0; }
+  @media (max-width:480px){
+    .kv{ grid-template-columns:minmax(11ch, 1fr) minmax(0, 1.6fr); }
+  }
 
-  .callout{ background:var(--tint); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-top:8px; }
   .chips{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0 0; padding:0; list-style:none; }
   .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; }
   .chip .ico{ width:18px; height:18px; }
 
-  /* Day blocks: compact card, no giant glyphs */
+  /* Day cards: page background (not tinted) */
   .day{
-    margin-top:14px;
-    padding:12px 14px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    background:var(--tint);
+    margin-top:14px; padding:12px 14px;
+    border:1px solid var(--border); border-radius:12px;
+    background:var(--bg);
     position:relative;
   }
   .day::before{
-    content:"";
-    position:absolute;
-    left:-1px; top:-1px; bottom:-1px; width:4px;
-    border-radius:12px 0 0 12px;
-    background: rgba(0,0,0,.25);
+    content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px;
+    border-radius:12px 0 0 12px; background:rgba(0,0,0,.25);
   }
-  .day h4{ margin:0 0 6px; font-weight:700; }
-  .day h4 .ico{ width:16px; height:16px; opacity:.9; }
   .day .meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:6px 0 0; }
+
+  /* Callouts stay softly tinted */
+  .callout{ background:var(--tint); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-top:8px; }
 
   /* GPX */
   .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
@@ -86,8 +91,6 @@
   .btn .ico{ width:20px; height:20px; }
   .gpx-note{ font-size:14px; text-align:center; max-width:720px; margin:6px auto 0; opacity:.95; }
 
-  @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
-  @media (max-width:480px){ .page{ padding:20px 20px 32px } .grid2{ grid-template-columns:1fr 1fr } .embed{ aspect-ratio:3/4 } .credit{ font-size:13px } }
   #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
 </style>
 </head>
@@ -95,17 +98,14 @@
 
 <!-- ICON SPRITE -->
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <!-- header -->
   <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
   <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
 
-  <!-- actions -->
   <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
   <symbol id="i-thumbs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10V4a2 2 0 0 0-2-2l-3 6H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h7l5-7V8a2 2 0 0 0-2-2h-1"/></symbol>
 
-  <!-- section/chip icons -->
   <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
   <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 0 4 4h0"/></symbol>
   <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21v-2M16 21v-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
@@ -115,9 +115,7 @@
   <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/></symbol>
   <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-18 9 18H3z"/><path d="M12 9l2 4h-4l2-4z"/></symbol>
   <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v12M11 6v12M15 6v12"/></symbol>
-  <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/>
-  </symbol>
+  <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/></symbol>
   <symbol id="i-shield-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M12 8v5"/><path d="M12 16h.01"/></symbol>
   <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/></symbol>
   <symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3L2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v5"/><path d="M12 18h.01"/></symbol>
@@ -125,7 +123,7 @@
   <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V2h6v2"/></symbol>
   <symbol id="i-file-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v4"/><path d="M12 18h.01"/></symbol>
   <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/></symbol>
-  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.86.32 1.7.6 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.12a2 2 0 0 1 2.11-.45c.8.28 1.64.48 2.5.6A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12 0 .32 1.7.6 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.12a2 2 0 0 1 2.11-.45c.8.28 1.64.48 2.5.6A2 2 0 0 1 22 16.92z"/></symbol>
 </svg>
 
 <div class="page">
@@ -188,9 +186,7 @@
   function safeParse(text){
     try{
       let x = JSON.parse(text);
-      if (typeof x === "string") {
-        try { x = JSON.parse(x); } catch {}
-      }
+      if (typeof x === "string") { try { x = JSON.parse(x); } catch {} }
       return x;
     }catch{ return null; }
   }
@@ -218,15 +214,15 @@
   };
 
   /* ---------- helpers to keep output clean ---------- */
-  const isDivider = (s) => /^[\s—–\-•]+$/.test(s || "");  // just dashes/bullets/whitespace
+  const isDivider = (s) => /^[\s—–\-•]+$/.test(s || "");
   const cleanLine  = (s) => (s || "").replace(/^[•\-–—]\s*/, "").trim();
-  const isMeaningful = (s) => /\p{L}|\p{N}/u.test((s || "").trim()); // has any letter/number
+  const isMeaningful = (s) => /\p{L}|\p{N}/u.test((s || "").trim());
 
   /* ============ LOSSLESS PARSER ============ */
   function parseSections(text){
     const lines = (text || "").split(/\r?\n/).map(s=>s.trim());
     const sections = [];
-    const titleRe = /^(?:DAY\s*\d+:.*|[A-Z][A-Z &\/’'–—\-]+(?::.*)?)+$/; // tolerant
+    const titleRe = /^(?:DAY\s*\d+:.*|[A-Z][A-Z &\/’'–—\-]+(?::.*)?)+$/;
     let current = null;
     const pushCurrent = ()=>{ if(current) sections.push(current); current = null; };
     for(const line of lines){
@@ -242,21 +238,14 @@
     pushCurrent();
     return sections;
   }
-
   function kvRows(lines){
     return (lines || [])
-      .map(cleanLine)
-      .filter(l => !isDivider(l))
-      .map(ln => {
-        const m = ln.match(/^([^:]+):\s*(.*)$/);
-        return m ? {k:m[1].trim(), v:m[2].trim()} : null;
-      })
+      .map(cleanLine).filter(l => !isDivider(l))
+      .map(ln => { const m = ln.match(/^([^:]+):\s*(.*)$/); return m ? {k:m[1].trim(), v:m[2].trim()} : null; })
       .filter(Boolean);
   }
   function nonKV(lines){
-    return (lines || [])
-      .map(cleanLine)
-      .filter(l => !isDivider(l))
+    return (lines || []).map(cleanLine).filter(l => !isDivider(l))
       .filter(ln => !/^([^:]+):\s+/.test(ln));
   }
 
@@ -292,9 +281,10 @@
     const flow = $("flow");
     let insertedItinContainer = false;
     let itinHost = null;
+    let disclaimerEl = null; // collect to append last
 
     for (const sec of sections){
-      // First DAY encountered => create itinerary container right here
+      // First DAY encountered => create itinerary container here
       if (/^DAY\s*\d+:/i.test(sec.title)){
         if (!insertedItinContainer){
           const wrap = document.createElement("div");
@@ -412,10 +402,32 @@
         continue;
       }
 
+      // Field Disclaimer — capture to append last
+      if (/^FIELD DISCLAIMER/i.test(sec.title)){
+        const el = document.createElement("div");
+        el.className = "section";
+        el.innerHTML = `<h3><svg class="ico"><use href="#i-file-warning"/></svg> Field Disclaimer</h3>`;
+        const kvd = kvRows(sec.lines);
+        const restd = nonKV(sec.lines);
+        if (kvd.length){
+          const grid = document.createElement("div"); grid.className="kv";
+          kvd.forEach(r => grid.insertAdjacentHTML("beforeend",
+            `<div class="k">${r.k}</div><div class="v">${r.v}</div>`));
+          el.appendChild(grid);
+        }
+        if (restd.length){
+          const c = document.createElement("div"); c.className="callout";
+          c.textContent = restd.join(" ");
+          el.appendChild(c);
+        }
+        disclaimerEl = el;
+        continue;
+      }
+
       // Skip empty/orphan sections
       if (!kv.length && !rest.some(isMeaningful)) continue;
 
-      // Generic section: KV grid + callout (lossless)
+      // Generic section: KV grid + callout
       if (kv.length){
         const grid = document.createElement("div"); grid.className = "kv";
         kv.forEach(r => grid.insertAdjacentHTML("beforeend",
@@ -460,7 +472,6 @@
       const end   = first(data,["end_trailhead","end"]);
       if (start || end) sec.querySelector("#trailheads").textContent = [start,end].filter(Boolean).join(" → ");
 
-      // best-effort chips (guarded)
       const missionText = mission || "";
       const miles = (missionText.match(/~?(\d{1,3})\s*(?:miles?|mi)\b/i)||[])[1];
       const gain = (missionText.match(/\+(\d{3,5})\s*ft/i)||[])[1];
@@ -472,7 +483,7 @@
       if (days && isMeaningful(days)) gpxChips.insertAdjacentHTML("beforeend", `<li class="chip"><svg class="ico"><use href="#i-cloudsun"/></svg> ${days} days</li>`);
     }
 
-    /* Safety sweeper: remove accidental empties (belt & suspenders) */
+    // Safety sweeper
     document.querySelectorAll('.chip').forEach(ch=>{
       const t = (ch.textContent || '').trim();
       if (!isMeaningful(t)) ch.remove();
@@ -481,6 +492,9 @@
       const t = (c.textContent || '').trim();
       if (!isMeaningful(t)) c.remove();
     });
+
+    // Field Disclaimer at the very bottom
+    if (disclaimerEl) $("flow").appendChild(disclaimerEl);
   }
 
   /* ================= MAIN ================== */
@@ -552,7 +566,7 @@
       });
     }
 
-    // Transform GPT text -> sections -> render IN ORDER (LOSSLESS)
+    // Transform GPT text -> sections -> render (LOSSLESS, ordered)
     const mission = first(data,["mission_text","mission","brief","summary"]) || "";
     const sections = parseSections(mission);
     renderFlow(sections, mission, data);
