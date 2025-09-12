@@ -55,7 +55,7 @@
   .day h4{ margin:0 0 6px; font-weight:700; font-size:clamp(17px,2vw,20px); }
   .day h4 .ico{ width:16px; height:16px; opacity:.9; }
 
-  /* KV grid (desktop default) */
+  /* KV grid (bold left column) */
   .kv{
     display:grid;
     grid-template-columns: minmax(12ch,1fr) minmax(0,2fr);
@@ -65,6 +65,7 @@
     grid-auto-rows:minmax(1.6em,auto);
   }
   .kv .k,.kv .v{ line-height:1.45; }
+  .kv .k{ font-weight:600; white-space:nowrap; }
   .kv .v{ overflow-wrap:anywhere; word-break:break-word; hyphens:auto; }
 
   /* Chips */
@@ -72,7 +73,7 @@
   .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; }
   .chip .ico{ width:18px; height:18px; }
 
-  /* Day cards on page background */
+  /* Day cards (page bg, subtle spine) */
   .day{
     margin-top:14px; padding:12px 14px;
     border:1px solid var(--border); border-radius:12px;
@@ -85,7 +86,7 @@
   }
   .day .meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:6px 0 0; }
 
-  /* Soft callout for extra paragraphs (used only if section has chips) */
+  /* Soft callout (only if section has chips/icons) */
   .callout{ background:var(--tint); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-top:8px; }
 
   /* Subtle single-line note (no box) */
@@ -102,7 +103,7 @@
   /* Mobile refinements */
   @media (max-width:640px){
     .kv{ grid-template-columns:minmax(8ch,1fr) minmax(0,2.5fr); }
-    .kv .k{ white-space:normal; font-size:0.9rem; opacity:.8; }
+    .kv .k{ white-space:normal; font-size:0.9rem; opacity:.9; font-weight:600; }
     .kv .v{ font-size:0.95rem; }
   }
   @supports (-webkit-touch-callout:none){ .kv .k{ white-space:normal; } }
@@ -225,7 +226,7 @@
   const cleanLine  = (s) => (s || "").replace(/^[•\-–—]\s*/, "").trim();
   const isMeaningful = (s) => /\p{L}|\p{N}/u.test((s || "").trim());
 
-  // Split "… Key: Value Key: Value …" that live on one physical line
+  // Split "… Key: Value Key: Value …" living on one physical line
   function expandInlineKVs(line){
     const parts = line
       .split(/(?=\s*[A-Z][A-Za-z ()/'&\-]*:\s)/)
@@ -257,10 +258,17 @@
     push();
     return sections;
   }
+
+  /* KV rows with special timeline handling */
   function kvRows(lines){
     return (lines || [])
       .map(cleanLine).filter(l => !isDivider(l))
-      .map(ln => { const m = ln.match(/^([^:]+):\s*(.*)$/); return m ? {k:m[1].trim(), v:m[2].trim()} : null; })
+      .map(ln => {
+        const t = ln.match(/^(\d+\s+(?:Days|Hours)\s+Out):\s*(.*)$/i); // timeline
+        if (t) return { k: t[1], v: t[2] };
+        const m = ln.match(/^([^:]+):\s*(.*)$/);
+        return m ? {k:m[1].trim(), v:m[2].trim()} : null;
+      })
       .filter(Boolean);
   }
   function nonKV(lines){
@@ -333,7 +341,6 @@
           </div>
         `;
 
-        // remaining lines (after splitting) join as readable sentences
         const extra = (sec.lines.slice(1) || [])
           .map(cleanLine).filter(l => !isDivider(l) && isMeaningful(l));
         if (extra.length){
@@ -421,7 +428,6 @@
         const extras = [...textBits, ...restBits];
 
         if (extras.length){
-          // Only show callout if we actually produced chips (icons). Otherwise show note.
           const el = document.createElement("div");
           el.className = madeChips ? "callout" : "note";
           el.textContent = extras.join(" ");
@@ -456,7 +462,7 @@
       /* Skip totally empty sections */
       if (!kv.length && !rest.some(isMeaningful)) continue;
 
-      /* Generic section: rule = no callouts where text has no icons */
+      /* Generic section: rule = no callouts when no chips/icons */
       let madeChips = false; // generic has no chips by default
       if (kv.length){
         const grid = document.createElement("div"); grid.className = "kv";
@@ -466,7 +472,6 @@
       }
       const restMeaningful = rest.filter(isMeaningful);
       if (restMeaningful.length){
-        // If no chips were rendered (no icons), use .note; if chips existed, use .callout
         const el = document.createElement("div");
         el.className = madeChips ? "callout" : "note";
         el.textContent = restMeaningful.join(" ");
