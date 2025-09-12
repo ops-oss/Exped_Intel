@@ -39,7 +39,13 @@
   .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
   .credit a{ text-decoration:underline; cursor:pointer; }
 
-  .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
+  .embed{ aspect-ratio:16/9 } 
+  .embed iframe{ width:100%; height:100%; border:0; display:block }
+  /* Taller GPX + Shuttle maps on phones */
+  .embed.gpx, .embed.map { aspect-ratio: 4 / 5; }
+  @media (min-width:700px){
+    .embed.gpx, .embed.map { aspect-ratio: 16 / 9; }
+  }
 
   /* Actions */
   .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
@@ -55,35 +61,27 @@
   .day h4{ margin:0 0 6px; font-weight:700; font-size:clamp(17px,2vw,20px); }
   .day h4 .ico{ width:16px; height:16px; opacity:.9; }
 
-  /* KV grid (bold left column) */
+  /* KV grid (bold left column, mobile-safe wrapping) */
   .kv{
     display:grid;
-    grid-template-columns: minmax(12ch,1fr) minmax(0,2fr);
+    grid-template-columns: minmax(14ch,1fr) minmax(0,2fr);
     row-gap:.75rem;
     column-gap:1rem;
     align-items:start;
     grid-auto-rows:minmax(1.6em,auto);
   }
   .kv .k,.kv .v{ line-height:1.45; }
-  .kv .k{ font-weight:600; white-space:nowrap; }
+  .kv .k{ font-weight:700; white-space:normal; word-break:keep-all; overflow-wrap:normal; }
   .kv .v{ overflow-wrap:anywhere; word-break:break-word; hyphens:auto; }
 
   /* Chips */
-  .chips{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0 0; padding:0; list-style:none; }
-  .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; }
+  .chips{ display:flex; flex-wrap:wrap; gap:.5rem; margin:8px 0 0; padding:0; list-style:none; align-items:stretch; }
+  .chip{ display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--border); border-radius:12px; padding:.35rem .6rem; background:var(--tint); font-size:.9rem; white-space:nowrap; }
   .chip .ico{ width:18px; height:18px; }
 
   /* Day cards (page bg, subtle spine) */
-  .day{
-    margin-top:14px; padding:12px 14px;
-    border:1px solid var(--border); border-radius:12px;
-    background:var(--bg);
-    position:relative;
-  }
-  .day::before{
-    content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px;
-    border-radius:12px 0 0 12px; background:rgba(0,0,0,.25);
-  }
+  .day{ margin-top:14px; padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--bg); position:relative; }
+  .day::before{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px; border-radius:12px 0 0 12px; background:rgba(0,0,0,.25); }
   .day .meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:6px 0 0; }
 
   /* Soft callout (only if section has chips/icons) */
@@ -102,9 +100,9 @@
 
   /* Mobile refinements */
   @media (max-width:640px){
-    .kv{ grid-template-columns:minmax(8ch,1fr) minmax(0,2.5fr); }
-    .kv .k{ white-space:normal; font-size:0.9rem; opacity:.9; font-weight:600; }
-    .kv .v{ font-size:0.95rem; }
+    .kv{ grid-template-columns:minmax(16ch,1fr) minmax(0,2.5fr); }
+    .kv .k{ font-size:0.98rem; opacity:1; font-weight:700; }
+    .kv .v{ font-size:0.98rem; }
   }
   @supports (-webkit-touch-callout:none){ .kv .k{ white-space:normal; } }
 </style>
@@ -259,14 +257,15 @@
     return sections;
   }
 
-  /* KV rows with special timeline handling */
+  /* KV rows with robust timeline handling */
   function kvRows(lines){
     return (lines || [])
       .map(cleanLine).filter(l => !isDivider(l))
       .map(ln => {
-        const t = ln.match(/^(\d+\s+(?:Days|Hours)\s+Out):\s*(.*)$/i); // timeline
-        if (t) return { k: t[1], v: t[2] };
-        const m = ln.match(/^([^:]+):\s*(.*)$/);
+        const s = ln.replace(/^\s*[—–-]\s*/, '');
+        const t = s.match(/^\s*(\d+)\s*(Days|Hours)\s*Out\s*:\s*(.*)$/i);
+        if (t) return { k: `${t[1]} ${t[2]} Out`, v: t[3].trim() };
+        const m = s.match(/^([^:]+):\s*(.*)$/);
         return m ? {k:m[1].trim(), v:m[2].trim()} : null;
       })
       .filter(Boolean);
@@ -403,7 +402,7 @@
         const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
         if (mapURL){
           const embed = document.createElement("div");
-          embed.className = "embed";
+          embed.className = "embed map";
           embed.innerHTML = `<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${mapURL}"></iframe>`;
           wrap.appendChild(embed);
         }
@@ -463,7 +462,7 @@
       if (!kv.length && !rest.some(isMeaningful)) continue;
 
       /* Generic section: rule = no callouts when no chips/icons */
-      let madeChips = false; // generic has no chips by default
+      let madeChips = false;
       if (kv.length){
         const grid = document.createElement("div"); grid.className = "kv";
         kv.forEach(r => grid.insertAdjacentHTML("beforeend",
@@ -487,7 +486,7 @@
       sec.className = "section";
       sec.innerHTML = `
         <h3><svg class="ico"><use href="#i-map"/></svg> GPX Route & Elevation</h3>
-        <div class="embed"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+        <div class="embed gpx"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
         <div class="gpx-actions">
           <a id="gpxBtn" class="btn" href="${gpxURL}" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
           <a id="gpxStudioLink" class="btn" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
@@ -502,7 +501,18 @@
       $("flow").appendChild(sec);
 
       const studio = gpxStudioURL(gpxURL);
-      sec.querySelector("#gpxStudio").src = studio;
+      const iframe = sec.querySelector("#gpxStudio");
+      iframe.src = studio;
+      iframe.addEventListener("load", () => {
+        setTimeout(() => {
+          try{
+            const s = new URL(iframe.src);
+            s.searchParams.set("cb", Date.now());
+            iframe.src = s.toString();
+          }catch{}
+        }, 150);
+      }, { once:true });
+
       sec.querySelector("#gpxStudioLink").href = studio;
 
       const start = first(data,["start_trailhead","start"]);
