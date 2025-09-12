@@ -1,490 +1,247 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Expedition Blueprint</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#E8E5E2; --ink:#1e1e1e; --paper:#fff; --muted:rgba(0,0,0,.7);
-  --border:rgba(0,0,0,.14); --accent:#000; --chip:#f3f1ef;
-  --h1: clamp(40px, 10vw, 96px);
-}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-a{color:inherit}
-.page{max-width:1120px;margin:0 auto;padding:20px 18px 64px}
-.header{display:grid;gap:16px}
-.title{font-size:var(--h1);line-height:1.02;letter-spacing:-.02em;font-weight:700;margin:8px 0 6px}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--paper);text-decoration:none;font-weight:600}
-.btn .ico{width:18px;height:18px}
-.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px}
-@media(min-width:900px){ .meta-grid{grid-template-columns:repeat(4,1fr)} }
-.label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.45rem}
-.value{font-size:clamp(18px,2.7vw,28px);line-height:1.28}
-.ico{width:20px;height:20px;stroke:currentColor}
-.fullbleed{width:100vw;margin-left:calc(50% - 50vw)}
-.hero{display:block}
-.credit{font-size:13px;margin:6px 0 0;text-align:right;opacity:.8}
-.section{margin:26px 0 0}
-.section h3{display:flex;align-items:center;gap:.6rem;font-size:clamp(18px,2.2vw,24px);margin:0 0 10px}
-.kv{display:grid;grid-template-columns:1fr;gap:12px 24px}
-@media(min-width:860px){ .kv{grid-template-columns:320px 1fr} }
-.k{font-weight:700}
-.v{opacity:.95}
-.divider{height:1px;background:var(--border);margin:20px 0}
-.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:10px 0 0;padding:0;list-style:none}
-.chip{display:inline-flex;align-items:center;gap:.4rem;background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:.35rem .6rem;font-size:.95rem}
-.embed{border-radius:10px;overflow:hidden;background:#ddd}
-.embed iframe{width:100%;height:100%;border:0;display:block}
-.embed.is-map{aspect-ratio:16/9}
-.embed.is-gpx{aspect-ratio:16/9}
-@media(max-width:600px){
-  .embed.is-map{aspect-ratio:3/4}
-  .embed.is-gpx{aspect-ratio:3/4}
-}
-.day{border:1px solid var(--border);border-radius:12px;background:var(--paper);padding:14px 14px 10px;margin:14px 0}
-.day h4{display:flex;align-items:center;gap:.6rem;margin:0 0 6px;font-size:clamp(18px,2.2vw,22px)}
-.day .sub{font-size:16px;opacity:.9;margin-bottom:8px}
-.meta{display:flex;flex-wrap:wrap;gap:.5rem;margin:6px 0 4px}
-.gpx-actions{margin:14px 0 6px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.btn-primary{background:#000;color:#fff;border-color:#000}
-.note{margin-top:8px;opacity:.9}
-.note b{display:block;margin-top:6px}
-.small{font-size:14px;opacity:.85}
-.print-only{display:none}
-@media print{
-  .actions,.fullbleed .credit a{display:none}
-  .print-only{display:block}
-  .page{padding:0}
-  .embed{page-break-inside:avoid}
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Expedition</title>
+
+  <link rel="stylesheet" href="/fonts.css" />
+
+  <style>
+    :root{
+      --bg: rgb(232, 229, 226);
+      --ink: rgb(30, 30, 30);
+      --paper: rgb(255, 255, 255);
+      --accent: rgb(254, 87, 51);
+      --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+      --h1: clamp(40px, 18vw, 88px);
+      --label: 14px;
+      --body: 18px;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-sans);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    img{ display:block; width:100%; height:auto }
+    a{ color:inherit; text-underline-offset:2px }
+
+    .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
+    .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
+    .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
+    @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
+    .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
+
+    .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); }
+    #heroLink{ display:block; }
+    .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
+    .credit a{ text-decoration:underline; cursor:pointer; }
+
+    .mission{ font-size:var(--body); line-height:1.6; margin-top:8px; white-space:pre-wrap; max-width:720px; margin-left:auto; margin-right:auto; text-align:left; }
+
+    .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
+
+    .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:var(--paper); }
+    #gpxBtn{ background:#000; color:#fff; border-color:#000; }
+
+    @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
+    @media (max-width:480px){
+      .page{ padding:20px 20px 32px }
+      .grid2{ grid-template-columns:1fr 1fr }
+      .embed{ aspect-ratio:3/4 }
+      .credit{ font-size:13px }
+      .mission{ padding:0 12px }
+    }
+
+    #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
+  </style>
 </head>
 <body>
+  <div class="page">
+    <div id="status">Loading…</div>
 
-<!-- ICON SPRITE -->
-<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21l6-4 6 4V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2z"/></symbol>
-  <symbol id="i-endorse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9l-3 6-2-3-3 6h14L14 9z"/><path d="M12 3v3"/></symbol>
-  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><rect x="6" y="13" width="12" height="9" rx="2"/><path d="M6 17h12"/></symbol>
-  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
-  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
-  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
-  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 0 4 4h0"/></symbol>
-  <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21v-2M16 21v-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
-  <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/></symbol>
-  <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-18 9 18H3z"/><path d="M12 9l2 4h-4l2-4z"/></symbol>
-  <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v12M11 6v12M15 6v12"/></symbol>
-  <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/></symbol>
-  <symbol id="i-tent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l9-16 9 16H3z"/><path d="M12 4v16"/></symbol>
-  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></symbol>
-  <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/></symbol>
-  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
-  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
-  <symbol id="i-signpost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M4 6h10l3 3H7z"/><path d="M20 14H10l-3-3h10z"/></symbol>
-</svg>
+    <h1 id="title" class="title"></h1>
 
-<div class="page" id="app">
-  <!-- HEADER -->
-  <header class="header">
-    <h1 class="title" id="expTitle">Expedition Title</h1>
-    <div class="actions">
-      <a href="#" class="btn" aria-label="Bookmark"><svg class="ico"><use href="#i-bookmark"/></svg>Bookmark</a>
-      <a href="#" class="btn" aria-label="Endorse"><svg class="ico"><use href="#i-endorse"/></svg>Endorse</a>
-      <button class="btn" onclick="window.print()" aria-label="Print"><svg class="ico"><use href="#i-print"/></svg>Print</button>
+    <div class="grid2">
+      <div><div class="label">Category</div><div id="category" class="value"></div></div>
+      <div><div class="label">Season</div><div id="season" class="value"></div></div>
+      <div><div class="label">Location</div><div id="location" class="value"></div></div>
+      <div><div class="label">Date</div><div id="date" class="value"></div></div>
     </div>
 
-    <div class="meta-grid">
-      <div><div class="label"><svg class="ico"><use href="#i-compass"/></svg>Category</div><div class="value" id="category"></div></div>
-      <div><div class="label"><svg class="ico"><use href="#i-sun"/></svg>Season</div><div class="value" id="season"></div></div>
-      <div><div class="label"><svg class="ico"><use href="#i-pin"/></svg>Location</div><div class="value" id="location"></div></div>
-      <div><div class="label"><svg class="ico"><use href="#i-calendar"/></svg>Date</div><div class="value" id="date"></div></div>
+    <div class="fullbleed">
+      <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
+        <img id="hero" alt="Expedition hero" />
+      </a>
+      <div id="credit" class="credit"></div>
     </div>
-  </header>
 
-  <!-- HERO -->
-  <div class="fullbleed">
-    <img id="hero" class="hero" src="https://images.unsplash.com/photo-1526481280698-8fcc13fd714e?q=80&w=1600&auto=format&fit=crop" alt="">
-    <div class="credit"><a id="creditLink" href="#" target="_blank" rel="noopener">Photo credit</a></div>
+    <div id="mission" class="mission"></div>
+
+    <div class="embed">
+      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <div class="embed" id="gpxEmbedWrap">
+      <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <div class="gpx-actions" id="gpxActions">
+      <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
+      <span id="trailheads" style="opacity:.7"></span>
+    </div>
   </div>
 
-  <!-- EXPEDITION ITINERARY (summary block) -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-signpost"/></svg> Expedition Itinerary</h3>
-    <div class="kv" id="itinerary-kv"></div>
-  </section>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const qp = (k) => new URL(location.href).searchParams.get(k);
+    const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
+    const first = (o,keys)=>{ for(const k of keys){ const v=get(o,k); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
 
-  <!-- PERMITS & ENTRY -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-file"/></svg> Permits & Entry</h3>
-    <div class="kv" id="permits-kv"></div>
-    <div class="divider"></div>
-  </section>
+    function getSlug(){
+      const q = qp("slug"); if (q) return q;
+      const parts = (location.pathname||"/").split("/").filter(Boolean);
+      const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
+      return i>-1 ? parts[i+1] : null;
+    }
 
-  <!-- SHUTTLE / TRANSPORTATION -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-bus"/></svg> Shuttle / Transportation</h3>
-    <div class="embed is-map"><iframe id="mapFrame" src=""></iframe></div>
-    <ul class="chips" id="shuttle-chips"></ul>
-  </section>
+    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
+    function gpxStudioURL(gpxUrl){
+      if(!gpxUrl) return "";
+      const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
+      return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
+    }
 
-  <!-- MULTI-TRAILHEAD LOGISTICS -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-route"/></svg> Multi-Trailhead Logistics</h3>
-    <div class="kv" id="multi-kv"></div>
-  </section>
+    function safeParse(text){
+      try{
+        let x = JSON.parse(text);
+        if (typeof x === "string") {
+          try { x = JSON.parse(x); } catch {}
+        }
+        return x;
+      }catch{ return null; }
+    }
 
-  <!-- KEY CONSIDERATIONS -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-lightbulb"/></svg> Key Considerations</h3>
-    <div class="kv" id="consider-kv"></div>
-  </section>
+    function normalizeData(raw){
+      if (typeof raw === "string") {
+        const again = safeParse(raw);
+        if (again) raw = again;
+      }
+      if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
+      let full = null, flat = null;
+      if (typeof raw?.index_json === "string") { full = safeParse(raw.index_json); }
+      else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
+      if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
+      else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
+      let out = { ...(full || {}), ...(flat || {}) };
+      if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
+      if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
+      if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
+      return Object.keys(out).length ? out : raw;
+    }
 
-  <!-- PERMIT & SHUTTLE TIMELINE -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-calendar"/></svg> Permit & Shuttle Timeline</h3>
-    <div class="kv" id="timeline-kv"></div>
-  </section>
+    const isValidUnsplashPhoto = (u)=>{
+      try{
+        const x = new URL(u);
+        return x.hostname === "unsplash.com" && /^\/photos\/[A-Za-z0-9_-]+/.test(x.pathname);
+      }catch{ return false; }
+    };
 
-  <!-- DAY-BY-DAY -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-signpost"/></svg> Itinerary Overview</h3>
-    <div id="days"></div>
-  </section>
+    async function main(){
+      const status = $("status");
+      const slug = getSlug();
+      if(!slug){ status.textContent="Missing slug (?slug= or /expedition/{slug})"; return; }
 
-  <!-- CAMPSITE INTEL + WEATHER -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-tent"/></svg> Campsite Intel</h3>
-    <div class="kv" id="campsite-kv"></div>
-    <div class="divider"></div>
-    <h3><svg class="ico"><use href="#i-cloudsun"/></svg> Weather & Altitude Notes</h3>
-    <div class="kv" id="weather-kv"></div>
-  </section>
+      const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
+      status.textContent = "Fetching…";
 
-  <!-- GEAR -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-mountain"/></svg> Gear Checklist</h3>
-    <div class="kv" id="gear-kv"></div>
-  </section>
+      let data;
+      try{
+        const res = await fetch(jsonURL, { cache:"no-store" });
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        const text = await res.text();
+        let raw = safeParse(text);
+        if (raw === null) raw = {};
+        data = normalizeData(raw);
+      }catch(e){
+        status.textContent = "Fetch failed: "+e.message;
+        return;
+      }
 
-  <!-- OPTIONAL MODS -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-lightbulb"/></svg> Optional Modification</h3>
-    <div class="kv" id="optional-kv"></div>
-  </section>
+      $("title").textContent = first(data,["title","name"]) || "";
+      $("category").textContent = first(data,["category","type"]) || "";
+      $("season").textContent = first(data,["season"]) || "";
+      $("location").textContent = first(data,["location","place"]) || "";
+      const d = first(data,["date","when"]);
+      $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d)
+        ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
+        : (d||"");
 
-  <!-- RISK MATRIX -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-shield"/></svg> Risk Matrix & Hazard Timeline</h3>
-    <div class="kv" id="risk-kv"></div>
-  </section>
+      const hero = first(data,["hero_image","hero.url","image"]);
+      if (hero) $("hero").src = hero;
 
-  <!-- CONDITIONS WATCH -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-cloudsun"/></svg> Conditions Watch</h3>
-    <div class="kv" id="conditions-kv"></div>
-  </section>
+      const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
+      let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
+      if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
 
-  <!-- BAILOUT SUMMARY -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-door-open"/></svg> Bailout Summary</h3>
-    <div class="kv" id="bailout-kv"></div>
-  </section>
+      $("credit").innerHTML = creditName
+        ? (creditLink
+            ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
+            : creditName)
+        : "";
 
-  <!-- EMERGENCY CONTACTS -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-phone"/></svg> Emergency Contacts & Numbers</h3>
-    <div class="kv" id="emergency-kv"></div>
-  </section>
+      const heroLinkEl = $("heroLink");
+      if (heroLinkEl) {
+        if (creditLink) {
+          heroLinkEl.href = creditLink;
+          heroLinkEl.style.pointerEvents = "auto";
+        } else {
+          heroLinkEl.removeAttribute("href");
+          heroLinkEl.style.pointerEvents = "none";
+        }
+      }
 
-  <!-- FINAL BRIEF -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-clipboard"/></svg> Final Brief Summary</h3>
-    <div class="kv" id="final-kv"></div>
-  </section>
+      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
+      const formatted = mission
+        .split(/\r?\n/)
+        .map(line => {
+          const t = line.trim();
+          if (!t) return "";
+          if (/^-{3,}$/.test(t)) return t;
+          if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
+          const m = t.match(/^([^:]+):\s*(.*)$/);
+          if (m && !/[a-z]/.test(m[1])) return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
+          if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
+          return t;
+        })
+        .join("<br/>");
+      $("mission").innerHTML = formatted;
 
-  <!-- GPX -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-map"/></svg> GPX Route & Elevation</h3>
-    <div class="embed is-gpx"><iframe id="gpxFrame" src=""></iframe></div>
-    <div class="gpx-actions">
-      <a id="downloadGpx" class="btn btn-primary" href="#" download><svg class="ico"><use href="#i-file"/></svg>DOWNLOAD GPX</a>
-      <a id="openGpxStudio" class="btn" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg>Open in GPX Studio</a>
-    </div>
-    <p class="note small">Starter GPX — review and adjust in your mapping app.</p>
-    <p class="note"><b>Do not rely on it as your only navigation source.</b></p>
-    <ul class="chips" id="gpx-chips"></ul>
-  </section>
+      const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
+      if (mapURL) $("map").src = mapURL;
 
-  <!-- DISCLAIMER -->
-  <section class="section">
-    <h3><svg class="ico"><use href="#i-file"/></svg> Field Disclaimer</h3>
-    <div id="disclaimer" class="v"></div>
-  </section>
-</div>
+      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
+      if (gpxURL) {
+        const studio = gpxStudioURL(gpxURL);
+        $("gpxStudio").src = studio;
+        $("gpxStudioLink").href = studio;
+        $("gpxBtn").href = gpxURL;
+        $("gpxBtn").download = (slug||"route") + ".gpx";
+        const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
+        if (th) $("trailheads").textContent = th;
+      } else {
+        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
+        $("gpxActions").style.display = "none";
+      }
 
-<script>
-/* ===== 1) DROP-IN DATA HOOK =====
-   Replace loadData() with your existing fetch (do not change your JSON).
-   Map fields below only; the renderer keeps all visuals/icons consistent. */
-async function loadData(){
-  // SAMPLE ONLY — REPLACE with your live JSON call.
-  return window.EXP_DATA || {};
-}
+      status.textContent = "";
+      setTimeout(()=>status.remove(), 10);
+    }
 
-/* ===== 2) RENDERER ===== */
-function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent = txt || ""; }
-function kv(containerId, rows){
-  const c = document.getElementById(containerId); if(!c) return;
-  c.innerHTML = "";
-  (rows||[]).forEach(([k,v])=>{
-    if(!k && !v) return;
-    const K = document.createElement("div"); K.className="k"; K.textContent=k;
-    const V = document.createElement("div"); V.className="v"; V.textContent=v;
-    c.appendChild(K); c.appendChild(V);
-  });
-}
-function chips(containerId, items){
-  const c=document.getElementById(containerId); if(!c) return;
-  c.innerHTML=""; (items||[]).forEach(t=>{
-    const li=document.createElement("li"); li.className="chip"; li.textContent=t; c.appendChild(li);
-  });
-}
-function renderDays(days){
-  const wrap=document.getElementById("days"); if(!wrap) return;
-  wrap.innerHTML="";
-  (days||[]).forEach(d=>{
-    const el=document.createElement("article"); el.className="day";
-    el.innerHTML = `
-      <h4><svg class="ico"><use href="#i-signpost"/></svg>${d.title||""}</h4>
-      ${d.summary?`<div class="sub">${d.summary}</div>`:""}
-      <div class="meta">
-        ${d.badges?.map(b=>`<span class="chip">${b}</span>`).join("")||""}
-      </div>
-      ${d.details?`<div class="v">${d.details}</div>`:""}
-    `;
-    wrap.appendChild(el);
-  });
-}
-
-(async function init(){
-  const data = await loadData();
-
-  // TITLE/HERO
-  setText("expTitle", data.title);
-  setText("category", data.category);
-  setText("season", data.season);
-  setText("location", data.location);
-  setText("date", data.date);
-  if(data.hero){ document.getElementById("hero").src = data.hero.src; }
-  if(data.hero?.credit){ const a=document.getElementById("creditLink"); a.href=data.hero.credit.url||"#"; a.textContent=data.hero.credit.text||"Photo credit"; }
-
-  // ITINERARY SUMMARY (exact items you listed)
-  kv("itinerary-kv", [
-    ["EXPEDITION ITINERARY", data.itinerary?.route],
-    ["PRIMARY OBJECTIVE", data.itinerary?.objective],
-    ["TRIP DURATION", data.itinerary?.duration],
-    ["TOTAL ESTIMATED MILEAGE", data.itinerary?.mileage],
-    ["EXPERIENCE LEVEL", data.itinerary?.experience],
-    ["TERRAIN TYPE", data.itinerary?.terrain],
-    ["Cumulative elevation gain/loss (ft)", data.itinerary?.elev],
-    ["Start and end trailhead", data.itinerary?.trailheads],
-    ["GPS coordinates", data.itinerary?.coords],
-  ]);
-
-  // PERMITS
-  kv("permits-kv", [
-    ["Requirement", data.permits?.requirement],
-    ["Issuing agency/jurisdiction", data.permits?.agency],
-    ["How to apply", data.permits?.apply],
-    ["Application window & deadline", data.permits?.window],
-    ["Processing time & approval odds", data.permits?.processing],
-    ["Cost & payment", data.permits?.cost],
-    ["Required documents/ID", data.permits?.docs],
-    ["Permit Pressure", data.permits?.pressure],
-    ["Verify", data.permits?.verify]
-  ]);
-
-  // SHUTTLE
-  document.getElementById("mapFrame").src = data.shuttle?.mapEmbed || "";
-  chips("shuttle-chips", data.shuttle?.highlights || []);
-
-  // MULTI-TRAILHEAD / CONSIDER / TIMELINE
-  kv("multi-kv", [
-    ["Staging plan", data.multi?.staging],
-    ["Vehicle retrieval", data.multi?.vehicle],
-    ["Backup plan", data.multi?.backup],
-  ]);
-  kv("consider-kv", [
-    ["Permits & Quotas", data.consider?.permits],
-    ["Seasonality", data.consider?.seasonality],
-    ["Shuttle & Staging", data.consider?.staging],
-    ["Objective Realities", data.consider?.realities],
-    ["Special Constraints", data.consider?.constraints],
-  ]);
-  kv("timeline-kv", [
-    ["90 Days Out", data.timeline?.d90],
-    ["30 Days Out", data.timeline?.d30],
-    ["7 Days Out", data.timeline?.d7],
-    ["48 Hours Out", data.timeline?.h48],
-  ]);
-
-  // DAYS
-  renderDays(data.days);
-
-  // CAMPSITE + WEATHER
-  kv("campsite-kv", [
-    ["Camp names and elevation", data.camps?.names],
-    ["Fire restrictions", data.camps?.fires],
-    ["Bear safety and food storage", data.camps?.bear],
-    ["Best views (sunrise/sunset)", data.camps?.views],
-    ["Noise level or solitude factor", data.camps?.noise],
-    ["Nearest water source", data.camps?.water],
-  ]);
-  kv("weather-kv", [
-    ["Typical temps", data.weather?.temps],
-    ["Sun exposure", data.weather?.exposure],
-    ["Acclimatization tips", data.weather?.acclimate],
-  ]);
-
-  // GEAR / OPTIONAL / RISK / CONDITIONS / BAILOUT / EMERGENCY / FINAL
-  kv("gear-kv", [
-    ["Core loadout systems", data.gear?.core],
-    ["Augments", data.gear?.augments],
-    ["Pro Tips", data.gear?.tips],
-  ]);
-  kv("optional-kv", [
-    ["Shorten", data.optional?.shorten],
-    ["Extend", data.optional?.extend],
-  ]);
-  kv("risk-kv", [
-    ["Weather", data.risk?.weather],
-    ["Terrain", data.risk?.terrain],
-    ["Wildlife", data.risk?.wildlife],
-    ["Human factors", data.risk?.humans],
-    ["Comms", data.risk?.comms],
-    ["Time-of-day window", data.risk?.window],
-    ["Mitigations", data.risk?.mitigations],
-    ["Thresholds", data.risk?.thresholds],
-    ["Bailouts", data.risk?.bailouts],
-  ]);
-  kv("conditions-kv", [
-    ["Verification source", data.conditions?.source],
-    ["Notes", data.conditions?.notes],
-  ]);
-  kv("bailout-kv", [
-    ["Day 1", data.bailout?.d1],
-    ["Day 2", data.bailout?.d2],
-    ["Day 3", data.bailout?.d3],
-    ["Day 4", data.bailout?.d4],
-  ]);
-  kv("emergency-kv", [
-    ["Emergency (life-threatening)", data.emergency?.emergency],
-    ["Managing authority dispatch/ranger", data.emergency?.ranger],
-    ["Nearest hospital/ER", data.emergency?.hospital],
-    ["Satellite message plan", data.emergency?.satellite],
-  ]);
-  kv("final-kv", [
-    ["Trail hours per day", data.final?.hours],
-    ["Wake/sleep rhythm", data.final?.rhythm],
-    ["Estimated calories burned per day", data.final?.calories],
-    ["Water needed per person", data.final?.water],
-    ["Recommended pack weight range", data.final?.pack],
-  ]);
-
-  // GPX
-  document.getElementById("gpxFrame").src = data.gpx?.embed || "";
-  const dl = document.getElementById("downloadGpx");
-  if (data.gpx?.download) dl.href = data.gpx.download;
-  const studio = document.getElementById("openGpxStudio");
-  if (data.gpx?.studio) studio.href = data.gpx.studio;
-  chips("gpx-chips", data.gpx?.stats || []);
-
-  // Disclaimer
-  document.getElementById("disclaimer").textContent = data.disclaimer || "";
-})();
-
-/* ===== 3) SAMPLE JSON (delete this block in prod) ===== */
-window.EXP_DATA = {
-  title:"Teton Crest Trail Expedition",
-  category:"End-to-End Traverse", season:"Fall",
-  location:"Teton Crest Trail, Grand Tetons National Park, WY", date:"Sep 13, 2025",
-  hero:{src:"https://images.unsplash.com/photo-1526481280698-8fcc13fd714e?q=80&w=1600&auto=format&fit=crop",
-        credit:{text:"Peter Robbins (Unsplash)",url:"#"}},
-  itinerary:{route:"Teton Crest Trail Traverse",objective:"End-to-End Traverse",duration:"4 days",
-    mileage:"~39 miles",experience:"advanced",terrain:"large mountains",
-    elev:"+7200 ft / -8200 ft",
-    trailheads:"Top of Aerial Tramway, WY → Leigh Lake Trailhead, WY",
-    coords:"43.5866, -110.8278 → 43.7962, -110.7184"},
-  permits:{requirement:"Yes",agency:"Grand Teton National Park",apply:"Apply via Recreation.gov",
-    window:"Opens January; apply early",processing:"Immediate; Moderate — good odds if reserved at release",
-    cost:"$45 per permit",docs:"Government-issued ID",
-    pressure:"Moderate — good odds if reserved at release; backup dates advised",
-    verify:"Verify with Grand Teton NP backcountry/permits page or office."},
-  shuttle:{mapEmbed:"https://www.google.com/maps/embed?pb=!1m18...",highlights:[
-    "Nearest major access: Jackson, WY – JAC",
-    "Travel time to trailhead: ~30 min from Jackson",
-    "Point-to-point · Overnight parking at Leigh Lake TH",
-    "Local shuttle ~$50 pp (book ahead)"
-  ]},
-  multi:{staging:"Outfitter shuttle from Leigh Lake to Aerial Tramway",
-         vehicle:"Shuttle service; $50 per person",
-         backup:"Rideshare or taxi from Jackson"},
-  consider:{permits:"Apply early for best odds",seasonality:"Snowpack may linger into early September",
-            staging:"Book shuttle in advance",realities:"No bailouts between campsites",
-            constraints:"No dogs allowed"},
-  timeline:{d90:"Apply for permits; inquire about shuttle",
-            d30:"Book lodging; confirm parking/cache logistics",
-            d7:"Check road/trail status; weather/flow",
-            h48:"Final forecast/flow; gear check; shuttle confirm"},
-  days:[
-    {title:"DAY 1: Top of Aerial Tramway → Marion Lake",
-     summary:"Rocky alpine trails; limited water; potential afternoon storms.",
-     badges:["7 mi","+1000/−800 ft","Fill at tram","Start early"],
-     details:"Distance & gain/loss: 7 mi, +1000/−800 ft · Terrain: Rocky alpine · Water: limited; fill at tram · Campsite: Marion Lake (9,300 ft) · Safety: watch weather · Bailout: Tram · Decision: continue past Marion if weather permits · Morale: first Teton views"},
-    {title:"DAY 2: Marion Lake → Sunset Lake",
-     summary:"Exposed ridges through Alaska Basin; carry sun protection.",
-     badges:["10 mi","+1800/−1600 ft","Streams in Basin","Layer up"],
-     details:"Distance & gain/loss: 10 mi, +1800/−1600 ft · Terrain: exposed ridges, rocky paths · Notables: Alaska Basin, Hurricane Pass · Campsite: Sunset Lake (9,600 ft) · Decision: assess weather at Hurricane Pass"},
-    {title:"DAY 3: Sunset Lake → North Fork Cascade Canyon",
-     summary:"Steep, rocky descents; more frequent water; use poles.",
-     badges:["12 mi","+2400/−3000 ft","Streams","Use poles"],
-     details:"Notables: Grand Teton views, Paintbrush Divide · Safety: steep descents require caution"},
-    {title:"DAY 4: North Fork Cascade Canyon → Leigh Lake TH",
-     summary:"Forested finish by lakes; mellow exit.",
-     badges:["10 mi","+2000/−2800 ft","Lakes & streams","Finish at TH"],
-     details:"Trail tip: enjoy scenery, lakeside breaks · Bailout: Exit at Leigh Lake Trailhead"}
-  ],
-  camps:{names:"Marion (9,300 ft), Sunset (9,600 ft), North Fork Cascade (8,300 ft)",
-         fires:"Fires prohibited; use stoves",bear:"Bear canisters required",
-         views:"Hurricane Pass, Paintbrush Divide",noise:"Moderate; popular route",
-         water:"Lakes and streams near campsites"},
-  weather:{temps:"30°F to 70°F",exposure:"High; minimal shade",acclimate:"Spend a day in Jackson to acclimate"},
-  gear:{core:"Pack, Shelter, Sleep, Water Filtration, Cook, Clothing, First Aid, Toiletries, Ditch Bag, Food Storage, Electronics, Misc.",
-        augments:"Trekking poles, bear canister, sun protection, layers, waterproofs",
-        tips:"Start early to avoid afternoon storms; use trekking poles"},
-  optional:{shorten:"Exit at Cascade Canyon for a shorter route",extend:"Add a day hike around Leigh Lake"},
-  risk:{weather:"Afternoon thunderstorms, temp swings",terrain:"Exposed ridges, steep descents",
-        wildlife:"Bears; use bear canisters",humans:"Altitude effects, fatigue",
-        comms:"Cell unreliable; satellite recommended; 07:00/19:00 check-ins",
-        window:"Storms 13:00–17:00",mitigations:"Early starts, layered clothing",
-        thresholds:"Avoid high passes during storms",bailouts:"Limited; plan accordingly"},
-  conditions:{source:"Grand Teton National Park",notes:"Snowpack/fire/flow hazards vary year-to-year"},
-  bailout:{d1:"Return via tramway",d2:"None",d3:"None",d4:"Exit at Leigh Lake Trailhead"},
-  emergency:{emergency:"911",ranger:"Verify with Grand Teton NP visitor center",
-             hospital:"Jackson, WY — verify before departure",
-             satellite:"InReach/PLB check-ins 07:00/19:00; message: who/what/where lat,long"},
-  final:{hours:"6–8 hours",rhythm:"Early rise, early sleep",calories:"3,000 calories",water:"3–4 liters",pack:"30–40 lbs"},
-  gpx:{embed:"https://gpx.studio/embed.html?...", download:"#", studio:"#",
-       stats:["~39 mi","+7200/−8200 ft","4 days"]},
-  disclaimer:"This blueprint is intel, not a guarantee. Conditions change without warning. Trails wash out. Weather turns. Maps lie. You are responsible for verifying details, preparing your team, and making sound calls under pressure. Expedition Intel accepts no liability."
-};
-</script>
+    if (typeof window !== "undefined") main();
+  </script>
 </body>
 </html>
