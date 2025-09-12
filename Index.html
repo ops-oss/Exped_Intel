@@ -1,536 +1,490 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Expedition</title>
-
-<!-- Brand base -->
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Expedition Blueprint</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg: #E8E5E2;
-    --ink: #1E1E1E;
-    --paper: #fff;
-    --pill: rgba(0,0,0,.06);
-    --ink-soft: rgba(0,0,0,.62);
-    --accent:#000; /* used only for primary CTAs */
-    --h1: clamp(36px, 9vw, 72px);
-    --h2: clamp(22px, 4.2vw, 32px);
-    --label: 13px;
-    --body: clamp(18px, 2.7vw, 20px);
-    --small: 14px;
-    --radius: 14px;
-    --radius-pill: 28px;
-    --gap: 18px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
-  img{display:block; width:100%; height:auto}
-  a{color:inherit; text-underline-offset:2px}
-  .page{max-width:1120px; margin:0 auto; padding:28px 16px 48px; display:grid; row-gap:22px}
-  .title{font-size:var(--h1); line-height:1; font-weight:800; letter-spacing:-.02em}
-
-  /* top actions */
-  .actions{display:flex; gap:10px; flex-wrap:wrap}
-  .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; background:var(--pill); border:1px solid rgba(0,0,0,.08); font-weight:600; text-decoration:none}
-  .btn.primary{background:#000; color:#fff; border-color:#000}
-  .btn .ico{width:18px; height:18px; mask-size:contain; -webkit-mask-size:contain; background:currentColor}
-
-  /* header facts */
-  .facts{display:grid; grid-template-columns:1fr 1fr; gap:8px 22px}
-  .fact{display:grid; gap:4px}
-  .fact .label{font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft)}
-  .fact .value{font-size:clamp(18px,3.8vw,22px); font-weight:600}
-
-  /* full-bleed hero */
-  .fullbleed{width:100vw; margin-left:calc(50% - 50vw)}
-  .credit{max-width:1120px; margin:6px auto 0; padding:0 16px; font-size:13px; color:#e35b4a; text-align:right}
-
-  /* section blocks */
-  section{scroll-margin-top:76px}
-  .h2{display:flex; align-items:center; gap:10px; font-size:var(--h2); font-weight:800; letter-spacing:-.01em; margin:18px 0 8px}
-  .h2 .ico{width:24px; height:24px; background:currentColor}
-  .kv{display:grid; grid-template-columns: minmax(160px, 280px) 1fr; gap:10px 24px; align-items:start; font-size:var(--body)}
-  .term{font-weight:800}
-  .note{margin-top:8px; font-size:var(--small); color:var(--ink-soft)}
-
-  /* chips / pills */
-  .pills{display:flex; gap:10px; flex-wrap:wrap}
-  .pill{display:inline-flex; align-items:center; gap:8px; padding:10px 12px; background:var(--pill); border:1px solid rgba(0,0,0,.08); border-radius:var(--radius-pill); font-weight:600}
-  .pill .ico{width:18px; height:18px; background:currentColor}
-
-  /* itinerary day cards */
-  .day{background:rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:14px 14px 10px; margin:14px 0}
-  .day h3{margin:0 0 6px; font-size:22px}
-  .day p{margin:0 0 12px; font-size:var(--body); color:var(--ink)}
-  .meta{display:flex; gap:10px; flex-wrap:wrap}
-  .meta .pill{background:rgba(0,0,0,.06)}
-
-  .embed{width:100%; aspect-ratio:16/9; border:0; border-radius:14px; overflow:hidden; background:#eee}
-  /* taller on mobile for map + gpx */
-  @media (max-width:600px){
-    .embed{aspect-ratio:4/5}
-  }
-
-  /* disclaimer */
-  .callout{margin-top:10px; font-size:var(--body)}
-  .callout strong{font-weight:900}
-
-  /* icons via CSS masks (single color, brand-neutral) */
-  .ico{mask:no-repeat center / contain; -webkit-mask:no-repeat center / contain}
-  .i-bookmark{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M7 3h10a2 2 0 0 1 2 2v16l-7-3-7 3V5a2 2 0 0 1 2-2z"/></svg>')}
-  .i-like{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 21s-6.7-4.35-9.33-7A6 6 0 1 1 12 6a6 6 0 1 1 9.33 8c-2.63 2.65-9.33 7-9.33 7z"/></svg>')}
-  .i-print{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M6 9V3h12v6H6zm12 2h2a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2h2v2h12v-2z"/></svg>')}
-  .i-doc{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M14 2H6a2 2 0 0 0-2 2v16l6-3 6 3V8l-4-6z"/></svg>')}
-  .i-triangle{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 3l10 18H2L12 3z"/></svg>')}
-  .i-map{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 3l6 2 6-2v18l-6 2-6-2-6 2V5l6-2z"/></svg>')}
-  .i-flag{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M6 3v18h2v-5h9l-2-4 2-4H8V3z"/></svg>')}
-  .i-camp{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 3l9 18H3L12 3zM9 17h6l-3-6-3 6z"/></svg>')}
-  .i-sun{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66 6.66l1.41 1.41M4.93 4.93l1.41 1.41m0 11.32L4.93 19.66M18.07 6.34l1.41-1.41M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"/></svg>')}
-  .i-pack{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M8 3h8a3 3 0 0 1 3 3v15H5V6a3 3 0 0 1 3-3zm0 6h8V7H8v2z"/></svg>')}
-  .i-alert{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>')}
-  .i-phone{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.6.7 4 .7.6 0 1 .4 1 1V22c0 .6-.4 1-1 1C10.1 23 1 13.9 1 2c0-.6.4-1 1-1h4.4c.6 0 1 .4 1 1 0 1.4.2 2.8.7 4 .1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>')}
-  .i-umbrella{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 2C6.5 2 2 6 2 10h20c0-4-4.5-8-10-8zm0 10a2 2 0 0 0-2 2v5a2 2 0 0 0 4 0v-1h-2v-4a2 2 0 0 0-0-2z"/></svg>')}
-  .i-generic{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="black"/></svg>')}
-
-  /* utilities */
-  .muted{color:var(--ink-soft)}
-  .divider{height:1px; background:rgba(0,0,0,.12); margin:18px 0}
-
-  /* mobile */
-  @media (max-width:800px){
-    .facts{grid-template-columns:1fr}
-    .kv{grid-template-columns: 1fr}
-    .term{font-size:18px}
-  }
+:root{
+  --bg:#E8E5E2; --ink:#1e1e1e; --paper:#fff; --muted:rgba(0,0,0,.7);
+  --border:rgba(0,0,0,.14); --accent:#000; --chip:#f3f1ef;
+  --h1: clamp(40px, 10vw, 96px);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+a{color:inherit}
+.page{max-width:1120px;margin:0 auto;padding:20px 18px 64px}
+.header{display:grid;gap:16px}
+.title{font-size:var(--h1);line-height:1.02;letter-spacing:-.02em;font-weight:700;margin:8px 0 6px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--paper);text-decoration:none;font-weight:600}
+.btn .ico{width:18px;height:18px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px}
+@media(min-width:900px){ .meta-grid{grid-template-columns:repeat(4,1fr)} }
+.label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.45rem}
+.value{font-size:clamp(18px,2.7vw,28px);line-height:1.28}
+.ico{width:20px;height:20px;stroke:currentColor}
+.fullbleed{width:100vw;margin-left:calc(50% - 50vw)}
+.hero{display:block}
+.credit{font-size:13px;margin:6px 0 0;text-align:right;opacity:.8}
+.section{margin:26px 0 0}
+.section h3{display:flex;align-items:center;gap:.6rem;font-size:clamp(18px,2.2vw,24px);margin:0 0 10px}
+.kv{display:grid;grid-template-columns:1fr;gap:12px 24px}
+@media(min-width:860px){ .kv{grid-template-columns:320px 1fr} }
+.k{font-weight:700}
+.v{opacity:.95}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:10px 0 0;padding:0;list-style:none}
+.chip{display:inline-flex;align-items:center;gap:.4rem;background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:.35rem .6rem;font-size:.95rem}
+.embed{border-radius:10px;overflow:hidden;background:#ddd}
+.embed iframe{width:100%;height:100%;border:0;display:block}
+.embed.is-map{aspect-ratio:16/9}
+.embed.is-gpx{aspect-ratio:16/9}
+@media(max-width:600px){
+  .embed.is-map{aspect-ratio:3/4}
+  .embed.is-gpx{aspect-ratio:3/4}
+}
+.day{border:1px solid var(--border);border-radius:12px;background:var(--paper);padding:14px 14px 10px;margin:14px 0}
+.day h4{display:flex;align-items:center;gap:.6rem;margin:0 0 6px;font-size:clamp(18px,2.2vw,22px)}
+.day .sub{font-size:16px;opacity:.9;margin-bottom:8px}
+.meta{display:flex;flex-wrap:wrap;gap:.5rem;margin:6px 0 4px}
+.gpx-actions{margin:14px 0 6px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn-primary{background:#000;color:#fff;border-color:#000}
+.note{margin-top:8px;opacity:.9}
+.note b{display:block;margin-top:6px}
+.small{font-size:14px;opacity:.85}
+.print-only{display:none}
+@media print{
+  .actions,.fullbleed .credit a{display:none}
+  .print-only{display:block}
+  .page{padding:0}
+  .embed{page-break-inside:avoid}
+}
 </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- Title -->
-  <h1 id="title" class="title">Expedition</h1>
+<!-- ICON SPRITE -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21l6-4 6 4V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2z"/></symbol>
+  <symbol id="i-endorse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9l-3 6-2-3-3 6h14L14 9z"/><path d="M12 3v3"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><rect x="6" y="13" width="12" height="9" rx="2"/><path d="M6 17h12"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 0 4 4h0"/></symbol>
+  <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21v-2M16 21v-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
+  <symbol id="i-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h4a3 3 0 1 1 0 6h-4"/></symbol>
+  <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-18 9 18H3z"/><path d="M12 9l2 4h-4l2-4z"/></symbol>
+  <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v12M11 6v12M15 6v12"/></symbol>
+  <symbol id="i-cloudsun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2"/><path d="M5 3v2M5 9v2M1 7h2M7 7h2"/><path d="M10 17h7a3 3 0 0 0 0-6 4 4 0 0 0-7 0 3 3 0 0 0 0 6z"/></symbol>
+  <symbol id="i-tent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l9-16 9 16H3z"/><path d="M12 4v16"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.6-2.2 4.7a6 6 0 0 0-1.8 3.2H9a6 6 0 0 0-1.8-3.2C6 12.6 5 11.2 5 9a7 7 0 0 1 7-7z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-signpost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M4 6h10l3 3H7z"/><path d="M20 14H10l-3-3h10z"/></symbol>
+</svg>
 
-  <!-- Actions -->
-  <div class="actions">
-    <a class="btn" href="#" id="bookmarkBtn"><span class="ico i-bookmark"></span>Bookmark</a>
-    <a class="btn" href="#" id="endorseBtn"><span class="ico i-like"></span>Endorse</a>
-    <button class="btn" id="printBtn" type="button"><span class="ico i-print"></span>Print</button>
-  </div>
+<div class="page" id="app">
+  <!-- HEADER -->
+  <header class="header">
+    <h1 class="title" id="expTitle">Expedition Title</h1>
+    <div class="actions">
+      <a href="#" class="btn" aria-label="Bookmark"><svg class="ico"><use href="#i-bookmark"/></svg>Bookmark</a>
+      <a href="#" class="btn" aria-label="Endorse"><svg class="ico"><use href="#i-endorse"/></svg>Endorse</a>
+      <button class="btn" onclick="window.print()" aria-label="Print"><svg class="ico"><use href="#i-print"/></svg>Print</button>
+    </div>
 
-  <!-- Header facts -->
-  <div class="facts">
-    <div class="fact">
-      <div class="label"><span class="ico i-doc" style="width:14px;height:14px;vertical-align:-2px"></span> Category</div>
-      <div id="hdrCategory" class="value"></div>
+    <div class="meta-grid">
+      <div><div class="label"><svg class="ico"><use href="#i-compass"/></svg>Category</div><div class="value" id="category"></div></div>
+      <div><div class="label"><svg class="ico"><use href="#i-sun"/></svg>Season</div><div class="value" id="season"></div></div>
+      <div><div class="label"><svg class="ico"><use href="#i-pin"/></svg>Location</div><div class="value" id="location"></div></div>
+      <div><div class="label"><svg class="ico"><use href="#i-calendar"/></svg>Date</div><div class="value" id="date"></div></div>
     </div>
-    <div class="fact">
-      <div class="label"><span class="ico i-sun" style="width:14px;height:14px;vertical-align:-2px"></span> Season</div>
-      <div id="hdrSeason" class="value"></div>
-    </div>
-    <div class="fact">
-      <div class="label"><span class="ico i-map" style="width:14px;height:14px;vertical-align:-2px"></span> Location</div>
-      <div id="hdrLocation" class="value"></div>
-    </div>
-    <div class="fact">
-      <div class="label"><span class="ico i-flag" style="width:14px;height:14px;vertical-align:-2px"></span> Date</div>
-      <div id="hdrDate" class="value"></div>
-    </div>
-  </div>
+  </header>
 
-  <!-- Hero -->
+  <!-- HERO -->
   <div class="fullbleed">
-    <img id="hero" alt="" />
+    <img id="hero" class="hero" src="https://images.unsplash.com/photo-1526481280698-8fcc13fd714e?q=80&w=1600&auto=format&fit=crop" alt="">
+    <div class="credit"><a id="creditLink" href="#" target="_blank" rel="noopener">Photo credit</a></div>
   </div>
-  <div id="credit" class="credit"></div>
 
-  <!-- Expedition Itinerary (top meta) -->
-  <section id="meta">
-    <div class="h2"><span class="ico i-doc"></span> Expedition Itinerary</div>
-    <div class="kv">
-      <div class="term">Route</div><div id="metaRoute"></div>
-    </div>
+  <!-- EXPEDITION ITINERARY (summary block) -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-signpost"/></svg> Expedition Itinerary</h3>
+    <div class="kv" id="itinerary-kv"></div>
   </section>
 
-  <!-- Terrain -->
-  <section id="terrain">
-    <div class="h2"><span class="ico i-triangle"></span> Terrain Type</div>
-    <div class="kv" id="terrainKV"></div>
+  <!-- PERMITS & ENTRY -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-file"/></svg> Permits & Entry</h3>
+    <div class="kv" id="permits-kv"></div>
+    <div class="divider"></div>
   </section>
 
-  <!-- Permits -->
-  <section id="permits">
-    <div class="h2"><span class="ico i-doc"></span> Permits & Entry</div>
-    <div class="kv" id="permitsKV"></div>
-    <div id="permitsVerify" class="note"></div>
+  <!-- SHUTTLE / TRANSPORTATION -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-bus"/></svg> Shuttle / Transportation</h3>
+    <div class="embed is-map"><iframe id="mapFrame" src=""></iframe></div>
+    <ul class="chips" id="shuttle-chips"></ul>
   </section>
 
-  <!-- Shuttle & Map -->
-  <section id="shuttle">
-    <div class="h2"><span class="ico i-map"></span> Shuttle / Transportation</div>
-    <iframe id="map" class="embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    <div class="pills" id="shuttlePills" style="margin-top:12px"></div>
+  <!-- MULTI-TRAILHEAD LOGISTICS -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-route"/></svg> Multi-Trailhead Logistics</h3>
+    <div class="kv" id="multi-kv"></div>
   </section>
 
-  <!-- Multi-Trailhead Logistics -->
-  <section id="multi">
-    <div class="h2"><span class="ico i-flag"></span> Multi-Trailhead Logistics</div>
-    <div class="kv" id="multiKV"></div>
+  <!-- KEY CONSIDERATIONS -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-lightbulb"/></svg> Key Considerations</h3>
+    <div class="kv" id="consider-kv"></div>
   </section>
 
-  <!-- Key Considerations -->
-  <section id="keys">
-    <div class="h2"><span class="ico i-umbrella"></span> Key Considerations</div>
-    <div class="kv" id="keysKV"></div>
+  <!-- PERMIT & SHUTTLE TIMELINE -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-calendar"/></svg> Permit & Shuttle Timeline</h3>
+    <div class="kv" id="timeline-kv"></div>
   </section>
 
-  <!-- Timeline -->
-  <section id="timeline">
-    <div class="h2"><span class="ico i-doc"></span> Permit & Shuttle Timeline</div>
-    <div class="kv" id="timelineKV"></div>
+  <!-- DAY-BY-DAY -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-signpost"/></svg> Itinerary Overview</h3>
+    <div id="days"></div>
   </section>
 
-  <!-- Itinerary Days -->
-  <section id="days">
-    <div class="h2"><span class="ico i-flag"></span> Itinerary Overview</div>
-    <div id="dayWrap"></div>
+  <!-- CAMPSITE INTEL + WEATHER -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-tent"/></svg> Campsite Intel</h3>
+    <div class="kv" id="campsite-kv"></div>
+    <div class="divider"></div>
+    <h3><svg class="ico"><use href="#i-cloudsun"/></svg> Weather & Altitude Notes</h3>
+    <div class="kv" id="weather-kv"></div>
   </section>
 
-  <!-- Campsite Intel -->
-  <section id="camps">
-    <div class="h2"><span class="ico i-camp"></span> Campsite Intel</div>
-    <div class="kv" id="campsKV"></div>
+  <!-- GEAR -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-mountain"/></svg> Gear Checklist</h3>
+    <div class="kv" id="gear-kv"></div>
   </section>
 
-  <!-- Weather & Altitude -->
-  <section id="weather">
-    <div class="h2"><span class="ico i-sun"></span> Weather & Altitude Notes</div>
-    <div class="kv" id="weatherKV"></div>
+  <!-- OPTIONAL MODS -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-lightbulb"/></svg> Optional Modification</h3>
+    <div class="kv" id="optional-kv"></div>
   </section>
 
-  <!-- Gear -->
-  <section id="gear">
-    <div class="h2"><span class="ico i-pack"></span> Gear Checklist</div>
-    <div class="kv" id="gearKV"></div>
+  <!-- RISK MATRIX -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-shield"/></svg> Risk Matrix & Hazard Timeline</h3>
+    <div class="kv" id="risk-kv"></div>
   </section>
 
-  <!-- Optional Mods -->
-  <section id="mods">
-    <div class="h2"><span class="ico i-flag"></span> Optional Modification</div>
-    <div class="kv" id="modsKV"></div>
+  <!-- CONDITIONS WATCH -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-cloudsun"/></svg> Conditions Watch</h3>
+    <div class="kv" id="conditions-kv"></div>
   </section>
 
-  <!-- Risk Matrix -->
-  <section id="risk">
-    <div class="h2"><span class="ico i-alert"></span> Risk Matrix & Hazard Timeline</div>
-    <div class="kv" id="riskKV"></div>
+  <!-- BAILOUT SUMMARY -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-door-open"/></svg> Bailout Summary</h3>
+    <div class="kv" id="bailout-kv"></div>
   </section>
 
-  <!-- Conditions -->
-  <section id="conditions">
-    <div class="h2"><span class="ico i-triangle"></span> Conditions Watch</div>
-    <div class="kv" id="conditionsKV"></div>
+  <!-- EMERGENCY CONTACTS -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-phone"/></svg> Emergency Contacts & Numbers</h3>
+    <div class="kv" id="emergency-kv"></div>
   </section>
 
-  <!-- Bailouts -->
-  <section id="bail">
-    <div class="h2"><span class="ico i-flag"></span> Bailout Summary</div>
-    <div class="kv" id="bailKV"></div>
-  </section>
-
-  <!-- Emergency -->
-  <section id="emergency">
-    <div class="h2"><span class="ico i-phone"></span> Emergency Contacts & Numbers</div>
-    <div class="kv" id="emKV"></div>
-  </section>
-
-  <!-- Final Brief -->
-  <section id="final">
-    <div class="h2"><span class="ico i-doc"></span> Final Brief Summary</div>
-    <div class="kv" id="finalKV"></div>
+  <!-- FINAL BRIEF -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-clipboard"/></svg> Final Brief Summary</h3>
+    <div class="kv" id="final-kv"></div>
   </section>
 
   <!-- GPX -->
-  <section id="gpx">
-    <div class="h2"><span class="ico i-map"></span> GPX Route & Elevation</div>
-    <iframe id="gpxStudio" class="embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    <div class="actions" style="margin-top:12px">
-      <a id="gpxBtn" class="btn primary" href="#" download><span class="ico i-doc"></span>Download GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><span class="ico i-map"></span>Open in GPX Studio</a>
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-map"/></svg> GPX Route & Elevation</h3>
+    <div class="embed is-gpx"><iframe id="gpxFrame" src=""></iframe></div>
+    <div class="gpx-actions">
+      <a id="downloadGpx" class="btn btn-primary" href="#" download><svg class="ico"><use href="#i-file"/></svg>DOWNLOAD GPX</a>
+      <a id="openGpxStudio" class="btn" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg>Open in GPX Studio</a>
     </div>
-    <p class="callout">Starter GPX — review and adjust in your mapping app.<br><strong>Do not rely on it as your only navigation source.</strong></p>
-    <div class="pills" id="gpxStats" style="margin-top:8px"></div>
+    <p class="note small">Starter GPX — review and adjust in your mapping app.</p>
+    <p class="note"><b>Do not rely on it as your only navigation source.</b></p>
+    <ul class="chips" id="gpx-chips"></ul>
   </section>
 
-  <!-- Disclaimer -->
-  <section id="disclaimer">
-    <div class="h2"><span class="ico i-doc"></span> Field Disclaimer</div>
-    <div id="disclaimerText" style="font-size:var(--body); line-height:1.65"></div>
+  <!-- DISCLAIMER -->
+  <section class="section">
+    <h3><svg class="ico"><use href="#i-file"/></svg> Field Disclaimer</h3>
+    <div id="disclaimer" class="v"></div>
   </section>
-
 </div>
 
 <script>
-  const $ = (id)=>document.getElementById(id);
-  const qp = (k)=>new URL(location.href).searchParams.get(k);
-  const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
-  const first = (o,keys)=>{ for(const k of keys){ const v=get(o,k); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
+/* ===== 1) DROP-IN DATA HOOK =====
+   Replace loadData() with your existing fetch (do not change your JSON).
+   Map fields below only; the renderer keeps all visuals/icons consistent. */
+async function loadData(){
+  // SAMPLE ONLY — REPLACE with your live JSON call.
+  return window.EXP_DATA || {};
+}
 
-  function getSlug(){
-    const q = qp("slug"); if (q) return q;
-    const parts = (location.pathname||"/").split("/").filter(Boolean);
-    const i = parts.findIndex(p=>["expedition","trip"].includes(p.toLowerCase()));
-    return i>-1 ? parts[i+1] : null;
-  }
+/* ===== 2) RENDERER ===== */
+function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent = txt || ""; }
+function kv(containerId, rows){
+  const c = document.getElementById(containerId); if(!c) return;
+  c.innerHTML = "";
+  (rows||[]).forEach(([k,v])=>{
+    if(!k && !v) return;
+    const K = document.createElement("div"); K.className="k"; K.textContent=k;
+    const V = document.createElement("div"); V.className="v"; V.textContent=v;
+    c.appendChild(K); c.appendChild(V);
+  });
+}
+function chips(containerId, items){
+  const c=document.getElementById(containerId); if(!c) return;
+  c.innerHTML=""; (items||[]).forEach(t=>{
+    const li=document.createElement("li"); li.className="chip"; li.textContent=t; c.appendChild(li);
+  });
+}
+function renderDays(days){
+  const wrap=document.getElementById("days"); if(!wrap) return;
+  wrap.innerHTML="";
+  (days||[]).forEach(d=>{
+    const el=document.createElement("article"); el.className="day";
+    el.innerHTML = `
+      <h4><svg class="ico"><use href="#i-signpost"/></svg>${d.title||""}</h4>
+      ${d.summary?`<div class="sub">${d.summary}</div>`:""}
+      <div class="meta">
+        ${d.badges?.map(b=>`<span class="chip">${b}</span>`).join("")||""}
+      </div>
+      ${d.details?`<div class="v">${d.details}</div>`:""}
+    `;
+    wrap.appendChild(el);
+  });
+}
 
-  const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
-  function gpxStudioURL(gpxUrl){
-    if(!gpxUrl) return "";
-    const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
-    return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
-  }
+(async function init(){
+  const data = await loadData();
 
-  function safeParse(text){
-    try{ let x = JSON.parse(text); if (typeof x === "string") { try { x = JSON.parse(x) } catch{} } return x; }
-    catch{ return null }
-  }
-  function normalizeData(raw){
-    if (typeof raw === "string"){ const again = safeParse(raw); if (again) raw = again; }
-    if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
-    let full=null, flat=null;
-    if (typeof raw?.index_json === "string") full = safeParse(raw.index_json);
-    else if (raw?.index_json && typeof raw.index_json === "object") full = raw.index_json;
-    if (typeof raw?.flat_json === "string") flat = safeParse(raw.flat_json);
-    else if (raw?.flat_json && typeof raw.flat_json === "object") flat = raw.flat_json;
-    let out = { ...(full||{}), ...(flat||{}) };
-    if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
-    if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
-    if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
-    return Object.keys(out).length ? out : raw;
-  }
+  // TITLE/HERO
+  setText("expTitle", data.title);
+  setText("category", data.category);
+  setText("season", data.season);
+  setText("location", data.location);
+  setText("date", data.date);
+  if(data.hero){ document.getElementById("hero").src = data.hero.src; }
+  if(data.hero?.credit){ const a=document.getElementById("creditLink"); a.href=data.hero.credit.url||"#"; a.textContent=data.hero.credit.text||"Photo credit"; }
 
-  function pill(iconClass, text){
-    const span = document.createElement("span");
-    span.className = "pill";
-    const i = document.createElement("span"); i.className = "ico " + (iconClass || "i-generic");
-    span.appendChild(i);
-    span.appendChild(document.createTextNode(" " + text));
-    return span;
-  }
-  function kvRow(term, val){
-    if(!val) return null;
-    const wrapT = document.createElement("div"); wrapT.className="term"; wrapT.textContent = term;
-    const wrapV = document.createElement("div"); wrapV.textContent = val;
-    return [wrapT, wrapV];
-  }
+  // ITINERARY SUMMARY (exact items you listed)
+  kv("itinerary-kv", [
+    ["EXPEDITION ITINERARY", data.itinerary?.route],
+    ["PRIMARY OBJECTIVE", data.itinerary?.objective],
+    ["TRIP DURATION", data.itinerary?.duration],
+    ["TOTAL ESTIMATED MILEAGE", data.itinerary?.mileage],
+    ["EXPERIENCE LEVEL", data.itinerary?.experience],
+    ["TERRAIN TYPE", data.itinerary?.terrain],
+    ["Cumulative elevation gain/loss (ft)", data.itinerary?.elev],
+    ["Start and end trailhead", data.itinerary?.trailheads],
+    ["GPS coordinates", data.itinerary?.coords],
+  ]);
 
-  // Break a long "label: value label: value" line into <div> with hard returns per label.
-  function splitColonLines(text){
-    return text.split(/(?:\s*-\s*)?(?=[A-Z][^:]*:\s)/g)
-               .map(s=>s.trim()).filter(Boolean)
-               .map(s=>s.replace(/\s*—\s*/g," — "))
-               .join("\n");
-  }
+  // PERMITS
+  kv("permits-kv", [
+    ["Requirement", data.permits?.requirement],
+    ["Issuing agency/jurisdiction", data.permits?.agency],
+    ["How to apply", data.permits?.apply],
+    ["Application window & deadline", data.permits?.window],
+    ["Processing time & approval odds", data.permits?.processing],
+    ["Cost & payment", data.permits?.cost],
+    ["Required documents/ID", data.permits?.docs],
+    ["Permit Pressure", data.permits?.pressure],
+    ["Verify", data.permits?.verify]
+  ]);
 
-  async function main(){
-    const slug = getSlug();
-    if(!slug){ $("title").textContent="Missing slug"; return; }
+  // SHUTTLE
+  document.getElementById("mapFrame").src = data.shuttle?.mapEmbed || "";
+  chips("shuttle-chips", data.shuttle?.highlights || []);
 
-    // fetch JSON
-    const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
-    let data={};
-    try{
-      const res = await fetch(jsonURL, {cache:"no-store"});
-      const txt = await res.text();
-      data = normalizeData(safeParse(txt) ?? {});
-    }catch(e){ console.error(e); }
+  // MULTI-TRAILHEAD / CONSIDER / TIMELINE
+  kv("multi-kv", [
+    ["Staging plan", data.multi?.staging],
+    ["Vehicle retrieval", data.multi?.vehicle],
+    ["Backup plan", data.multi?.backup],
+  ]);
+  kv("consider-kv", [
+    ["Permits & Quotas", data.consider?.permits],
+    ["Seasonality", data.consider?.seasonality],
+    ["Shuttle & Staging", data.consider?.staging],
+    ["Objective Realities", data.consider?.realities],
+    ["Special Constraints", data.consider?.constraints],
+  ]);
+  kv("timeline-kv", [
+    ["90 Days Out", data.timeline?.d90],
+    ["30 Days Out", data.timeline?.d30],
+    ["7 Days Out", data.timeline?.d7],
+    ["48 Hours Out", data.timeline?.h48],
+  ]);
 
-    // header
-    $("title").textContent = first(data,["title","name"]) || "Expedition";
-    $("hdrCategory").textContent = first(data,["category","type"]) || "";
-    $("hdrSeason").textContent = first(data,["season"]) || "";
-    $("hdrLocation").textContent = first(data,["location","place"]) || "";
-    const d = first(data,["date","when"]);
-    $("hdrDate").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d)
-      ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
-      : (d||"");
+  // DAYS
+  renderDays(data.days);
 
-    const hero = first(data,["hero_image","hero.url","image"]);
-    if (hero) $("hero").src = hero;
-    const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
-    const creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
-    $("credit").innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : "";
+  // CAMPSITE + WEATHER
+  kv("campsite-kv", [
+    ["Camp names and elevation", data.camps?.names],
+    ["Fire restrictions", data.camps?.fires],
+    ["Bear safety and food storage", data.camps?.bear],
+    ["Best views (sunrise/sunset)", data.camps?.views],
+    ["Noise level or solitude factor", data.camps?.noise],
+    ["Nearest water source", data.camps?.water],
+  ]);
+  kv("weather-kv", [
+    ["Typical temps", data.weather?.temps],
+    ["Sun exposure", data.weather?.exposure],
+    ["Acclimatization tips", data.weather?.acclimate],
+  ]);
 
-    // meta route
-    $("metaRoute").textContent = first(data,["title","route","primary_objective","objective","name"])?.replace(/^EXPEDITION ITINERARY:\s*/i,"") || "";
+  // GEAR / OPTIONAL / RISK / CONDITIONS / BAILOUT / EMERGENCY / FINAL
+  kv("gear-kv", [
+    ["Core loadout systems", data.gear?.core],
+    ["Augments", data.gear?.augments],
+    ["Pro Tips", data.gear?.tips],
+  ]);
+  kv("optional-kv", [
+    ["Shorten", data.optional?.shorten],
+    ["Extend", data.optional?.extend],
+  ]);
+  kv("risk-kv", [
+    ["Weather", data.risk?.weather],
+    ["Terrain", data.risk?.terrain],
+    ["Wildlife", data.risk?.wildlife],
+    ["Human factors", data.risk?.humans],
+    ["Comms", data.risk?.comms],
+    ["Time-of-day window", data.risk?.window],
+    ["Mitigations", data.risk?.mitigations],
+    ["Thresholds", data.risk?.thresholds],
+    ["Bailouts", data.risk?.bailouts],
+  ]);
+  kv("conditions-kv", [
+    ["Verification source", data.conditions?.source],
+    ["Notes", data.conditions?.notes],
+  ]);
+  kv("bailout-kv", [
+    ["Day 1", data.bailout?.d1],
+    ["Day 2", data.bailout?.d2],
+    ["Day 3", data.bailout?.d3],
+    ["Day 4", data.bailout?.d4],
+  ]);
+  kv("emergency-kv", [
+    ["Emergency (life-threatening)", data.emergency?.emergency],
+    ["Managing authority dispatch/ranger", data.emergency?.ranger],
+    ["Nearest hospital/ER", data.emergency?.hospital],
+    ["Satellite message plan", data.emergency?.satellite],
+  ]);
+  kv("final-kv", [
+    ["Trail hours per day", data.final?.hours],
+    ["Wake/sleep rhythm", data.final?.rhythm],
+    ["Estimated calories burned per day", data.final?.calories],
+    ["Water needed per person", data.final?.water],
+    ["Recommended pack weight range", data.final?.pack],
+  ]);
 
-    // terrain KV
-    const terrainKV = $("terrainKV");
-    (kvRow("Cumulative elevation gain/loss (ft)", first(data,["cum_elev","+elev","cumulative_elevation","+elevation"])) ?? []).forEach(n=>terrainKV.appendChild(n));
-    (kvRow("Start and end trailhead", first(data,["start_end_trailhead","start_end","trailheads"])) ?? []).forEach(n=>terrainKV.appendChild(n));
-    (kvRow("GPS coordinates", first(data,["gps","coordinates","gps_coordinates"])) ?? []).forEach(n=>terrainKV.appendChild(n));
+  // GPX
+  document.getElementById("gpxFrame").src = data.gpx?.embed || "";
+  const dl = document.getElementById("downloadGpx");
+  if (data.gpx?.download) dl.href = data.gpx.download;
+  const studio = document.getElementById("openGpxStudio");
+  if (data.gpx?.studio) studio.href = data.gpx.studio;
+  chips("gpx-chips", data.gpx?.stats || []);
 
-    // permits KV
-    const permitsKV = $("permitsKV");
-    [["Requirement","permits.requirement"],
-     ["Issuing agency/jurisdiction","permits.agency"],
-     ["How to apply","permits.how"],
-     ["Application window & deadline","permits.window"],
-     ["Processing time & approval odds","permits.processing"],
-     ["Cost & payment","permits.cost"],
-     ["Required documents/ID","permits.documents"],
-     ["Permit Pressure","permits.pressure"]]
-     .forEach(([t,k])=>{
-       const val = first(data,[k,t.toLowerCase().replace(/\s+/g,'_')]);
-       const row = kvRow(t, val);
-       if(row){ row.forEach(n=>permitsKV.appendChild(n)) }
-     });
-    const verify = first(data,["permits.verify","permits_verify","verify"]);
-    $("permitsVerify").textContent = verify || "";
+  // Disclaimer
+  document.getElementById("disclaimer").textContent = data.disclaimer || "";
+})();
 
-    // map + shuttle pills
-    const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
-    if (mapURL) $("map").src = mapURL;
-    const shuttleP = $("shuttlePills");
-    [
-      ["i-map", first(data,["shuttle.nearest_access","nearest_access"])],
-      ["i-map", first(data,["shuttle.travel_time_start","travel_time_start"])],
-      ["i-map", first(data,["shuttle.basecamp_pre","basecamp_pre"])],
-      ["i-map", first(data,["shuttle.access_type","access_type"])],
-      ["i-map", first(data,["shuttle.parking","parking"])],
-      ["i-map", first(data,["shuttle.local_transport","local_transport"])],
-      ["i-map", first(data,["shuttle.direction","direction"])],
-      ["i-map", first(data,["shuttle.travel_time_finish","travel_time_finish"])],
-      ["i-map", first(data,["shuttle.basecamp_post","basecamp_post"])],
-      ["i-map", first(data,["shuttle.fuel_restrictions","fuel_restrictions"])]
-    ].forEach(([ico,txt])=>{ if(txt) shuttleP.appendChild(pill(ico,txt)) })
-
-    // multi KV
-    const multiKV = $("multiKV");
-    [["Staging plan","multi.staging"],["Vehicle retrieval","multi.vehicle"],["Backup plan","multi.backup"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>multiKV.appendChild(n)) });
-
-    // keys KV
-    const keysKV = $("keysKV");
-    [["Permits & Quotas","keys.quotas"],["Seasonality","keys.seasonality"],["Shuttle & Staging","keys.staging"],["Objective Realities","keys.realities"],["Special Constraints","keys.constraints"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>keysKV.appendChild(n)) });
-
-    // timeline KV (bold left)
-    const timelineKV = $("timelineKV");
-    [["90 Days Out","timeline.d90"],["30 Days Out","timeline.d30"],["7 Days Out","timeline.d7"],["48 Hours Out","timeline.h48"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>timelineKV.appendChild(n)) });
-
-    // days
-    const dayWrap = $("dayWrap");
-    (get(data,"days")||[]).forEach((d,i)=>{
-      const card = document.createElement("article"); card.className="day";
-      const h = document.createElement("h3");
-      h.textContent = d.title || `Day ${i+1}`;
-      card.appendChild(h);
-      const p = document.createElement("p");
-      p.textContent = d.summary || d.desc || "";
-      card.appendChild(p);
-      const m = document.createElement("div"); m.className="meta";
-      if (d.miles) m.appendChild(pill("i-doc", `${d.miles} mi`));
-      if (d.gain || d.loss) m.appendChild(pill("i-triangle", `${d.gain?`+${d.gain}`:""} ${d.loss?`/ -${d.loss}`:""} ft`.trim()));
-      card.appendChild(m);
-      if (d.details){
-        const details = document.createElement("div");
-        details.className="pill"; details.style.display="block"; details.style.borderRadius="12px"; details.style.lineHeight="1.55";
-        details.textContent = splitColonLines(d.details);
-        card.appendChild(details);
-      }
-      dayWrap.appendChild(card);
-    });
-
-    // campsite intel
-    const campsKV = $("campsKV");
-    [["Camp names and elevation", "camps.names"],
-     ["Fire restrictions","camps.fire"],
-     ["Bear safety and food storage","camps.bear"],
-     ["Best views (sunrise/sunset)","camps.views"],
-     ["Noise level or solitude factor","camps.noise"],
-     ["Nearest water source","camps.water"]]
-     .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>campsKV.appendChild(n)) });
-
-    // weather/altitude
-    const weatherKV = $("weatherKV");
-    [["Typical temps","weather.temps"],["Sun exposure","weather.sun"],["Acclimatization tips","weather.acclimatize"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>weatherKV.appendChild(n)) });
-
-    // gear
-    const gearKV = $("gearKV");
-    [["Augments","gear.augments"],["Tips","gear.tips"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]) || first(data,["gear."+t.toLowerCase()]); const r = kvRow(t,v); if(r) r.forEach(n=>gearKV.appendChild(n)) });
-    const core = first(data,["gear.core","gear.core_text"]);
-    if (core){
-      const full = document.createElement("div"); full.style.gridColumn="1 / -1"; full.textContent = core;
-      gearKV.appendChild(full);
-    }
-
-    // mods
-    const modsKV = $("modsKV");
-    [["Shorten","mods.shorten"],["Extend","mods.extend"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>modsKV.appendChild(n)) });
-
-    // risk
-    const riskKV = $("riskKV");
-    [["Weather","risk.weather"],["Terrain","risk.terrain"],["Wildlife","risk.wildlife"],["Human factors","risk.human"],["Comms","risk.comms"],["Time-of-day window","risk.window"],["Mitigations","risk.mitigations"],["Thresholds","risk.thresholds"],["Bailouts","risk.bailouts"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>riskKV.appendChild(n)) });
-
-    // conditions
-    const conditionsKV = $("conditionsKV");
-    [["Verification source","conditions.source"]].forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>conditionsKV.appendChild(n)) });
-    const condText = first(data,["conditions.text","conditions.desc"]);
-    if(condText){ const full = document.createElement("div"); full.style.gridColumn="1/-1"; full.textContent=condText; conditionsKV.appendChild(full); }
-
-    // bailouts
-    const bailKV = $("bailKV");
-    [["Day 1","bailouts.d1"],["Day 2","bailouts.d2"],["Day 3","bailouts.d3"],["Day 4","bailouts.d4"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>bailKV.appendChild(n)) });
-
-    // emergency
-    const emKV = $("emKV");
-    [["Emergency (life-threatening)","emergency.911"],["Managing authority dispatch/ranger","emergency.dispatch"],["Satellite message plan","emergency.sat"],["Nearest hospital/ER","emergency.hospital"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>emKV.appendChild(n)) });
-
-    // final brief
-    const finalKV = $("finalKV");
-    [["Trail hours per day","final.hours"],["Wake/sleep rhythm","final.rhythm"],["Estimated calories burned per day","final.calories"],["Water needed per person","final.water"],["Recommended pack weight range","final.pack"]]
-      .forEach(([t,k])=>{ const v = first(data,[k]); const r = kvRow(t,v); if(r) r.forEach(n=>finalKV.appendChild(n)) });
-
-    // GPX
-    const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
-    if (gpxURL){
-      const studio = gpxStudioURL(gpxURL);
-      $("gpxStudio").src = studio;
-      $("gpxStudioLink").href = studio;
-      $("gpxBtn").href = gpxURL;
-      $("gpxBtn").download = (slug||"route") + ".gpx";
-      // small stats if available
-      const stats = $("gpxStats");
-      [["i-doc", first(data,["stats.miles","total_miles","mileage"]) && `~${first(data,["stats.miles","total_miles","mileage"])}`],
-       ["i-triangle", first(data,["stats.gain"]) && `+${first(data,["stats.gain"])} ft`],
-       ["i-triangle", first(data,["stats.loss"]) && `-${first(data,["stats.loss"])} ft`],
-       ["i-flag", first(data,["trip_days","duration"]) && `${first(data,["trip_days","duration"])}`]
-      ].forEach(([ico,txt])=>{ if(txt) stats.appendChild(pill(ico,txt)) });
-    }
-
-    // disclaimer
-    $("disclaimerText").textContent = first(data,["disclaimer","field_disclaimer"]) || "";
-
-    // buttons
-    $("printBtn").addEventListener("click", ()=>window.print());
-    $("bookmarkBtn").addEventListener("click", (e)=>{ e.preventDefault(); alert("Bookmarked (placeholder)"); });
-    $("endorseBtn").addEventListener("click", (e)=>{ e.preventDefault(); alert("Endorsed (placeholder)"); });
-  }
-
-  main();
+/* ===== 3) SAMPLE JSON (delete this block in prod) ===== */
+window.EXP_DATA = {
+  title:"Teton Crest Trail Expedition",
+  category:"End-to-End Traverse", season:"Fall",
+  location:"Teton Crest Trail, Grand Tetons National Park, WY", date:"Sep 13, 2025",
+  hero:{src:"https://images.unsplash.com/photo-1526481280698-8fcc13fd714e?q=80&w=1600&auto=format&fit=crop",
+        credit:{text:"Peter Robbins (Unsplash)",url:"#"}},
+  itinerary:{route:"Teton Crest Trail Traverse",objective:"End-to-End Traverse",duration:"4 days",
+    mileage:"~39 miles",experience:"advanced",terrain:"large mountains",
+    elev:"+7200 ft / -8200 ft",
+    trailheads:"Top of Aerial Tramway, WY → Leigh Lake Trailhead, WY",
+    coords:"43.5866, -110.8278 → 43.7962, -110.7184"},
+  permits:{requirement:"Yes",agency:"Grand Teton National Park",apply:"Apply via Recreation.gov",
+    window:"Opens January; apply early",processing:"Immediate; Moderate — good odds if reserved at release",
+    cost:"$45 per permit",docs:"Government-issued ID",
+    pressure:"Moderate — good odds if reserved at release; backup dates advised",
+    verify:"Verify with Grand Teton NP backcountry/permits page or office."},
+  shuttle:{mapEmbed:"https://www.google.com/maps/embed?pb=!1m18...",highlights:[
+    "Nearest major access: Jackson, WY – JAC",
+    "Travel time to trailhead: ~30 min from Jackson",
+    "Point-to-point · Overnight parking at Leigh Lake TH",
+    "Local shuttle ~$50 pp (book ahead)"
+  ]},
+  multi:{staging:"Outfitter shuttle from Leigh Lake to Aerial Tramway",
+         vehicle:"Shuttle service; $50 per person",
+         backup:"Rideshare or taxi from Jackson"},
+  consider:{permits:"Apply early for best odds",seasonality:"Snowpack may linger into early September",
+            staging:"Book shuttle in advance",realities:"No bailouts between campsites",
+            constraints:"No dogs allowed"},
+  timeline:{d90:"Apply for permits; inquire about shuttle",
+            d30:"Book lodging; confirm parking/cache logistics",
+            d7:"Check road/trail status; weather/flow",
+            h48:"Final forecast/flow; gear check; shuttle confirm"},
+  days:[
+    {title:"DAY 1: Top of Aerial Tramway → Marion Lake",
+     summary:"Rocky alpine trails; limited water; potential afternoon storms.",
+     badges:["7 mi","+1000/−800 ft","Fill at tram","Start early"],
+     details:"Distance & gain/loss: 7 mi, +1000/−800 ft · Terrain: Rocky alpine · Water: limited; fill at tram · Campsite: Marion Lake (9,300 ft) · Safety: watch weather · Bailout: Tram · Decision: continue past Marion if weather permits · Morale: first Teton views"},
+    {title:"DAY 2: Marion Lake → Sunset Lake",
+     summary:"Exposed ridges through Alaska Basin; carry sun protection.",
+     badges:["10 mi","+1800/−1600 ft","Streams in Basin","Layer up"],
+     details:"Distance & gain/loss: 10 mi, +1800/−1600 ft · Terrain: exposed ridges, rocky paths · Notables: Alaska Basin, Hurricane Pass · Campsite: Sunset Lake (9,600 ft) · Decision: assess weather at Hurricane Pass"},
+    {title:"DAY 3: Sunset Lake → North Fork Cascade Canyon",
+     summary:"Steep, rocky descents; more frequent water; use poles.",
+     badges:["12 mi","+2400/−3000 ft","Streams","Use poles"],
+     details:"Notables: Grand Teton views, Paintbrush Divide · Safety: steep descents require caution"},
+    {title:"DAY 4: North Fork Cascade Canyon → Leigh Lake TH",
+     summary:"Forested finish by lakes; mellow exit.",
+     badges:["10 mi","+2000/−2800 ft","Lakes & streams","Finish at TH"],
+     details:"Trail tip: enjoy scenery, lakeside breaks · Bailout: Exit at Leigh Lake Trailhead"}
+  ],
+  camps:{names:"Marion (9,300 ft), Sunset (9,600 ft), North Fork Cascade (8,300 ft)",
+         fires:"Fires prohibited; use stoves",bear:"Bear canisters required",
+         views:"Hurricane Pass, Paintbrush Divide",noise:"Moderate; popular route",
+         water:"Lakes and streams near campsites"},
+  weather:{temps:"30°F to 70°F",exposure:"High; minimal shade",acclimate:"Spend a day in Jackson to acclimate"},
+  gear:{core:"Pack, Shelter, Sleep, Water Filtration, Cook, Clothing, First Aid, Toiletries, Ditch Bag, Food Storage, Electronics, Misc.",
+        augments:"Trekking poles, bear canister, sun protection, layers, waterproofs",
+        tips:"Start early to avoid afternoon storms; use trekking poles"},
+  optional:{shorten:"Exit at Cascade Canyon for a shorter route",extend:"Add a day hike around Leigh Lake"},
+  risk:{weather:"Afternoon thunderstorms, temp swings",terrain:"Exposed ridges, steep descents",
+        wildlife:"Bears; use bear canisters",humans:"Altitude effects, fatigue",
+        comms:"Cell unreliable; satellite recommended; 07:00/19:00 check-ins",
+        window:"Storms 13:00–17:00",mitigations:"Early starts, layered clothing",
+        thresholds:"Avoid high passes during storms",bailouts:"Limited; plan accordingly"},
+  conditions:{source:"Grand Teton National Park",notes:"Snowpack/fire/flow hazards vary year-to-year"},
+  bailout:{d1:"Return via tramway",d2:"None",d3:"None",d4:"Exit at Leigh Lake Trailhead"},
+  emergency:{emergency:"911",ranger:"Verify with Grand Teton NP visitor center",
+             hospital:"Jackson, WY — verify before departure",
+             satellite:"InReach/PLB check-ins 07:00/19:00; message: who/what/where lat,long"},
+  final:{hours:"6–8 hours",rhythm:"Early rise, early sleep",calories:"3,000 calories",water:"3–4 liters",pack:"30–40 lbs"},
+  gpx:{embed:"https://gpx.studio/embed.html?...", download:"#", studio:"#",
+       stats:["~39 mi","+7200/−8200 ft","4 days"]},
+  disclaimer:"This blueprint is intel, not a guarantee. Conditions change without warning. Trails wash out. Weather turns. Maps lie. You are responsible for verifying details, preparing your team, and making sound calls under pressure. Expedition Intel accepts no liability."
+};
 </script>
 </body>
 </html>
