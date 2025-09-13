@@ -17,6 +17,8 @@
       --h1: clamp(40px, 18vw, 88px);
       --label: 14px;
       --body: 18px;
+      --border: rgba(0,0,0,.16);
+      --border-soft: rgba(0,0,0,.10);
     }
     *{ box-sizing:border-box }
     html,body{ height:100% }
@@ -29,7 +31,23 @@
 
     .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
     .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
+
+    /* Approved: ghost actions under title */
+    .actions{ display:flex; gap:18px; flex-wrap:wrap; }
+    .btn-ghost{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:12px 18px; background:transparent; color:inherit;
+      border:1px solid var(--border); border-radius:8px; font-weight:600;
+      text-decoration:none; cursor:pointer;
+    }
+    .btn-ghost .ico{ width:20px; height:20px; stroke:currentColor; }
+    .btn-ghost[data-active="true"]{ background:var(--paper); border-color:var(--border-soft); }
+
+    /* Approved: labels with subtle line icons */
     .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
+    .label.with-icon{ display:flex; align-items:center; gap:.5rem; }
+    .label .ico{ width:18px; height:18px; stroke:currentColor; opacity:.9; }
+
     .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
     @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
     .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
@@ -60,16 +78,75 @@
   </style>
 </head>
 <body>
+  <!-- tiny inline icon sprite (neutral stroke; no brand blue) -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 3h10a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z"/>
+    </symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5"/>
+    </symbol>
+    <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8" rx="2"/><path d="M6 17h12"/><path d="M18 9h1a3 3 0 0 1 3 3v1H2v-1a3 3 0 0 1 3-3h1"/>
+    </symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/>
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/>
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>
+    </symbol>
+  </svg>
+
   <div class="page">
     <div id="status">Loading…</div>
 
     <h1 id="title" class="title"></h1>
 
+    <!-- APPROVED ACTIONS -->
+    <div class="actions" aria-label="Page actions">
+      <button id="btnBookmark" class="btn-ghost" type="button">
+        <svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span>
+      </button>
+      <button id="btnShare" class="btn-ghost" type="button">
+        <svg class="ico"><use href="#i-share"/></svg><span>Share</span>
+      </button>
+      <button id="btnPrint" class="btn-ghost" type="button">
+        <svg class="ico"><use href="#i-print"/></svg><span>Print</span>
+      </button>
+    </div>
+
+    <!-- APPROVED META GRID (with icons; compass for Category) -->
     <div class="grid2">
-      <div><div class="label">Category</div><div id="category" class="value"></div></div>
-      <div><div class="label">Season</div><div id="season" class="value"></div></div>
-      <div><div class="label">Location</div><div id="location" class="value"></div></div>
-      <div><div class="label">Date</div><div id="date" class="value"></div></div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-compass"/></svg><span>Category</span>
+        </div>
+        <div id="category" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><span>Season</span>
+        </div>
+        <div id="season" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg><span>Location</span>
+        </div>
+        <div id="location" class="value"></div>
+      </div>
+      <div>
+        <div class="label with-icon">
+          <svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg><span>Date</span>
+        </div>
+        <div id="date" class="value"></div>
+      </div>
     </div>
 
     <div class="fullbleed">
@@ -95,6 +172,58 @@
     </div>
   </div>
 
+  <script>
+    /* ---- actions: bookmark/share/print ---- */
+    (function(){
+      const key = 'ei_bookmarks';
+      const btnBm = document.getElementById('btnBookmark');
+      const btnShare = document.getElementById('btnShare');
+      const btnPrint = document.getElementById('btnPrint');
+
+      const url = location.href.split('#')[0];
+      const titleEl = document.getElementById('title');
+
+      function getSet(){
+        try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]')); }
+        catch{ return new Set(); }
+      }
+      function saveSet(set){
+        try{ localStorage.setItem(key, JSON.stringify([...set])); }catch{}
+      }
+
+      function updateBmState(){
+        const set = getSet();
+        const active = set.has(url);
+        btnBm.dataset.active = active ? 'true' : 'false';
+        btnBm.querySelector('span').textContent = active ? 'Bookmarked' : 'Bookmark';
+      }
+
+      btnBm.addEventListener('click', () => {
+        const set = getSet();
+        if(set.has(url)) set.delete(url); else set.add(url);
+        saveSet(set); updateBmState();
+      });
+
+      btnShare.addEventListener('click', async () => {
+        const title = document.title || (titleEl?.textContent?.trim()) || 'Expedition';
+        if (navigator.share) {
+          try{ await navigator.share({ title, url }); }catch{}
+        } else {
+          try{
+            await navigator.clipboard.writeText(url);
+            btnShare.querySelector('span').textContent = 'Link copied';
+            setTimeout(()=>btnShare.querySelector('span').textContent='Share', 1400);
+          }catch{}
+        }
+      });
+
+      btnPrint.addEventListener('click', () => window.print());
+
+      updateBmState();
+    })();
+  </script>
+
+  <!-- your existing data/embedding logic, unchanged -->
   <script>
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
@@ -237,8 +366,8 @@
         $("gpxActions").style.display = "none";
       }
 
-      status.textContent = "";
-      setTimeout(()=>status.remove(), 10);
+      $("status").textContent = "";
+      setTimeout(()=>$("status").remove(), 10);
     }
 
     if (typeof window !== "undefined") main();
