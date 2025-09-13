@@ -5,18 +5,25 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expedition</title>
 
+  <!-- Your font sheet -->
   <link rel="stylesheet" href="/fonts.css" />
 
   <style>
     :root{
-      --bg: rgb(232, 229, 226);
-      --ink: rgb(30, 30, 30);
-      --paper: rgb(255, 255, 255);
-      --accent: rgb(254, 87, 51);
+      --bg: rgb(232,229,226);
+      --ink: rgb(28,28,28);
+      --paper: #fff;
+      --paper-2: rgb(242,239,236);
+      --accent: rgb(254,87,51); /* kept for subtle highlights only */
+      --border: rgba(0,0,0,.16);
+
       --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+
       --h1: clamp(40px, 18vw, 88px);
+      --h2: clamp(22px, 5vw, 36px);
       --label: 14px;
       --body: 18px;
+      --meta: clamp(18px,2.6vw,28px);
     }
     *{ box-sizing:border-box }
     html,body{ height:100% }
@@ -27,51 +34,135 @@
     img{ display:block; width:100%; height:auto }
     a{ color:inherit; text-underline-offset:2px }
 
-    .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
-    .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
+    .page{ max-width:1120px; margin:0 auto; padding:24px 16px 56px; display:grid; row-gap:20px; }
+
+    .title{ font-size:var(--h1); line-height:1.02; font-weight:800; letter-spacing:-0.02em; margin:0 0 4px; }
+
+    /* metadata grid under title */
     .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
     .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
     @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
-    .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
+    .value{ font-size:var(--meta); line-height:1.28; display:flex; gap:10px; align-items:flex-start }
+    .value svg{ flex:0 0 22px; margin-top:.2em; opacity:.88 }
 
+    /* action bar */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 6px }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; font-weight:700; border-radius:24px; text-decoration:none; border:1px solid var(--border); background:var(--paper); }
+    .btn svg{ width:18px; height:18px }
+    .btn.primary{ background:#000; color:#fff; border-color:#000; }
+
+    /* hero fullbleed */
     .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); }
     #heroLink{ display:block; }
     .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
     .credit a{ text-decoration:underline; cursor:pointer; }
 
+    /* mission / narrative (auto-formatted) */
     .mission{ font-size:var(--body); line-height:1.6; margin-top:8px; white-space:pre-wrap; max-width:720px; margin-left:auto; margin-right:auto; text-align:left; }
 
-    .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
+    /* section wrappers */
+    .section{ padding:18px 16px; background:var(--paper-2); border:1px solid var(--border); border-radius:10px; }
+    .section + .section{ margin-top:6px }
+    .sect-title{ display:flex; align-items:center; gap:10px; font-size:var(--h2); font-weight:800; letter-spacing:-.01em; margin:0 0 8px; }
+    .sect-title svg{ width:28px; height:28px; opacity:.92 }
 
+    /* list rows inside sections */
+    .row{ display:grid; grid-template-columns:180px 1fr; gap:14px; padding:8px 0; border-top:1px dashed var(--border) }
+    .row:first-of-type{ border-top:0 }
+    .row .k{ font-weight:700 }
+    .row .v{ }
+
+    /* embeds */
+    .embed{ aspect-ratio:16/9 } 
+    .embed iframe{ width:100%; height:100%; border:0; display:block }
+
+    /* GPX actions */
     .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:var(--paper); }
     #gpxBtn{ background:#000; color:#fff; border-color:#000; }
+    .fine{ font-size:13px; opacity:.7; text-align:center; max-width:780px; margin:6px auto 0 }
 
+    /* phone tweaks */
     @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
-    @media (max-width:480px){
-      .page{ padding:20px 20px 32px }
-      .grid2{ grid-template-columns:1fr 1fr }
+    @media (max-width:560px){
+      .row{ grid-template-columns:1fr; gap:6px }
+      .page{ padding:20px 20px 40px }
       .embed{ aspect-ratio:3/4 }
       .credit{ font-size:13px }
       .mission{ padding:0 12px }
     }
 
     #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
+    .muted{ opacity:.7 }
+
+    /* tiny tooltip for Bookmark */
+    .tip{ display:none; font-size:12px; background:var(--paper); border:1px solid var(--border); padding:8px 10px; border-radius:8px; }
+    .tip.show{ display:inline-block }
   </style>
 </head>
 <body>
   <div class="page">
     <div id="status">Loading…</div>
 
+    <!-- Big title -->
     <h1 id="title" class="title"></h1>
 
-    <div class="grid2">
-      <div><div class="label">Category</div><div id="category" class="value"></div></div>
-      <div><div class="label">Season</div><div id="season" class="value"></div></div>
-      <div><div class="label">Location</div><div id="location" class="value"></div></div>
-      <div><div class="label">Date</div><div id="date" class="value"></div></div>
+    <!-- Action buttons -->
+    <div class="actions">
+      <button id="bookmarkBtn" class="btn" type="button" aria-label="Bookmark">
+        <!-- bookmark icon -->
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
+        Bookmark
+      </button>
+      <button id="shareBtn" class="btn" type="button" aria-label="Share">
+        <!-- share icon -->
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>
+        Share
+      </button>
+      <button id="printBtn" class="btn" type="button" aria-label="Print">
+        <!-- print icon -->
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+        Print
+      </button>
+      <span id="bmTip" class="tip">Press <strong>Share</strong> → “Add to Reading List/Bookmarks” on iOS.</span>
     </div>
 
+    <!-- Meta grid with icons -->
+    <div class="grid2">
+      <div>
+        <div class="label">Category</div>
+        <div class="value">
+          <!-- pin icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+          <span id="category"></span>
+        </div>
+      </div>
+      <div>
+        <div class="label">Season</div>
+        <div class="value">
+          <!-- sun icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.536-7.536l-1.414 1.414M7.878 16.122l-1.414 1.414m0-12.728l1.414 1.414M16.122 16.122l1.414 1.414"/></svg>
+          <span id="season"></span>
+        </div>
+      </div>
+      <div>
+        <div class="label">Location</div>
+        <div class="value">
+          <!-- location icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="location"></span>
+        </div>
+      </div>
+      <div>
+        <div class="label">Date</div>
+        <div class="value">
+          <!-- calendar icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span id="date"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero image + credit -->
     <div class="fullbleed">
       <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
         <img id="hero" alt="Expedition hero" />
@@ -79,23 +170,46 @@
       <div id="credit" class="credit"></div>
     </div>
 
+    <!-- ===== Mission / Narrative (auto-formatted from JSON) ===== -->
     <div id="mission" class="mission"></div>
 
-    <div class="embed">
-      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
+    <!-- ===== Shuttle / Transportation (map first) ===== -->
+    <section class="section" id="section-shuttle">
+      <h2 class="sect-title">
+        <!-- map folded icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l7-3 4 3 7-3v18l-7 3-4-3-7 3z"/><path d="M10 3v18M14 6v18"/></svg>
+        Shuttle / Transportation
+      </h2>
+      <div class="embed" style="margin-bottom:12px">
+        <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
 
-    <div class="embed" id="gpxEmbedWrap">
-      <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-    <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.7"></span>
-    </div>
+      <!-- You can optionally render a few key bullets into rows here if you want structured view -->
+      <!-- Example rows (filled by your mission text already, so keeping this minimal/optional) -->
+    </section>
+
+    <!-- ===== GPX near the end (before disclaimer) ===== -->
+    <section class="section" id="section-gpx">
+      <h2 class="sect-title">
+        <!-- route icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h4v4H3zM17 17h4v4h-4z"/><path d="M7 5h5a5 5 0 0 1 5 5v2a5 5 0 0 0 5 5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/></svg>
+        GPX Route & Elevation
+      </h2>
+
+      <div class="embed" id="gpxEmbedWrap">
+        <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="gpx-actions" id="gpxActions">
+        <a id="gpxBtn" class="btn primary" href="#" download>DOWNLOAD GPX</a>
+        <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
+      </div>
+      <p class="fine">GPX files provided here are <strong>starter overlays</strong>. Review and adjust in your mapping app; do not rely on this as your only navigation source.</p>
+      <p class="fine muted" id="trailheads"></p>
+    </section>
   </div>
 
   <script>
+    // ------- helpers -------
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
     const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
@@ -150,6 +264,24 @@
       }catch{ return false; }
     };
 
+    // ------- actions -------
+    $("printBtn").addEventListener("click", ()=>window.print());
+    $("shareBtn").addEventListener("click", async ()=>{
+      const data = { title: document.title || "Expedition", url: location.href };
+      try{
+        if (navigator.share) { await navigator.share(data); }
+        else {
+          await navigator.clipboard.writeText(location.href);
+          alert("Link copied to clipboard.");
+        }
+      }catch{}
+    });
+    $("bookmarkBtn").addEventListener("click", ()=>{
+      $("bmTip").classList.add("show");
+      setTimeout(()=>$("bmTip").classList.remove("show"), 4500);
+    });
+
+    // ------- main -------
     async function main(){
       const status = $("status");
       const slug = getSlug();
@@ -171,7 +303,7 @@
         return;
       }
 
-      $("title").textContent = first(data,["title","name"]) || "";
+      $("title").textContent = first(data,["title","name"]) || "Expedition Itinerary";
       $("category").textContent = first(data,["category","type"]) || "";
       $("season").textContent = first(data,["season"]) || "";
       $("location").textContent = first(data,["location","place"]) || "";
@@ -186,13 +318,11 @@
       const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
       let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
       if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
-
       $("credit").innerHTML = creditName
         ? (creditLink
             ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
             : creditName)
         : "";
-
       const heroLinkEl = $("heroLink");
       if (heroLinkEl) {
         if (creditLink) {
@@ -204,6 +334,7 @@
         }
       }
 
+      // Mission text formatter (keeps your current behavior)
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
       const formatted = mission
         .split(/\r?\n/)
@@ -220,20 +351,22 @@
         .join("<br/>");
       $("mission").innerHTML = formatted;
 
+      // Map
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if (mapURL) $("map").src = mapURL;
 
+      // GPX
       const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
       if (gpxURL) {
         const studio = gpxStudioURL(gpxURL);
         $("gpxStudio").src = studio;
         $("gpxStudioLink").href = studio;
         $("gpxBtn").href = gpxURL;
-        $("gpxBtn").download = (slug||"route") + ".gpx";
+        $("gpxBtn").download = (getSlug()||"route") + ".gpx";
         const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
         if (th) $("trailheads").textContent = th;
       } else {
-        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
+        $("gpxEmbedWrap").innerHTML = `<div class="muted" style="padding:10px 0">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
         $("gpxActions").style.display = "none";
       }
 
