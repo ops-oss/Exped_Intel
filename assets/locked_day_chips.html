@@ -1,0 +1,210 @@
+<!-- ================= EI LOCKED DAY CHIPS — START ================= -->
+<!-- 1) SPRITE: locked line icons (neutral stroke, no brand blue) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <!-- Distance -->
+  <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="5" cy="12" r="2"></circle>
+    <circle cx="19" cy="12" r="2"></circle>
+    <path d="M7 12h10"></path>
+  </symbol>
+
+  <!-- Elevation (locked) -->
+  <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 17l6-6 4 4 8-8"></path>
+    <path d="M12 7v-3"></path>
+    <path d="M12 20v-3"></path>
+  </symbol>
+
+  <!-- Campsite (tent) -->
+  <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 20h18L12 4 3 20z"></path>
+  </symbol>
+
+  <!-- Trail sign (LOCKED FINAL: wider boards, clean joins) -->
+  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v18"></path>
+    <!-- top board -->
+    <path d="M6 6h12l-2.2-3H8.2z"></path>
+    <!-- bottom board -->
+    <path d="M18 13H6l2.2 3h7.6z"></path>
+  </symbol>
+
+  <!-- Terrain (mountains) -->
+  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 20l7-12 4 6 3-4 4 10H3z"></path>
+  </symbol>
+
+  <!-- Water (droplet) -->
+  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"></path>
+  </symbol>
+
+  <!-- Safety (shield + check) -->
+  <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"></path>
+    <path d="M9.5 12.5l2 2 3.5-3.5"></path>
+  </symbol>
+
+  <!-- Decision (fork) -->
+  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 20c0-4 4-6 8-6h4"></path>
+    <path d="M6 4h4"></path>
+    <path d="M18 4h-4v6"></path>
+  </symbol>
+
+  <!-- Morale (camera) -->
+  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="7" width="18" height="13" rx="2"></rect>
+    <circle cx="12" cy="13.5" r="3.5"></circle>
+    <path d="M8 7l2-3h4l2 3"></path>
+  </symbol>
+</svg>
+
+<!-- 2) STYLES: locked chip + day layout (Option B) -->
+<style>
+  :root{
+    --ink:#1e1e1e;
+    --chip-border:rgba(0,0,0,.22);
+    --chip-fill:rgba(255,255,255,.66);
+    --chip2-border:rgba(0,0,0,.16);
+    --chip2-fill:rgba(0,0,0,.06);
+    --label-w:210px;
+  }
+  /* Day card */
+  .day{padding:18px 16px;border:1px solid rgba(0,0,0,.08);border-radius:10px;background:rgba(255,255,255,.35);margin:18px 0}
+  .day h3{font-size:clamp(18px,3.2vw,24px);margin:0 0 8px;letter-spacing:-.01em}
+  .day .preview{margin:2px 0 14px;color:rgba(30,30,30,.75);font-size:16.5px;line-height:1.6}
+
+  /* Label + Chip rows */
+  .kv-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px dashed rgba(0,0,0,.08)}
+  .kv-row:first-of-type{border-top:0}
+  .kv-label{flex:0 0 var(--label-w);font-weight:700;font-size:14.5px;letter-spacing:.01em;white-space:nowrap}
+
+  /* Chips (locked) */
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 12px;font-size:14px;line-height:1;
+    border:1.5px solid var(--chip-border);border-radius:6px;background:var(--chip-fill);
+    color:var(--ink);white-space:nowrap
+  }
+  .chip.secondary{border:1px solid var(--chip2-border);background:var(--chip2-fill);font-size:13.5px}
+  .chip svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+  /* Responsive */
+  @media (max-width:720px){ :root{--label-w:150px} }
+  @media (max-width:520px){
+    :root{--label-w:100%}
+    .kv-row{flex-direction:column;align-items:flex-start;gap:6px}
+    .kv-label{width:100%}
+  }
+</style>
+
+<!-- 3) JS: parser + renderer, exposed via window.eiLocked -->
+<script>
+(function(){
+  const ICON = {
+    distance:'<svg><use href="#c-distance"/></svg>',
+    elevation:'<svg><use href="#c-elevation"/></svg>',
+    campsite:'<svg><use href="#c-campsite"/></svg>',
+    trail:'<svg><use href="#c-trail"/></svg>',
+    terrain:'<svg><use href="#c-terrain"/></svg>',
+    water:'<svg><use href="#c-water"/></svg>',
+    safety:'<svg><use href="#c-safety"/></svg>',
+    decision:'<svg><use href="#c-decision"/></svg>',
+    morale:'<svg><use href="#c-morale"/></svg>'
+  };
+
+  function chipHTML(key, text, secondary=false){
+    const svg = ICON[key] || '';
+    return `<span class="chip${secondary?' secondary':''}">${svg}${text}</span>`;
+  }
+
+  function splitMission(mission){
+    const lines = (mission||"").split(/\r?\n/);
+    const days=[]; let cur=null;
+    const isDay=t=>/^DAY\s*\d+:/i.test((t||'').trim());
+
+    for(const raw of lines){
+      const t = (raw||'').trim();
+      if(!t || /^-{-3,}$/i.test(t)) continue;
+
+      if(isDay(t)){ if(cur) days.push(cur); cur={title:t,preview:"",bullets:[]}; continue; }
+
+      if(cur){
+        // first non-bullet after title becomes preview
+        if(!/^[-–]\s+/.test(t) && !cur.preview){ cur.preview=t; continue; }
+        const m=t.match(/^[-–]\s*([^:]+):\s*(.*)$/);
+        if(m) cur.bullets.push({label:m[1].trim(),value:m[2].trim()});
+      }
+    }
+    if(cur) days.push(cur);
+    return days;
+  }
+
+  function chipKeyForDay(label){
+    const L=(label||"").toLowerCase();
+    if (L.startsWith("distance")) return "distance";
+    if (L.includes("gain") || L.includes("loss")) return "elevation";
+    if (L.startsWith("campsite")) return "campsite";
+    if (L.startsWith("primary trail")) return "trail";
+    if (L.startsWith("terrain")) return "terrain";
+    if (L.startsWith("water") || L.startsWith("key water")) return "water";
+    if (L.startsWith("safety")) return "safety";
+    if (L.startsWith("decision")) return "decision";
+    if (L.startsWith("morale")) return "morale";
+    return null;
+  }
+
+  function renderDay(day){
+    const primOrder=["distance","elevation","campsite"];
+    const primary={}; const secondary=[];
+
+    for(const b of day.bullets){
+      const key=chipKeyForDay(b.label);
+      if(!key) continue;
+      if(primOrder.includes(key) && !primary[key]) primary[key]=b.value;
+      else secondary.push({key,value:b.value,label:b.label});
+    }
+
+    let html=`<section class="day">`;
+    html+=`<h3>${day.title.replace(/^DAY\s*/i,"DAY ")}</h3>`;
+    if(day.preview) html+=`<p class="preview">${day.preview}</p>`;
+
+    // Primary three (label + chip)
+    const labelMap={distance:"Distance",elevation:"Elevation Gain/Loss",campsite:"Campsite"};
+    for(const k of primOrder){
+      if(!primary[k]) continue;
+      html+=`<div class="kv-row"><div class="kv-label">${labelMap[k]}:</div><div class="kv-value">${chipHTML(k,primary[k],false)}</div></div>`;
+    }
+
+    // Secondary (label + secondary chip)
+    const secMap={trail:"Primary trail(s)",terrain:"Terrain",water:"Water",safety:"Safety",decision:"Decision point",morale:"Morale marker"};
+    for(const s of secondary){
+      const labelText=secMap[s.key] || (s.label||"Info");
+      html+=`<div class="kv-row"><div class="kv-label">${labelText}:</div><div class="kv-value">${chipHTML(s.key,s.value,true)}</div></div>`;
+    }
+
+    html+=`</section>`;
+    return html;
+  }
+
+  function renderDays(days, target){
+    const el = (typeof target==="string") ? document.querySelector(target) : target;
+    if(!el) return;
+    el.innerHTML = days.map(renderDay).join("");
+  }
+
+  // expose a tiny API you can call from your index
+  window.eiLocked = { splitMission, renderDays };
+})();
+</script>
+<!-- ================= EI LOCKED DAY CHIPS — END ================= -->
