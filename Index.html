@@ -41,7 +41,6 @@
       text-decoration:none; cursor:pointer;
     }
     .btn-ghost .ico{ width:20px; height:20px; stroke:currentColor; }
-    .btn-ghost[data-active="true"]{ background:var(--paper); border-color:var(--border-soft); }
 
     /* Approved: labels with subtle line icons */
     .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
@@ -58,6 +57,48 @@
     .credit a{ text-decoration:underline; cursor:pointer; }
 
     .mission{ font-size:var(--body); line-height:1.6; margin-top:8px; white-space:pre-wrap; max-width:720px; margin-left:auto; margin-right:auto; text-align:left; }
+
+    /* NEW: Expedition Itinerary chip section */
+    .exp-itin { max-width:900px; margin:10px auto 0; border:1px solid rgba(0,0,0,.08); border-radius:10px; background:rgba(255,255,255,.35); padding:16px; }
+    .exp-itin h2{ margin:0 0 10px; font-size:clamp(18px,3.2vw,24px); letter-spacing:-0.01em; }
+    .exp-rows{ display:grid; grid-template-columns:1fr; gap:10px; }
+    @media (min-width:700px){ .exp-rows{ grid-template-columns:1fr 1fr } }
+    .exp-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .exp-row .kv-label{ font-weight:700; font-size:14.5px; letter-spacing:.01em; margin-right:2px; }
+
+    /* Chips (Locked style) */
+    .chip {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; font-size:14px; line-height:1;
+      border:1.5px solid rgba(0,0,0,.22); border-radius:6px;
+      background: rgba(255,255,255,.66); color:inherit; white-space:nowrap;
+    }
+    .chip.secondary {
+      border:1px solid rgba(0,0,0,.16);
+      background: rgba(0,0,0,.06);   /* slightly darker so it reads as secondary */
+      font-size:13.5px;
+    }
+    .chip svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; }
+
+    /* Day blocks with chips (Locked layout) */
+    .itinerary-days { max-width:900px; margin: 10px auto 0; }
+    .day {
+      padding: 18px 16px;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 10px;
+      background: rgba(255,255,255,.35);
+      margin: 18px 0;
+    }
+    .day h3 { font-size: clamp(18px,3.2vw,24px); margin: 0 0 8px; letter-spacing: -0.01em; }
+    .day .preview { margin: 2px 0 14px; color: rgba(30,30,30,.75); font-size: 16.5px; line-height: 1.6; }
+    .kv-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-top:1px dashed rgba(0,0,0,.08); }
+    .kv-row:first-of-type { border-top:0; }
+    .kv-label { flex:0 0 210px; font-weight:700; font-size:14.5px; letter-spacing:.01em; white-space:nowrap; }
+    @media (max-width:720px){ .kv-label{ flex-basis:150px } }
+    @media (max-width:520px){
+      .kv-row{ flex-direction:column; align-items:flex-start; gap:6px }
+      .kv-label{ width:100%; flex-basis:100% }
+    }
 
     .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
 
@@ -78,8 +119,9 @@
   </style>
 </head>
 <body>
-  <!-- tiny inline icon sprite (neutral stroke; no brand blue) -->
+  <!-- inline neutral icon sprite (you can swap to Tabler later) -->
   <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <!-- top actions -->
     <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M7 3h10a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z"/>
     </symbol>
@@ -89,6 +131,8 @@
     <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8" rx="2"/><path d="M6 17h12"/><path d="M18 9h1a3 3 0 0 1 3 3v1H2v-1a3 3 0 0 1 3-3h1"/>
     </symbol>
+
+    <!-- meta labels -->
     <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/>
     </symbol>
@@ -100,6 +144,42 @@
     </symbol>
     <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>
+    </symbol>
+
+    <!-- chips (locked set used in itinerary + days) -->
+    <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><path d="M7 12h10"></path>
+    </symbol>
+    <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 17l6-6 4 4 8-8"></path><path d="M12 7v-3"></path><path d="M12 20v-3"></path>
+    </symbol>
+    <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20h18L12 4 3 20z"></path>
+    </symbol>
+    <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v18"></path><path d="M7 6h10l-2-3H9z"></path><path d="M17 13H7l2 3h6z"></path>
+    </symbol>
+    <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20l7-12 4 6 3-4 4 10H3z"></path>
+    </symbol>
+    <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"></path>
+    </symbol>
+    <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"></path><path d="M9.5 12.5l2 2 3.5-3.5"></path>
+    </symbol>
+    <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 20c0-4 4-6 8-6h4"></path><path d="M6 4h4"></path><path d="M18 4h-4v6"></path>
+    </symbol>
+    <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="7" width="18" height="13" rx="2"></rect><circle cx="12" cy="13.5" r="3.5"></circle><path d="M8 7l2-3h4l2 3"></path>
+    </symbol>
+    <symbol id="c-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="2"></circle>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/>
+    </symbol>
+    <symbol id="c-objective" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v20"></path><path d="M12 6l4 3-4 3-4-3 4-3z"></path>
     </symbol>
   </svg>
 
@@ -121,7 +201,7 @@
       </button>
     </div>
 
-    <!-- APPROVED META GRID (with icons; compass for Category) -->
+    <!-- APPROVED META GRID -->
     <div class="grid2">
       <div>
         <div class="label with-icon">
@@ -156,8 +236,19 @@
       <div id="credit" class="credit"></div>
     </div>
 
+    <!-- Non-day text (will render here) -->
     <div id="mission" class="mission"></div>
 
+    <!-- Expedition Itinerary chips (new) -->
+    <section id="expItin" class="exp-itin" style="display:none">
+      <h2>Expedition Itinerary</h2>
+      <div class="exp-rows" id="expRows"></div>
+    </section>
+
+    <!-- Day blocks with chips (new) -->
+    <div id="itineraryDays" class="itinerary-days"></div>
+
+    <!-- Map / GPX embeds (unchanged) -->
     <div class="embed">
       <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
@@ -171,10 +262,12 @@
       <span id="trailheads" style="opacity:.7"></span>
     </div>
   </div>
-<p class="gpx-note" style="text-align:center; font-size:14px; opacity:.75; margin:6px 0 0;">
-  Starter GPX — review and adjust in your mapping app.<br>
-  <strong>Do not rely on it as your only navigation source.</strong>
-</p>
+
+  <p class="gpx-note" style="text-align:center; font-size:14px; opacity:.75; margin:6px 0 0;">
+    Starter GPX — review and adjust in your mapping app.<br>
+    <strong>Do not rely on it as your only navigation source.</strong>
+  </p>
+
   <script>
     /* ---- actions: bookmark/share/print ---- */
     (function(){
@@ -193,20 +286,17 @@
       function saveSet(set){
         try{ localStorage.setItem(key, JSON.stringify([...set])); }catch{}
       }
-
       function updateBmState(){
         const set = getSet();
         const active = set.has(url);
         btnBm.dataset.active = active ? 'true' : 'false';
         btnBm.querySelector('span').textContent = active ? 'Bookmarked' : 'Bookmark';
       }
-
       btnBm.addEventListener('click', () => {
         const set = getSet();
         if(set.has(url)) set.delete(url); else set.add(url);
         saveSet(set); updateBmState();
       });
-
       btnShare.addEventListener('click', async () => {
         const title = document.title || (titleEl?.textContent?.trim()) || 'Expedition';
         if (navigator.share) {
@@ -219,14 +309,12 @@
           }catch{}
         }
       });
-
       btnPrint.addEventListener('click', () => window.print());
-
       updateBmState();
     })();
   </script>
 
-  <!-- your existing data/embedding logic, unchanged -->
+  <!-- data fetch + render -->
   <script>
     const $ = (id) => document.getElementById(id);
     const qp = (k) => new URL(location.href).searchParams.get(k);
@@ -282,6 +370,152 @@
       }catch{ return false; }
     };
 
+    /* ---------- CHIP RENDER HELPERS (locked) ---------- */
+    const CHIP_SVG = {
+      distance: '<svg><use href="#c-distance"/></svg>',
+      elevation: '<svg><use href="#c-elevation"/></svg>',
+      campsite : '<svg><use href="#c-campsite"/></svg>',
+      trail    : '<svg><use href="#c-trail"/></svg>',
+      terrain  : '<svg><use href="#c-terrain"/></svg>',
+      water    : '<svg><use href="#c-water"/></svg>',
+      safety   : '<svg><use href="#c-safety"/></svg>',
+      decision : '<svg><use href="#c-decision"/></svg>',
+      morale   : '<svg><use href="#c-morale"/></svg>',
+      gps      : '<svg><use href="#c-gps"/></svg>',
+      objective: '<svg><use href="#c-objective"/></svg>'
+    };
+
+    function chipHTML(key, text, secondary=false){
+      const svg = CHIP_SVG[key] || '';
+      return `<span class="chip${secondary?' secondary':''}">${svg}${text}</span>`;
+    }
+
+    function splitMission(m){
+      const lines = m.split(/\r?\n/);
+      const days = []; let pre = []; let cur = null;
+      const isDay = (t)=>/^DAY\s*\d+:/i.test(t);
+
+      for(const raw of lines){
+        const t = raw.trim(); if(!t) continue;
+        if(/^-{3,}$/.test(t)) continue; // ignore separators
+
+        if(isDay(t)){ if(cur) days.push(cur); cur = { title:t, preview:"", bullets:[] }; continue; }
+
+        if(cur){
+          if(!/^[-–]\s+/.test(t) && !cur.preview){ cur.preview = t; continue; }
+          const m = t.match(/^[-–]\s*([^:]+):\s*(.*)$/);
+          if(m) cur.bullets.push({ label:m[1].trim(), value:m[2].trim() });
+          else  cur.bullets.push({ label:"", value:t });
+        }else{
+          pre.push(t);
+        }
+      }
+      if(cur) days.push(cur);
+      return { preText: pre.join("\n"), days };
+    }
+
+    function chipKeyForDay(label){
+      const L = (label||"").toLowerCase();
+      if (L.startsWith("distance")) return "distance";
+      if (L.includes("gain") || L.includes("loss")) return "elevation";
+      if (L.startsWith("campsite")) return "campsite";
+      if (L.startsWith("primary trail")) return "trail";
+      if (L.startsWith("terrain")) return "terrain";
+      if (L.startsWith("water") || L.startsWith("key water")) return "water";
+      if (L.startsWith("safety")) return "safety";
+      if (L.startsWith("decision")) return "decision";
+      if (L.startsWith("morale")) return "morale";
+      return null;
+    }
+
+    function renderDay(day){
+      const primOrder = ["distance","elevation","campsite"];
+      const primary = {}; const secondary = [];
+
+      for(const b of day.bullets){
+        const key = chipKeyForDay(b.label);
+        if(!key) continue;
+        if(primOrder.includes(key) && !primary[key]) primary[key] = b.value;
+        else secondary.push({ key, value: b.value, label: b.label });
+      }
+
+      let html = `<section class="day">`;
+      html += `<h3>${day.title.replace(/^DAY\s*/i,"DAY ")}</h3>`;
+      if(day.preview) html += `<p class="preview">${day.preview}</p>`;
+
+      for(const k of primOrder){
+        if(!primary[k]) continue;
+        const labelText = (k==="distance") ? "Distance"
+                       : (k==="elevation") ? "Elevation Gain/Loss"
+                       : "Campsite";
+        html += `<div class="kv-row"><div class="kv-label">${labelText}:</div><div class="kv-value">${chipHTML(k, primary[k], false)}</div></div>`;
+      }
+
+      const secMap = {
+        trail:"Primary trail(s)", terrain:"Terrain", water:"Water",
+        safety:"Safety", decision:"Decision point", morale:"Morale marker"
+      };
+      for(const s of secondary){
+        const labelText = secMap[s.key] || (s.label||"Info");
+        html += `<div class="kv-row"><div class="kv-label">${labelText}:</div><div class="kv-value">${chipHTML(s.key, s.value, true)}</div></div>`;
+      }
+
+      html += `</section>`;
+      return html;
+    }
+
+    /* Parse expedition itinerary info from preText (before the first DAY) */
+    function parseExpeditionItinerary(preText){
+      // capture key lines into map
+      const out = {};
+      const add = (k,v)=>{ if(v && !out[k]) out[k]=v; };
+      const lines = preText.split(/\r?\n/).map(t=>t.trim()).filter(Boolean);
+
+      for(const t of lines){
+        const m = t.match(/^([^:]+):\s*(.*)$/);
+        if(m){
+          const key = m[1].toLowerCase();
+          const val = m[2].trim();
+          if(key.startsWith('primary objective')) add('objective', val);
+          else if(key.startsWith('trip duration')) add('duration', val);
+          else if(key.startsWith('total estimated mileage')) add('mileage', val);
+          else if(key.startsWith('experience level')) add('experience', val);
+          else if(key.startsWith('terrain type')) add('terrain', val);
+          else if(key.includes('cumulative elevation')) add('elevation', val);
+          else if(key.startsWith('start and end trailhead')) add('trailheads', val);
+          else if(key.startsWith('gps coordinates')) add('gps', val);
+          else if(key.startsWith('expedition itinerary')) add('title', val);
+        }
+      }
+      return out;
+    }
+
+    function renderExpeditionChips(info){
+      const rows = [];
+
+      // Row 1: Distance / Elevation / GPS
+      const r1 = [];
+      if(info.mileage)   r1.push(chipHTML('distance', info.mileage));
+      if(info.elevation) r1.push(chipHTML('elevation', info.elevation));
+      if(info.gps)       r1.push(chipHTML('gps', info.gps));
+      if(r1.length) rows.push({label:'Route Stats', chips:r1});
+
+      // Row 2: Objective / Terrain
+      const r2 = [];
+      if(info.objective) r2.push(chipHTML('objective', info.objective));
+      if(info.terrain)   r2.push(chipHTML('terrain', info.terrain));
+      if(r2.length) rows.push({label:'Profile', chips:r2});
+
+      // Row 3: Trailheads (secondary chip)
+      const r3 = [];
+      if(info.trailheads) r3.push(chipHTML('trail', info.trailheads, true));
+      if(r3.length) rows.push({label:'Start / End', chips:r3});
+
+      return rows.map(row => {
+        return `<div class="exp-row"><div class="kv-label">${row.label}:</div><div class="kv-chips">${row.chips.join(' ')}</div></div>`;
+      }).join('');
+    }
+
     async function main(){
       const status = $("status");
       const slug = getSlug();
@@ -318,13 +552,11 @@
       const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
       let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
       if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
-
       $("credit").innerHTML = creditName
         ? (creditLink
             ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
             : creditName)
         : "";
-
       const heroLinkEl = $("heroLink");
       if (heroLinkEl) {
         if (creditLink) {
@@ -336,22 +568,36 @@
         }
       }
 
+      /* --------- build pre-text + days --------- */
       const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-      const formatted = mission
+      const { preText, days } = splitMission(mission);
+
+      // Render preText (simple bold treatment for all-caps labels)
+      const formattedPre = preText
         .split(/\r?\n/)
         .map(line => {
-          const t = line.trim();
-          if (!t) return "";
-          if (/^-{3,}$/.test(t)) return t;
-          if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
+          const t = line.trim(); if(!t) return "";
+          if (/^-{3,}$/.test(t)) return "";
           const m = t.match(/^([^:]+):\s*(.*)$/);
           if (m && !/[a-z]/.test(m[1])) return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
           if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
           return t;
         })
         .join("<br/>");
-      $("mission").innerHTML = formatted;
+      $("mission").innerHTML = formattedPre;
 
+      // Expedition Itinerary chips (from preText)
+      const itinInfo = parseExpeditionItinerary(preText);
+      const expRows = renderExpeditionChips(itinInfo);
+      if(expRows){
+        $("expRows").innerHTML = expRows;
+        $("expItin").style.display = "block";
+      }
+
+      // Days
+      $("itineraryDays").innerHTML = days.map(renderDay).join("");
+
+      // Map / GPX
       const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
       if (mapURL) $("map").src = mapURL;
 
