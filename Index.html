@@ -1,379 +1,330 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Expedition</title>
-
-  <link rel="stylesheet" href="/fonts.css" />
-
-  <style>
-    :root{
-      --bg: rgb(232, 229, 226);
-      --ink: rgb(30, 30, 30);
-      --paper: rgb(255, 255, 255);
-      --accent: rgb(254, 87, 51);
-      --font-sans: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
-      --h1: clamp(40px, 18vw, 88px);
-      --label: 14px;
-      --body: 18px;
-      --border: rgba(0,0,0,.16);
-      --border-soft: rgba(0,0,0,.10);
-    }
-    *{ box-sizing:border-box }
-    html,body{ height:100% }
-    body{
-      margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-sans);
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    img{ display:block; width:100%; height:auto }
-    a{ color:inherit; text-underline-offset:2px }
-
-    .page{ max-width:1120px; margin:0 auto; padding:24px 16px 40px; display:grid; row-gap:20px; }
-    .title{ font-size:var(--h1); line-height:1.02; font-weight:700; letter-spacing:-0.02em; }
-
-    /* Approved: ghost actions under title */
-    .actions{ display:flex; gap:18px; flex-wrap:wrap; }
-    .btn-ghost{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:12px 18px; background:transparent; color:inherit;
-      border:1px solid var(--border); border-radius:8px; font-weight:600;
-      text-decoration:none; cursor:pointer;
-    }
-    .btn-ghost .ico{ width:20px; height:20px; stroke:currentColor; }
-    .btn-ghost[data-active="true"]{ background:var(--paper); border-color:var(--border-soft); }
-
-    /* Approved: labels with subtle line icons */
-    .label{ font-size:var(--label); letter-spacing:.18em; text-transform:uppercase; opacity:.7 }
-    .label.with-icon{ display:flex; align-items:center; gap:.5rem; }
-    .label .ico{ width:18px; height:18px; stroke:currentColor; opacity:.9; }
-
-    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; align-items:start; margin-top:8px; }
-    @media (min-width:960px){ .grid2{ grid-template-columns:repeat(4,1fr); } }
-    .value{ font-size:clamp(18px,2.6vw,28px); line-height:1.28 }
-
-    .fullbleed{ width:100vw; margin-left:calc(50% - 50vw); }
-    #heroLink{ display:block; }
-    .credit{ text-align:right; font-size:14px; margin-top:8px; color:var(--accent); padding-right:16px; }
-    .credit a{ text-decoration:underline; cursor:pointer; }
-
-    .mission{ font-size:var(--body); line-height:1.6; margin-top:8px; white-space:pre-wrap; max-width:720px; margin-left:auto; margin-right:auto; text-align:left; }
-
-    .embed{ aspect-ratio:16/9 } .embed iframe{ width:100%; height:100%; border:0; display:block }
-
-    .gpx-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:28px; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:var(--paper); }
-    #gpxBtn{ background:#000; color:#fff; border-color:#000; }
-
-    @media (max-width:810px){ .value{ font-size:clamp(18px,4.6vw,24px) } }
-    @media (max-width:480px){
-      .page{ padding:20px 20px 32px }
-      .grid2{ grid-template-columns:1fr 1fr }
-      .embed{ aspect-ratio:3/4 }
-      .credit{ font-size:13px }
-      .mission{ padding:0 12px }
-    }
-
-    #status{ font-size:12px; opacity:.7; max-width:720px; margin:0 auto; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Expedition – Preview</title>
+<link rel="stylesheet" href="/fonts.css"/>
+<style>
+  :root{
+    --bg:#e8e5e2; --ink:#1e1e1e; --paper:#fff; --accent:#fe5733;
+    --label:14px; --body:18px; --h1:clamp(40px,18vw,88px);
+    --border:rgba(0,0,0,.12); --tint:rgba(0,0,0,.06);
+    --chip-border:rgba(0,0,0,.22); --chip-fill:rgba(255,255,255,.66);
+    --chip2-border:rgba(0,0,0,.16); --chip2-fill:rgba(0,0,0,.06);
+    --label-w:210px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Poppins",system-ui,-apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+  img{display:block;width:100%;height:auto}
+  a{color:inherit;text-underline-offset:2px}
+  .page{max-width:1120px;margin:0 auto;padding:24px 16px 40px;display:grid;row-gap:20px}
+  .title{font-size:var(--h1);line-height:1.02;font-weight:700;letter-spacing:-0.02em}
+  .actions{display:flex;gap:18px;flex-wrap:wrap}
+  .btn-ghost{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:transparent;color:inherit;border:1px solid var(--border);border-radius:8px;font-weight:600;text-decoration:none;cursor:pointer}
+  .btn-ghost .ico{width:20px;height:20px;stroke:currentColor}
+  .btn-ghost[data-active="true"]{background:var(--paper)}
+  .label{font-size:var(--label);letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .label.with-icon{display:flex;align-items:center;gap:.45rem}
+  .label .ico{width:clamp(16px,1.6vw,20px);height:clamp(16px,1.6vw,20px);stroke:currentColor;opacity:.9;flex:0 0 auto}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;align-items:start;margin-top:8px}
+  @media (min-width:960px){.grid2{grid-template-columns:repeat(4,1fr)}}
+  .value{font-size:clamp(18px,2.6vw,28px);line-height:1.28}
+  .fullbleed{width:100vw;margin-left:calc(50% - 50vw)}
+  #heroLink{display:block}
+  .credit{text-align:right;font-size:14px;margin-top:8px;color:var(--accent);padding-right:16px}
+  .credit a{text-decoration:underline;cursor:pointer}
+  .section{margin-top:26px}
+  .section h3{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px;font-weight:700;letter-spacing:-0.01em}
+  .kv{display:grid;grid-template-columns:minmax(12ch,1fr) minmax(0,2fr);row-gap:.75rem;column-gap:1rem;align-items:start;grid-auto-rows:minmax(1.6em,auto)}
+  .kv .k{font-weight:700;line-height:1.45}
+  .kv .v{line-height:1.45;overflow-wrap:anywhere;word-break:break-word;hyphens:auto}
+  /* Paragraph-only = full width */
+  .kv.single{grid-template-columns:1fr}
+  .kv.single .v{grid-column:1 / -1}
+  .embed{aspect-ratio:16/9}
+  @media (max-width:640px){ .embed{aspect-ratio:3/4} }
+  .embed iframe{width:100%;height:100%;border:0;display:block}
+  .gpx-actions{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;font-weight:700;border-radius:28px;text-decoration:none;border:1px solid var(--border);background:#000;color:#fff}
+  .btn .ico{width:20px;height:20px}
+  .gpx-note{font-size:14px;text-align:center;max-width:720px;margin:6px auto 0;opacity:.95}
+  .row{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px dashed rgba(0,0,0,.08)}
+  .row:first-of-type{border-top:0}
+  .row .labelB{flex:0 0 var(--label-w);font-weight:700;font-size:14.5px;letter-spacing:.01em;white-space:nowrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:14px;line-height:1;border:1.5px solid var(--chip-border);border-radius:6px;background:var(--chip-fill);color:var(--ink);white-space:nowrap}
+  .chip.secondary{border:1px solid var(--chip2-border);background:var(--chip2-fill);font-size:13.5px}
+  .chip svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+  .day{padding:18px 16px;border:1px solid rgba(0,0,0,.08);border-radius:10px;background:rgba(255,255,255,.35);margin:18px 0}
+  .day h4{font-size:clamp(18px,3.2vw,24px);margin:0 0 8px;letter-spacing:-0.01em}
+  .day .preview{margin:2px 0 14px;color:rgba(30,30,30,.75);font-size:16.5px;line-height:1.6}
+  @media (max-width:720px){ :root{--label-w:150px} }
+  @media (max-width:520px){
+    :root{--label-w:100%}
+    .row{flex-direction:column;align-items:flex-start;gap:6px}
+    .row .labelB{width:100%}
+  }
+  #status{font-size:12px;opacity:.7;max-width:720px;margin:0 auto}
+</style>
 </head>
 <body>
-  <!-- tiny inline icon sprite (neutral stroke; no brand blue) -->
-  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M7 3h10a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z"/>
-    </symbol>
-    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5"/>
-    </symbol>
-    <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8" rx="2"/><path d="M6 17h12"/><path d="M18 9h1a3 3 0 0 1 3 3v1H2v-1a3 3 0 0 1 3-3h1"/>
-    </symbol>
-    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/>
-    </symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-    </symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/>
-    </symbol>
-    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>
-    </symbol>
-  </svg>
+<div class="page">
+  <div id="status">Loading…</div>
+  <h1 id="title" class="title"></h1>
 
-  <div class="page">
-    <div id="status">Loading…</div>
-
-    <h1 id="title" class="title"></h1>
-
-    <!-- APPROVED ACTIONS -->
-    <div class="actions" aria-label="Page actions">
-      <button id="btnBookmark" class="btn-ghost" type="button">
-        <svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span>
-      </button>
-      <button id="btnShare" class="btn-ghost" type="button">
-        <svg class="ico"><use href="#i-share"/></svg><span>Share</span>
-      </button>
-      <button id="btnPrint" class="btn-ghost" type="button">
-        <svg class="ico"><use href="#i-print"/></svg><span>Print</span>
-      </button>
-    </div>
-
-    <!-- APPROVED META GRID (with icons; compass for Category) -->
-    <div class="grid2">
-      <div>
-        <div class="label with-icon">
-          <svg class="ico" aria-hidden="true"><use href="#i-compass"/></svg><span>Category</span>
-        </div>
-        <div id="category" class="value"></div>
-      </div>
-      <div>
-        <div class="label with-icon">
-          <svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><span>Season</span>
-        </div>
-        <div id="season" class="value"></div>
-      </div>
-      <div>
-        <div class="label with-icon">
-          <svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg><span>Location</span>
-        </div>
-        <div id="location" class="value"></div>
-      </div>
-      <div>
-        <div class="label with-icon">
-          <svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg><span>Date</span>
-        </div>
-        <div id="date" class="value"></div>
-      </div>
-    </div>
-
-    <div class="fullbleed">
-      <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Photo credit link">
-        <img id="hero" alt="Expedition hero" />
-      </a>
-      <div id="credit" class="credit"></div>
-    </div>
-
-    <div id="mission" class="mission"></div>
-
-    <div class="embed">
-      <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-
-    <div class="embed" id="gpxEmbedWrap">
-      <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-    <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download>DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.7"></span>
-    </div>
+  <!-- Top actions -->
+  <div class="actions">
+    <button id="btnBookmark" class="btn-ghost"><svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span></button>
+    <button id="btnShare" class="btn-ghost"><svg class="ico"><use href="#i-share"/></svg><span>Share</span></button>
+    <button id="btnPrint" class="btn-ghost"><svg class="ico"><use href="#i-print"/></svg><span>Print</span></button>
   </div>
-<p class="gpx-note" style="text-align:center; font-size:14px; opacity:.75; margin:6px 0 0;">
-  Starter GPX — review and adjust in your mapping app.<br>
-  <strong>Do not rely on it as your only navigation source.</strong>
-</p>
-  <script>
-    /* ---- actions: bookmark/share/print ---- */
-    (function(){
-      const key = 'ei_bookmarks';
-      const btnBm = document.getElementById('btnBookmark');
-      const btnShare = document.getElementById('btnShare');
-      const btnPrint = document.getElementById('btnPrint');
 
-      const url = location.href.split('#')[0];
-      const titleEl = document.getElementById('title');
+  <!-- Header grid -->
+  <div class="grid2">
+    <div><div class="label with-icon"><svg class="ico"><use href="#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="#i-pin"/></svg><span>Location</span></div><div id="location" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
+  </div>
 
-      function getSet(){
-        try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]')); }
-        catch{ return new Set(); }
-      }
-      function saveSet(set){
-        try{ localStorage.setItem(key, JSON.stringify([...set])); }catch{}
-      }
+  <!-- Hero -->
+  <div class="fullbleed">
+    <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer"><img id="hero" alt="Expedition hero"/></a>
+    <div id="credit" class="credit"></div>
+  </div>
 
-      function updateBmState(){
-        const set = getSet();
-        const active = set.has(url);
-        btnBm.dataset.active = active ? 'true' : 'false';
-        btnBm.querySelector('span').textContent = active ? 'Bookmarked' : 'Bookmark';
-      }
+  <!-- Expedition Itinerary -->
+  <section id="expItin" class="section" style="display:none">
+    <h3>Expedition Itinerary</h3>
+    <div id="expKV" class="kv"></div>
+    <div id="expChips" style="margin-top:8px"></div>
+  </section>
 
-      btnBm.addEventListener('click', () => {
-        const set = getSet();
-        if(set.has(url)) set.delete(url); else set.add(url);
-        saveSet(set); updateBmState();
-      });
+  <!-- ORDERED SECTIONS -->
+  <section class="section"><h3>Permits & Entry</h3><div id="permits_entry"></div></section>
 
-      btnShare.addEventListener('click', async () => {
-        const title = document.title || (titleEl?.textContent?.trim()) || 'Expedition';
-        if (navigator.share) {
-          try{ await navigator.share({ title, url }); }catch{}
-        } else {
-          try{
-            await navigator.clipboard.writeText(url);
-            btnShare.querySelector('span').textContent = 'Link copied';
-            setTimeout(()=>btnShare.querySelector('span').textContent='Share', 1400);
-          }catch{}
-        }
-      });
+  <section class="section">
+    <h3>Shuttle / Transportation</h3>
+    <div id="shuttle_transportation"></div>
+    <div class="embed" style="margin-top:10px"><iframe id="shuttle_map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+  </section>
 
-      btnPrint.addEventListener('click', () => window.print());
+  <section class="section"><h3>Permit & Shuttle Timeline</h3><div id="permit_timeline"></div></section>
+  <section class="section"><h3>Multi-Trailhead Logistics</h3><div id="multi_trailhead"></div></section>
+  <section class="section"><h3>Key Considerations</h3><div id="key_considerations"></div></section>
 
-      updateBmState();
-    })();
-  </script>
+  <!-- DAYS -->
+  <section class="section"><h3>Itinerary Overview</h3><div id="itineraryDays"></div></section>
 
-  <!-- your existing data/embedding logic, unchanged -->
-  <script>
-    const $ = (id) => document.getElementById(id);
-    const qp = (k) => new URL(location.href).searchParams.get(k);
-    const get = (o,p)=>p.split('.').reduce((a,c)=>a?.[c],o);
-    const first = (o,keys)=>{ for(const k of keys){ const v=get(o,k); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
+  <!-- GPX -->
+  <div class="section">
+    <h3>GPX Route & Elevation</h3>
+    <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <div class="gpx-actions" id="gpxActions">
+      <a id="gpxBtn" class="btn" href="#" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
+      <span id="trailheads" style="opacity:.8"></span>
+    </div>
+    <div class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><strong>Do not rely on it as your only navigation source.</strong></div>
+  </div>
 
-    function getSlug(){
-      const q = qp("slug"); if (q) return q;
-      const parts = (location.pathname||"/").split("/").filter(Boolean);
-      const i = parts.findIndex(p=>p.toLowerCase()==="expedition" || p.toLowerCase()==="trip");
-      return i>-1 ? parts[i+1] : null;
-    }
+  <section class="section"><h3>Campsite Intel</h3><div id="campsite_intel"></div></section>
+  <section class="section"><h3>Weather & Altitude Notes</h3><div id="weather_altitude"></div></section>
+  <section class="section"><h3>Gear Checklist</h3><div id="gear_checklist"></div></section>
+  <section class="section"><h3>Optional Modification</h3><div id="optional_mod"></div></section>
+  <section class="section"><h3>Risk Matrix & Hazard Timeline</h3><div id="risk_matrix"></div></section>
+  <section class="section"><h3>Conditions Watch</h3><div id="conditions_watch"></div></section>
+  <section class="section"><h3>Bailout Summary</h3><div id="bailout_summary"></div></section>
+  <section class="section"><h3>Emergency Contacts & Numbers</h3><div id="emergency"></div></section>
+  <section class="section"><h3>Final Brief Summary</h3><div id="final_brief"></div></section>
+  <section class="section"><h3>Field Disclaimer</h3><div id="field_disclaimer"></div></section>
+</div>
 
-    const MAPBOX_TOKEN = "pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg";
-    function gpxStudioURL(gpxUrl){
-      if(!gpxUrl) return "";
-      const options = { token: MAPBOX_TOKEN, files: [ gpxUrl ], distanceUnits: "imperial" };
-      return "https://gpx.studio/embed?options=" + encodeURIComponent(JSON.stringify(options));
-    }
+<!-- SVG sprite (unchanged) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8" rx="2"/><path d="M6 17h12"/><path d="M18 9h1a3 3 0 0 1 3 3v1H2v-1a3 3 0 0 1 3-3h1"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
+  <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h10"/></symbol>
+  <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M12 7v-3"/><path d="M12 20v-3"/></symbol>
+  <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18L12 4 3 20z"/></symbol>
+  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 6h10l-2-3H9z"/><path d="M17 13H7l2 3h6z"/></symbol>
+  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l7-12 4 6 3-4 4 10H3z"/></symbol>
+  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></symbol>
+  <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"/><path d="M9.5 12.5l2 2 3.5-3.5"/></symbol>
+  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20c0-4 4-6 8-6h4"/><path d="M6 4h4"/><path d="M18 4h-4v6"/></symbol>
+  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></symbol>
+  <symbol id="c-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M21 21H3"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/></symbol>
+</svg>
 
-    function safeParse(text){
-      try{
-        let x = JSON.parse(text);
-        if (typeof x === "string") {
-          try { x = JSON.parse(x); } catch {}
-        }
-        return x;
-      }catch{ return null; }
-    }
+<!-- Optional inline fallback data (remove in prod if you want) -->
+<script id="ei-data" type="application/json">{}</script>
 
-    function normalizeData(raw){
-      if (typeof raw === "string") {
-        const again = safeParse(raw);
-        if (again) raw = again;
-      }
-      if (raw && (raw.schema_version || raw.hero_image || raw.image_link || raw.mission_text)) return raw;
-      let full = null, flat = null;
-      if (typeof raw?.index_json === "string") { full = safeParse(raw.index_json); }
-      else if (raw?.index_json && typeof raw.index_json === "object") { full = raw.index_json; }
-      if (typeof raw?.flat_json === "string") { flat = safeParse(raw.flat_json); }
-      else if (raw?.flat_json && typeof raw.flat_json === "object") { flat = raw.flat_json; }
-      let out = { ...(full || {}), ...(flat || {}) };
-      if (out && !out.image_link) out.image_link = out.imageLink || out.credit_link || out.image_credit_link || "";
-      if (out && !out.image_credit) out.image_credit = out.imageCredit || out.photo_credit || "";
-      if (out && !out.hero_image) out.hero_image = out.hero?.url || out.image || out.heroImage || "";
-      return Object.keys(out).length ? out : raw;
-    }
+<script>
+/* --- utils --- */
+const $ = id => document.getElementById(id);
+const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
 
-    const isValidUnsplashPhoto = (u)=>{
-      try{
-        const x = new URL(u);
-        return x.hostname === "unsplash.com" && /^\/photos\/[A-Za-z0-9_-]+/.test(x.pathname);
-      }catch{ return false; }
-    };
+/* Bookmark/Share/Print */
+(() => {
+  const key='ei_bookmarks', url=location.href.split('#')[0];
+  const btnBm=$('btnBookmark'), btnShare=$('btnShare'), btnPrint=$('btnPrint');
+  const getSet=()=>{ try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]')); }catch{return new Set()} };
+  const saveSet=s=>{ try{ localStorage.setItem(key, JSON.stringify([...s])); }catch{} };
+  const upd=()=>{ const on=getSet().has(url); btnBm.dataset.active=on?'true':'false'; btnBm.querySelector('span').textContent=on?'Bookmarked':'Bookmark'; };
+  btnBm.addEventListener('click',()=>{const s=getSet(); s.has(url)?s.delete(url):s.add(url); saveSet(s); upd();});
+  btnShare.addEventListener('click', async ()=>{ const title=document.title||'Expedition'; if(navigator.share){ try{ await navigator.share({title,url}); }catch{} } else { try{ await navigator.clipboard.writeText(url); btnShare.querySelector('span').textContent='Link copied'; setTimeout(()=>btnShare.querySelector('span').textContent='Share',1400);}catch{} }});
+  btnPrint.addEventListener('click',()=>window.print());
+  upd();
+})();
 
-    async function main(){
-      const status = $("status");
-      const slug = getSlug();
-      if(!slug){ status.textContent="Missing slug (?slug= or /expedition/{slug})"; return; }
+/* KV or paragraph-only */
+function kvOrParagraph(containerId, text){
+  const el = $(containerId); if(!el){return;}
+  if(!text){ el.innerHTML=''; return; }
+  const lines = String(text).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const hasKV = lines.some(l=>/^[^:]+:\s*\S/.test(l));
+  if(hasKV){
+    const rows=[];
+    for(const l of lines){ const m=l.match(/^([^:]+):\s*(.*)$/); if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); } }
+    el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
+  }else{
+    el.innerHTML = `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
+  }
+}
 
-      const jsonURL = `https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/${slug}.json?cb=${Date.now()}`;
-      status.textContent = "Fetching…";
+/* Day + expedition helpers (unchanged) */
+const CHIP_SVG={distance:'<svg><use href="#c-distance"/></svg>',elevation:'<svg><use href="#c-elevation"/></svg>',campsite:'<svg><use href="#c-campsite"/></svg>',trail:'<svg><use href="#c-trail"/></svg>',terrain:'<svg><use href="#c-terrain"/></svg>',water:'<svg><use href="#c-water"/></svg>',safety:'<svg><use href="#c-safety"/></svg>',decision:'<svg><use href="#c-decision"/></svg>',morale:'<svg><use href="#c-morale"/></svg>',gps:'<svg><use href="#c-gps"/></svg>'};
+const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
+function renderDay(day){
+  let html=`<article class="day"><h4>${day.title||''}</h4>`;
+  if(day.preview) html+=`<p class="preview">${day.preview}</p>`;
+  const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
+  prim.forEach(([k,l])=>{ const v=day.chips?.[k]; if(v) html+=`<div class="row"><div class="labelB">${l}:</div><div>${chipHTML(k,v,false)}</div></div>`; });
+  const secOrder=["trail","terrain","water","safety","decision","morale"];
+  const labels={trail:"Primary trail(s)",terrain:"Terrain",water:"Key water sources",safety:"Safety",decision:"Decision point",morale:"Morale marker"};
+  secOrder.forEach(k=>{ const v=day.chips?.[k]; if(v) html+=`<div class="row"><div class="labelB">${labels[k]}:</div><div>${chipHTML(k,v,true)}</div></div>`; });
+  return html+`</article>`;
+}
+function renderExpeditionKV(info){
+  const kv=$('expKV'); kv.innerHTML='';
+  const add=(k,v)=>{ if(v) kv.insertAdjacentHTML('beforeend', `<div class="k">${k}</div><div class="v">${v}</div>`); };
+  add("EXPEDITION ITINERARY", info.route||"");
+  add("PRIMARY OBJECTIVE", info.objective||"");
+  add("TRIP DURATION", info.duration||"");
+  add("TOTAL ESTIMATED MILEAGE", info.mileage||"");
+  add("EXPERIENCE LEVEL", info.experience||"");
+  add("TERRAIN TYPE", info.terrain||"");
+}
+function renderExpeditionChips(info){
+  const host=$('expChips'); const chips=[];
+  if(info.elevation) chips.push(chipHTML('elevation', info.elevation));
+  if(info.trailheads) chips.push(chipHTML('trail', info.trailheads, true));
+  if(info.gps) chips.push(chipHTML('gps', info.gps));
+  host.innerHTML = chips.join(' ');
+}
 
-      let data;
-      try{
-        const res = await fetch(jsonURL, { cache:"no-store" });
-        if(!res.ok) throw new Error("HTTP "+res.status);
-        const text = await res.text();
-        let raw = safeParse(text);
-        if (raw === null) raw = {};
-        data = normalizeData(raw);
-      }catch(e){
-        status.textContent = "Fetch failed: "+e.message;
-        return;
-      }
+/* Data loader: ?src= override → else compute from /trip/<slug> → fallback to inline */
+const SUPABASE_BASE='https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
+function computeSrc(){
+  const qp=new URLSearchParams(location.search).get('src');
+  if(qp) return qp;
+  const parts=location.pathname.replace(/\/+$/,'').split('/');
+  const slug = parts.pop() || 'teton-crest-trail-expedition';
+  return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
+}
+async function loadData(){
+  const url = computeSrc();
+  try{
+    const res = await fetch(url,{cache:'no-store',headers:{accept:'application/json'}});
+    if(!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    return await res.json();
+  }catch(err){
+    console.warn('Falling back to inline JSON:', err);
+    return safeParse(document.getElementById('ei-data')?.textContent)||{};
+  }
+}
 
-      $("title").textContent = first(data,["title","name"]) || "";
-      $("category").textContent = first(data,["category","type"]) || "";
-      $("season").textContent = first(data,["season"]) || "";
-      $("location").textContent = first(data,["location","place"]) || "";
-      const d = first(data,["date","when"]);
-      $("date").textContent = /^\d{4}-\d{2}-\d{2}$/.test(d)
-        ? new Date(d+"T00:00:00Z").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})
-        : (d||"");
+/* -------- Main (single IIFE) -------- */
+(async ()=>{
+  const status=$('status');
+  let data={};
+  try{ data = await loadData(); }
+  catch(e){ console.error(e); status.textContent='Could not load expedition data.'; data = safeParse(document.getElementById('ei-data')?.textContent)||{}; }
 
-      const hero = first(data,["hero_image","hero.url","image"]);
-      if (hero) $("hero").src = hero;
+  // Title/meta
+  $('title').textContent = data.title||'';
+  document.title = data.title ? `Expedition – ${data.title}` : 'Expedition – Preview';
+  $('category').textContent = data.category||'';
+  $('season').textContent = data.season||'';
+  $('location').textContent = data.location||'';
+  const d=data.date||'';
+  $('date').textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : d;
 
-      const creditName = first(data,["image_credit","credit","photo_credit"]) || "";
-      let creditLink = first(data,["image_link","credit_link","image_credit_link"]) || "";
-      if (!isValidUnsplashPhoto(creditLink)) creditLink = "";
+  // Hero + credit
+  if(data.hero_image) $('hero').src = data.hero_image;
+  const creditName=data.image_credit||''; const creditLink=data.image_link||'';
+  $('credit').innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : '';
+  if(creditLink) $('heroLink').href = creditLink;
 
-      $("credit").innerHTML = creditName
-        ? (creditLink
-            ? `<a href="${creditLink}" target="_blank" rel="noopener noreferrer" title="${creditLink}">${creditName}</a>`
-            : creditName)
-        : "";
+  // Expedition itinerary
+  const ei=data.expedition_itinerary||{};
+  if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain){
+    $('expItin').style.display='block';
+    renderExpeditionKV(ei);
+    renderExpeditionChips(ei);
+  }
 
-      const heroLinkEl = $("heroLink");
-      if (heroLinkEl) {
-        if (creditLink) {
-          heroLinkEl.href = creditLink;
-          heroLinkEl.style.pointerEvents = "auto";
-        } else {
-          heroLinkEl.removeAttribute("href");
-          heroLinkEl.style.pointerEvents = "none";
-        }
-      }
+  // Ordered sections
+  kvOrParagraph('permits_entry', data.permits_entry);
+  kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
+  if(data.shuttle_map_url) $('shuttle_map').src = data.shuttle_map_url;
+  kvOrParagraph('permit_timeline', data.permit_timeline);
+  kvOrParagraph('multi_trailhead', data.multi_trailhead);
+  kvOrParagraph('key_considerations', data.key_considerations);
 
-      const mission = first(data,["mission_text","mission","brief","summary"]) || "";
-      const formatted = mission
-        .split(/\r?\n/)
-        .map(line => {
-          const t = line.trim();
-          if (!t) return "";
-          if (/^-{3,}$/.test(t)) return t;
-          if (/^DAY\s*\d+:/i.test(t)) return `<strong>${t}</strong>`;
-          const m = t.match(/^([^:]+):\s*(.*)$/);
-          if (m && !/[a-z]/.test(m[1])) return `<strong>${m[1].trim()}:</strong> ${m[2]}`;
-          if (!/[a-z]/.test(t)) return `<strong>${t}</strong>`;
-          return t;
-        })
-        .join("<br/>");
-      $("mission").innerHTML = formatted;
+  // Days
+  const days = Array.isArray(data.days)?data.days:[];
+  $('itineraryDays').innerHTML = days.map(renderDay).join('');
 
-      const mapURL = first(data,["map_embed_url","map_embed","map.url"]);
-      if (mapURL) $("map").src = mapURL;
+  // GPX
+  const gpxURL=data.gpx_download_link||'';
+  if(gpxURL){
+    const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({token:"pk.XXXXXXXX",files:[gpxURL],distanceUnits:"imperial"}));
+    $('gpxStudio').src=studio; $('gpxStudioLink').href=studio; $('gpxBtn').href=gpxURL; $('gpxBtn').download='route.gpx';
+    const th=[data.start_trailhead,data.end_trailhead].filter(Boolean).join(' → ');
+    if(th) $('trailheads').textContent=th;
+  }else{
+    $('gpxEmbedWrap').innerHTML=`<div style="opacity:.7;font-size:14px">No GPX URL set.</div>`;
+    $('gpxActions').style.display='none';
+  }
 
-      const gpxURL = first(data,["gpx_download_link","gpx_url","gpx","gpxFile","gpx_file","gpxDownload","gpx_download"]);
-      if (gpxURL) {
-        const studio = gpxStudioURL(gpxURL);
-        $("gpxStudio").src = studio;
-        $("gpxStudioLink").href = studio;
-        $("gpxBtn").href = gpxURL;
-        $("gpxBtn").download = (slug||"route") + ".gpx";
-        const th = [first(data,["start_trailhead","start"]), first(data,["end_trailhead","end"])].filter(Boolean).join(" → ");
-        if (th) $("trailheads").textContent = th;
-      } else {
-        $("gpxEmbedWrap").innerHTML = `<div style="opacity:.7;font-size:14px">No GPX URL found (expected <code>gpx_download_link</code>).</div>`;
-        $("gpxActions").style.display = "none";
-      }
+  // Remaining text sections
+  kvOrParagraph('campsite_intel', data.campsite_intel);
+  kvOrParagraph('weather_altitude', data.weather_altitude);
+  kvOrParagraph('gear_checklist', data.gear_checklist);
+  kvOrParagraph('optional_mod', data.optional_mod);
+  kvOrParagraph('risk_matrix', data.risk_matrix);
+  kvOrParagraph('conditions_watch', data.conditions_watch);
+  kvOrParagraph('bailout_summary', data.bailout_summary);
+  kvOrParagraph('emergency', data.emergency);
+  kvOrParagraph('final_brief', data.final_brief);
+  kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
-      $("status").textContent = "";
-      setTimeout(()=>$("status").remove(), 10);
-    }
-
-    if (typeof window !== "undefined") main();
-  </script>
+  status.textContent=''; setTimeout(()=>status.remove(),10);
+})();
+</script>
 </body>
 </html>
