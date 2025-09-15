@@ -181,16 +181,23 @@ const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary'
 
 /* ---------- KV or paragraph-only renderer ---------- */
 function kvOrParagraph(containerId, text){
-  const el = $(containerId); if(!el) return;
+  const el = $(containerId); 
+  if(!el){ return; }
   if(!text){ el.innerHTML=''; return; }
-  const lines = String(text).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  const hasKV = lines.some(l=>/^[^:]+:\s*\S/.test(l));
+
+  // Split, trim, and remove leading dashes
+  const lines = String(text)
+    .split(/\r?\n/)
+    .map(s => s.trim().replace(/^-\s*/, "")) // <-- strip "- "
+    .filter(Boolean);
+
+  const hasKV = lines.some(l => /^[^:]+:\s*\S/.test(l));
+
   if(hasKV){
     const rows=[];
     for(const l of lines){
       const m=l.match(/^([^:]+):\s*(.*)$/);
-      if(m) rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`);
-      else rows.push(`<div class="k"></div><div class="v">${l}</div>`);
+      if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); }
     }
     el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
   }else{
