@@ -69,6 +69,83 @@
     .row .labelB{width:100%}
   }
   #status{font-size:12px;opacity:.7;max-width:720px;margin:0 auto}
+  /* ===== HIERARCHY + DIVIDERS ===== */
+
+/* 1) Stronger section headers */
+.section{
+  margin-top: 34px;                 /* a bit more separation from previous block */
+  padding-top: 18px;
+  border-top: 1px solid rgba(0,0,0,.08); /* subtle divider */
+}
+.section h3{
+  font-size: clamp(22px, 3.8vw, 26px);
+  font-weight: 800;                 /* punchier than subheads below */
+  letter-spacing: -0.015em;
+  margin: 0 0 14px;
+  scroll-margin-top: 80px;
+}
+
+/* 2) Subheads (left-side labels) read as “tier 2” */
+.row .labelB{
+  font-weight: 600;
+  opacity: .85;
+  font-size: 15px;                  /* slightly smaller than before */
+  letter-spacing: .01em;
+}
+
+/* 3) Key/Value tables: keys a touch lighter than section h3 */
+.kv .k{
+  font-weight: 700;
+  opacity: .9;
+}
+.kv .v{
+  opacity: .98;
+}
+
+/* 4) Day cards: hierarchy within the card */
+.day{
+  padding: 18px 16px;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,.38);
+}
+.day h4{
+  font-size: clamp(20px, 4.5vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+.day .preview{
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: rgba(30,30,30,.80);
+}
+
+/* 5) Chip spacing: both in EI block + day rows */
+#expChips{
+  display: flex; flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-top: 14px !important;
+}
+.row .chip{ margin-top: 4px; }
+
+/* 6) Optional: faint separators between long rows */
+.row:not(:first-of-type){ border-top: 1px dashed rgba(0,0,0,.06); }
+
+/* 7) Mobile tweaks */
+@media (max-width:720px){
+  .section{ margin-top: 28px; padding-top: 14px; }
+  .section h3{ font-size: clamp(20px, 5.2vw, 24px); }
+  .row .labelB{ font-size: 14.5px; }
+}
+
+/* ===== HERO (from last step; keep or refine) ===== */
+@media (max-width:640px){
+  #hero{
+    height: min(90svh, 100vw * 4 / 3); /* tall, ~3:4 feel */
+    object-fit: cover;
+  }
+}
 </style>
 </head>
 <body>
@@ -236,8 +313,9 @@ function kvOrParagraph(containerId, text){
 
 /* ---------- day + expedition render ---------- */
 function renderDay(day){
-  let html=`<article class="day"><h4>${day.title||''}</h4>`;
-  if(day.preview) html+=`<p class="preview">${day.preview}</p>`;
+  const title = (day.title || '').replace(/\s+TO\s+/gi, ' → ');
+  let html = `<article class="day"><h4>${title}</h4>`;
+  if(day.preview) html += `<p class="preview">${day.preview}</p>`;
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{ const v=day.chips?.[k]; if(v) html+=`<div class="row"><div class="labelB">${l}:</div><div>${chipHTML(k,v,false)}</div></div>`; });
   const secOrder=["trail","terrain","water","safety","decision","morale"];
