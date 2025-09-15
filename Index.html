@@ -353,7 +353,64 @@ async function loadData(){
     return safeParse(document.getElementById('ei-data')?.textContent)||{};
   }
 }
+<script>
+/* Bookmark/Share/Print — add this block */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const btnBm = $('btnBookmark'), btnShare = $('btnShare'), btnPrint = $('btnPrint');
+  if (!btnBm || !btnShare || !btnPrint) return; // buttons missing → noop
 
+  const KEY = 'ei_bookmarks';
+  const url = location.href.split('#')[0];
+
+  // pick a writable storage; fall back to memory
+  let memory = new Set();
+  const canWrite = (s) => { try { s.setItem('__t','1'); s.removeItem('__t'); return true; } catch { return false; } };
+  const store = canWrite(localStorage) ? localStorage
+              : canWrite(sessionStorage) ? sessionStorage
+              : null;
+
+  const readSet  = () => { if(!store) return memory; try{ return new Set(JSON.parse(store.getItem(KEY)||'[]')); }catch{ return new Set(); } };
+  const writeSet = (set) => { if(store){ try{ store.setItem(KEY, JSON.stringify([...set])); return; }catch{} } memory = new Set(set); };
+
+  const setUI = (on) => {
+    btnBm.dataset.active = on ? 'true' : 'false';
+    btnBm.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btnBm.querySelector('span').textContent = on ? 'Bookmarked' : 'Bookmark';
+  };
+
+  // init state
+  setUI(readSet().has(url));
+
+  // bookmark toggle
+  btnBm.addEventListener('click', () => {
+    const s = readSet();
+    s.has(url) ? s.delete(url) : s.add(url);
+    writeSet(s);
+    setUI(s.has(url));
+  });
+
+  // share with fallbacks
+  btnShare.addEventListener('click', async () => {
+    const title = document.title || 'Expedition';
+    try {
+      if (navigator.share) { await navigator.share({ title, url }); return; }
+      await navigator.clipboard.writeText(url);
+      btnShare.querySelector('span').textContent = 'Link copied';
+      setTimeout(() => btnShare.querySelector('span').textContent = 'Share', 1400);
+    } catch {
+      const ok = window.prompt('Copy this link:', url);
+      if (ok !== null) {
+        btnShare.querySelector('span').textContent = 'Link ready';
+        setTimeout(() => btnShare.querySelector('span').textContent = 'Share', 1400);
+      }
+    }
+  });
+
+  // print
+  btnPrint.addEventListener('click', () => window.print());
+})();
+</script>
 /* ---------- Main ---------- */
 (async ()=>{
   const status=$('status');
