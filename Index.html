@@ -175,6 +175,45 @@ const $ = id => document.getElementById(id);
 const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
 const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduce((a,c)=>a?.[c],obj); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
 
+/* ---------- Bookmark / Share / Print ---------- */
+(() => {
+  const btnBm = $('btnBookmark'), btnShare = $('btnShare'), btnPrint = $('btnPrint');
+  if (!btnBm || !btnShare || !btnPrint) return;
+
+  const KEY='ei_bookmarks';
+  const url=location.href.split('#')[0];
+
+  // choose writable storage (incognito-safe fallback)
+  const canWrite = (s)=>{ try{ s.setItem('__t','1'); s.removeItem('__t'); return true; }catch{ return false; } };
+  const store = canWrite(localStorage) ? localStorage : (canWrite(sessionStorage) ? sessionStorage : null);
+  let mem = new Set();
+  const read = ()=> store ? new Set(JSON.parse(store.getItem(KEY)||'[]')) : mem;
+  const write = (set)=> { if(store){ try{ store.setItem(KEY, JSON.stringify([...set])); return; }catch{} } mem = new Set(set); };
+
+  const setUI = (on)=>{ btnBm.dataset.active = on ? 'true' : 'false'; btnBm.setAttribute('aria-pressed', on?'true':'false'); btnBm.querySelector('span').textContent = on ? 'Bookmarked' : 'Bookmark'; };
+  setUI(read().has(url));
+
+  btnBm.addEventListener('click', ()=>{
+    const s = read();
+    s.has(url) ? s.delete(url) : s.add(url);
+    write(s); setUI(s.has(url));
+  });
+
+  btnShare.addEventListener('click', async ()=>{
+    const title=document.title||'Expedition';
+    try{
+      if(navigator.share){ await navigator.share({title,url}); return; }
+      await navigator.clipboard.writeText(url);
+      btnShare.querySelector('span').textContent='Link copied';
+      setTimeout(()=>btnShare.querySelector('span').textContent='Share',1400);
+    }catch{
+      window.prompt('Copy this link:', url);
+    }
+  });
+
+  btnPrint.addEventListener('click',()=>window.print());
+})();
+
 /* ---------- chips ---------- */
 const CHIP_SVG={distance:'<svg><use href="#c-distance"/></svg>',elevation:'<svg><use href="#c-elevation"/></svg>',campsite:'<svg><use href="#c-campsite"/></svg>',trail:'<svg><use href="#c-trail"/></svg>',terrain:'<svg><use href="#c-terrain"/></svg>',water:'<svg><use href="#c-water"/></svg>',safety:'<svg><use href="#c-safety"/></svg>',decision:'<svg><use href="#c-decision"/></svg>',morale:'<svg><use href="#c-morale"/></svg>',gps:'<svg><use href="#c-gps"/></svg>'};
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
@@ -184,21 +223,11 @@ function kvOrParagraph(containerId, text){
   const el = $(containerId); 
   if(!el){ return; }
   if(!text){ el.innerHTML=''; return; }
-
-  // Split, trim, and remove leading dashes
-  const lines = String(text)
-    .split(/\r?\n/)
-    .map(s => s.trim().replace(/^-\s*/, "")) // <-- strip "- "
-    .filter(Boolean);
-
+  const lines = String(text).split(/\r?\n/).map(s => s.trim().replace(/^-\s*/, "")).filter(Boolean);
   const hasKV = lines.some(l => /^[^:]+:\s*\S/.test(l));
-
   if(hasKV){
     const rows=[];
-    for(const l of lines){
-      const m=l.match(/^([^:]+):\s*(.*)$/);
-      if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); }
-    }
+    for(const l of lines){ const m=l.match(/^([^:]+):\s*(.*)$/); if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); } }
     el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
   }else{
     el.innerHTML = `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
@@ -241,41 +270,30 @@ function inflateFromMission(data){
   const txt = (data.mission_text||"").replace(/\r/g,'').trim();
   if(!txt) return out;
 
-  // split by visible dividers "⸻" while keeping order
   const parts = txt.split(/\n?\s*⸻\s*\n?/g);
-
-  // helpers
   const grab = (label) => {
     const re = new RegExp(`(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*⸻|$)`,'i');
     const m = txt.match(re);
     return m ? m[2].trim() : "";
   };
 
-  // Expedition KV from top block (first part)
   {
     const head = parts[0]||"";
-    const kv = {};
-    const getLine = (k, aliasRE) => {
-      const m = head.match(new RegExp(`${aliasRE}:\\s*(.+)`, 'i'));
-      return m ? m[1].trim() : "";
+    const getLine = (aliasRE) => head.match(new RegExp(`${aliasRE}:\\s*(.+)`,'i'))?.[1]?.trim() || "";
+    const kv = {
+      route:      getLine("EXPEDITION\\s+ITINERARY"),
+      objective:  getLine("PRIMARY\\s+OBJECTIVE"),
+      duration:   getLine("TRIP\\s+DURATION"),
+      mileage:    getLine("TOTAL\\s+ESTIMATED\\s+MILEAGE"),
+      experience: getLine("EXPERIENCE\\s+LEVEL"),
+      terrain:    getLine("TERRAIN\\s+TYPE")
     };
-    kv.route = getLine("EXPEDITION ITINERARY","EXPEDITION\\s+ITINERARY");
-    kv.objective = getLine("PRIMARY OBJECTIVE","PRIMARY\\s+OBJECTIVE");
-    kv.duration = getLine("TRIP DURATION","TRIP\\s+DURATION");
-    kv.mileage = getLine("TOTAL ESTIMATED MILEAGE","TOTAL\\s+ESTIMATED\\s+MILEAGE");
-    kv.experience = getLine("EXPERIENCE LEVEL","EXPERIENCE\\s+LEVEL");
-    kv.terrain = getLine("TERRAIN TYPE","TERRAIN\\s+TYPE");
     const elev = head.match(/Cumulative elevation[^:]*:\s*([^\n]+)/i)?.[1];
-    const th = head.match(/Start and end trailhead[^:]*:\s*([^\n]+)/i)?.[1];
-    const gps = head.match(/GPS coordinates[^:]*:\s*([^\n]+)/i)?.[1];
-    out.expedition_itinerary = {
-      route: kv.route, objective: kv.objective, duration: kv.duration,
-      mileage: kv.mileage, experience: kv.experience, terrain: kv.terrain,
-      elevation: elev||"", trailheads: th||"", gps: gps||""
-    };
+    const th   = head.match(/Start and end trailhead[^:]*:\s*([^\n]+)/i)?.[1];
+    const gps  = head.match(/GPS coordinates[^:]*:\s*([^\n]+)/i)?.[1];
+    out.expedition_itinerary = { ...kv, elevation:elev||"", trailheads:th||"", gps:gps||"" };
   }
 
-  // Simple section grabs
   out.permits_entry         ||= grab("PERMITS\\s*&\\s*ENTRY");
   out.shuttle_transportation||= grab("SHUTTLE\\s*/\\s*TRANSPORTATION");
   out.multi_trailhead       ||= grab("MULTI-TRAILHEAD\\s+LOGISTICS");
@@ -292,41 +310,28 @@ function inflateFromMission(data){
   out.final_brief           ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
   out.field_disclaimer      ||= grab("FIELD\\s+DISCLAIMER");
 
-  // Days (match "DAY N: ..." blocks)
   if(!Array.isArray(out.days) || out.days.length===0){
     const dayBlocks = txt.split(/\n\s*⸻\s*\n/g).filter(s=>/^DAY\s*\d+/i.test(s));
     out.days = dayBlocks.map(block=>{
       const title = block.match(/^DAY\s*\d+:\s*(.+)$/mi)?.[0]?.trim() || "";
       const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
-      // preview: until first bullet or blank line
       const preview = afterTitle.split(/\n-\s/)[0].split(/\n{2,}/)[0].trim();
-
-      // chips
       const pick = (re) => (afterTitle.match(re)?.[1]||"").trim();
       const chips = {
         distance: pick(/Distance[^:]*:\s*([^\n]+)/i) || pick(/Distance and elevation[^:]*:\s*([^,]+,[^\n]+)/i),
-        elevation: (()=>{
-          const s = pick(/Distance and elevation[^:]*:\s*([^\n]+)/i);
-          const m = s.match(/([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i);
-          return m ? m[1] : "";
-        })(),
+        elevation: (()=>{ const s=pick(/Distance and elevation[^:]*:\s*([^\n]+)/i); const m=s.match(/([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i); return m?m[1]:""; })(),
         campsite: pick(/Campsite location:\s*([^\n]+)/i),
-        trail: pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
-        terrain: pick(/Terrain:\s*([^\n]+)/i),
-        water: pick(/Key water sources:\s*([^\n]+)/i),
-        safety: pick(/Safety:\s*([^\n]+)/i),
+        trail:    pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
+        terrain:  pick(/Terrain:\s*([^\n]+)/i),
+        water:    pick(/Key water sources:\s*([^\n]+)/i),
+        safety:   pick(/Safety:\s*([^\n]+)/i),
         decision: pick(/Decision point:\s*([^\n]+)/i),
-        morale: pick(/Morale marker:\s*([^\n]+)/i)
+        morale:   pick(/Morale marker:\s*([^\n]+)/i)
       };
-      // clean distance if combined
-      if(!chips.distance){
-        const dm = afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i);
-        if(dm) chips.distance = dm[1];
-      }
+      if(!chips.distance){ const dm=afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i); if(dm) chips.distance=dm[1]; }
       return { title, preview, chips };
     });
   }
-
   return out;
 }
 
@@ -360,7 +365,6 @@ async function loadData(){
   let data={};
   try{ data = await loadData(); } catch(e){ console.error(e); status.textContent='Could not load expedition data.'; }
 
-  // Augment from mission_text so the page has the fields it expects
   data = inflateFromMission(data);
 
   // Title/meta
@@ -378,7 +382,7 @@ async function loadData(){
   $('credit').innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : '';
   if(creditLink) { const a=$('heroLink'); a.href=creditLink; a.style.pointerEvents='auto'; } else { const a=$('heroLink'); a.removeAttribute('href'); a.style.pointerEvents='none'; }
 
-  // Expedition itinerary block
+  // Expedition itinerary
   const ei = data.expedition_itinerary||{};
   if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain||ei.elevation||ei.trailheads||ei.gps){
     $('expItin').style.display='block';
@@ -386,13 +390,11 @@ async function loadData(){
     renderExpeditionChips(ei);
   }
 
-  // Ordered sections (now filled even if they only existed in mission_text)
+  // Ordered sections
   kvOrParagraph('permits_entry', data.permits_entry);
   kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
-  // Google Map (supports either key)
   const mapURL = data.map_embed_url || data.shuttle_map_url || "";
   if (mapURL && $('shuttle_map')) $('shuttle_map').src = mapURL;
-
   kvOrParagraph('permit_timeline', data.permit_timeline);
   kvOrParagraph('multi_trailhead', data.multi_trailhead);
   kvOrParagraph('key_considerations', data.key_considerations);
