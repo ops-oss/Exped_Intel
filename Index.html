@@ -308,7 +308,7 @@ async function loadData(){
   // GPX
   const gpxURL=data.gpx_download_link||'';
   if(gpxURL){
-    const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({token:"pk.XXXXXXXX",files:[gpxURL],distanceUnits:"imperial"}));
+    const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({token:"pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg",files:[gpxURL],distanceUnits:"imperial"}));
     $('gpxStudio').src=studio; $('gpxStudioLink').href=studio; $('gpxBtn').href=gpxURL; $('gpxBtn').download='route.gpx';
     const th=[data.start_trailhead,data.end_trailhead].filter(Boolean).join(' → ');
     if(th) $('trailheads').textContent=th;
