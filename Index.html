@@ -237,26 +237,32 @@ function renderExpeditionChips(info){
 }
 
 /* Data loader: ?src= override → else compute from /trip/<slug> → fallback to inline */
-const SUPABASE_BASE='https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
+const SUPABASE_BASE = 'https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
+
 function computeSrc(){
-  const qp=new URLSearchParams(location.search).get('src');
-  if(qp) return qp;
-  const parts=location.pathname.replace(/\/+$/,'').split('/');
-  const slug = parts.pop() || 'teton-crest-trail-expedition';
+  // explicit override for CodePen/testing
+  const qp = new URLSearchParams(location.search).get('src');
+  if (qp) return qp;
+
+  // /trip/<slug>[optional trailing slash]
+  const m = location.pathname.match(/\/trip\/([^\/?#]+)\/?$/);
+  const slug = m?.[1] || 'teton-crest-trail-expedition';
+
   return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
 }
+
 async function loadData(){
   const url = computeSrc();
+  console.log('EI JSON URL →', url); // visibility for debugging
   try{
-    const res = await fetch(url,{cache:'no-store',headers:{accept:'application/json'}});
-    if(!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    const res = await fetch(url, { cache:'no-store', headers:{ accept:'application/json' } });
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     return await res.json();
   }catch(err){
     console.warn('Falling back to inline JSON:', err);
-    return safeParse(document.getElementById('ei-data')?.textContent)||{};
+    return safeParse(document.getElementById('ei-data')?.textContent) || {};
   }
 }
-
 /* -------- Main (single IIFE) -------- */
 (async ()=>{
   const status=$('status');
