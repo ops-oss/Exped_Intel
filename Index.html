@@ -79,7 +79,7 @@
 }
 .section h3{
   font-size: clamp(22px, 3.8vw, 26px);
-  font-weight: 800;                 /* punchier than subheads below */
+  font-weight: 600;                 /* punchier than subheads below */
   letter-spacing: -0.015em;
   margin: 0 0 14px;
   scroll-margin-top: 80px;
@@ -111,8 +111,8 @@
 }
 .day h4{
   font-size: clamp(20px, 4.5vw, 24px);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: -0.00em;
   margin: 0 0 8px;
 }
 .day .preview{
@@ -509,6 +509,14 @@ async function loadData(){
   kvOrParagraph('final_brief', data.final_brief);
   kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
+/* === Hide empty sections === */
+for (const s of document.querySelectorAll('.section')) {
+  const body = s.querySelector('div[id]');
+  if (body && !body.textContent.trim()) {
+    s.style.display = 'none';
+  }
+}
+  
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
 </script>
