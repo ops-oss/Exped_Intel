@@ -76,12 +76,14 @@
   <div id="status">Loading…</div>
   <h1 id="title" class="title"></h1>
 
+  <!-- Top actions -->
   <div class="actions">
     <button id="btnBookmark" class="btn-ghost"><svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span></button>
     <button id="btnShare" class="btn-ghost"><svg class="ico"><use href="#i-share"/></svg><span>Share</span></button>
     <button id="btnPrint" class="btn-ghost"><svg class="ico"><use href="#i-print"/></svg><span>Print</span></button>
   </div>
 
+  <!-- Header grid -->
   <div class="grid2">
     <div><div class="label with-icon"><svg class="ico"><use href="#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
     <div><div class="label with-icon"><svg class="ico"><use href="#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
@@ -89,17 +91,26 @@
     <div><div class="label with-icon"><svg class="ico"><use href="#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
   </div>
 
+  <!-- Hero -->
   <div class="fullbleed">
     <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer"><img id="hero" alt="Expedition hero"/></a>
     <div id="credit" class="credit"></div>
   </div>
 
+  <!-- Expedition Itinerary (summary chips) -->
   <section id="expItin" class="section" style="display:none">
     <h3>Expedition Itinerary</h3>
     <div id="expKV" class="kv"></div>
     <div id="expChips" style="margin-top:8px"></div>
   </section>
 
+  <!-- Overview Map (Google/MyMaps/etc. embed) -->
+  <section class="section">
+    <h3>Overview Map</h3>
+    <div class="embed"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+  </section>
+
+  <!-- ORDERED SECTIONS -->
   <section class="section"><h3>Permits & Entry</h3><div id="permits_entry"></div></section>
 
   <section class="section">
@@ -112,8 +123,10 @@
   <section class="section"><h3>Multi-Trailhead Logistics</h3><div id="multi_trailhead"></div></section>
   <section class="section"><h3>Key Considerations</h3><div id="key_considerations"></div></section>
 
+  <!-- DAYS -->
   <section class="section"><h3>Itinerary Overview</h3><div id="itineraryDays"></div></section>
 
+  <!-- GPX -->
   <div class="section">
     <h3>GPX Route & Elevation</h3>
     <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
@@ -125,6 +138,7 @@
     <div class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><strong>Do not rely on it as your only navigation source.</strong></div>
   </div>
 
+  <!-- Text sections -->
   <section class="section"><h3>Campsite Intel</h3><div id="campsite_intel"></div></section>
   <section class="section"><h3>Weather & Altitude Notes</h3><div id="weather_altitude"></div></section>
   <section class="section"><h3>Gear Checklist</h3><div id="gear_checklist"></div></section>
@@ -161,47 +175,36 @@
   <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/></symbol>
 </svg>
 
-<script id="ei-data" type="application/json">{}</script>
-
 <script>
-/* --- utils --- */
+/* ---------- utils ---------- */
 const $ = id => document.getElementById(id);
 const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
+const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduce((a,c)=>a?.[c],obj); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
 
-/* Bookmark/Share/Print */
-(() => {
-  const key='ei_bookmarks', url=location.href.split('#')[0];
-  const btnBm=$('btnBookmark'), btnShare=$('btnShare'), btnPrint=$('btnPrint');
-  const getSet=()=>{ try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]')); }catch{return new Set()} };
-  const saveSet=s=>{ try{ localStorage.setItem(key, JSON.stringify([...s])); }catch{} };
-  const upd=()=>{ const on=getSet().has(url); btnBm.dataset.active=on?'true':'false'; btnBm.querySelector('span').textContent=on?'Bookmarked':'Bookmark'; };
-  btnBm.addEventListener('click',()=>{const s=getSet(); s.has(url)?s.delete(url):s.add(url); saveSet(s); upd();});
-  btnShare.addEventListener('click', async ()=>{ const title=document.title||'Expedition'; if(navigator.share){ try{ await navigator.share({title,url}); }catch{} } else { try{ await navigator.clipboard.writeText(url); btnShare.querySelector('span').textContent='Link copied'; setTimeout(()=>btnShare.querySelector('span').textContent='Share',1400);}catch{} }});
-  btnPrint.addEventListener('click',()=>window.print());
-  upd();
-})();
+/* ---------- chips ---------- */
+const CHIP_SVG={distance:'<svg><use href="#c-distance"/></svg>',elevation:'<svg><use href="#c-elevation"/></svg>',campsite:'<svg><use href="#c-campsite"/></svg>',trail:'<svg><use href="#c-trail"/></svg>',terrain:'<svg><use href="#c-terrain"/></svg>',water:'<svg><use href="#c-water"/></svg>',safety:'<svg><use href="#c-safety"/></svg>',decision:'<svg><use href="#c-decision"/></svg>',morale:'<svg><use href="#c-morale"/></svg>',gps:'<svg><use href="#c-gps"/></svg>'};
+const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
 
-/* KV or paragraph-only (hardened) */
+/* ---------- KV or paragraph-only renderer ---------- */
 function kvOrParagraph(containerId, text){
   const el = $(containerId); if(!el) return;
-  if (text == null) { el.innerHTML=''; return; }
-  if (typeof text !== 'string') {
-    try { text = JSON.stringify(text, null, 2); } catch { text = String(text); }
-  }
+  if(!text){ el.innerHTML=''; return; }
   const lines = String(text).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   const hasKV = lines.some(l=>/^[^:]+:\s*\S/.test(l));
   if(hasKV){
     const rows=[];
-    for(const l of lines){ const m=l.match(/^([^:]+):\s*(.*)$/); if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); } }
+    for(const l of lines){
+      const m=l.match(/^([^:]+):\s*(.*)$/);
+      if(m) rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`);
+      else rows.push(`<div class="k"></div><div class="v">${l}</div>`);
+    }
     el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
   }else{
     el.innerHTML = `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
   }
 }
 
-/* Day + expedition helpers */
-const CHIP_SVG={distance:'<svg><use href="#c-distance"/></svg>',elevation:'<svg><use href="#c-elevation"/></svg>',campsite:'<svg><use href="#c-campsite"/></svg>',trail:'<svg><use href="#c-trail"/></svg>',terrain:'<svg><use href="#c-terrain"/></svg>',water:'<svg><use href="#c-water"/></svg>',safety:'<svg><use href="#c-safety"/></svg>',decision:'<svg><use href="#c-decision"/></svg>',morale:'<svg><use href="#c-morale"/></svg>',gps:'<svg><use href="#c-gps"/></svg>'};
-const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
+/* ---------- day + expedition render ---------- */
 function renderDay(day){
   let html=`<article class="day"><h4>${day.title||''}</h4>`;
   if(day.preview) html+=`<p class="preview">${day.preview}</p>`;
@@ -213,28 +216,124 @@ function renderDay(day){
   return html+`</article>`;
 }
 function renderExpeditionKV(info){
-  const kv=$('expKV'); kv.innerHTML='';
+  const kv=$('expKV'); if(!kv) return; kv.innerHTML='';
   const add=(k,v)=>{ if(v) kv.insertAdjacentHTML('beforeend', `<div class="k">${k}</div><div class="v">${v}</div>`); };
-  add("EXPEDITION ITINERARY", info.route||"");
-  add("PRIMARY OBJECTIVE", info.objective||"");
+  add("EXPEDITION ITINERARY", info.route||"Teton Crest Trail Traverse");
+  add("PRIMARY OBJECTIVE", info.objective||"End-to-End Traverse");
   add("TRIP DURATION", info.duration||"");
   add("TOTAL ESTIMATED MILEAGE", info.mileage||"");
   add("EXPERIENCE LEVEL", info.experience||"");
   add("TERRAIN TYPE", info.terrain||"");
 }
 function renderExpeditionChips(info){
-  const host=$('expChips'); const chips=[];
+  const host=$('expChips'); if(!host) return;
+  const chips=[];
   if(info.elevation) chips.push(chipHTML('elevation', info.elevation));
   if(info.trailheads) chips.push(chipHTML('trail', info.trailheads, true));
   if(info.gps) chips.push(chipHTML('gps', info.gps));
   host.innerHTML = chips.join(' ');
 }
 
-/* Data loader: ?src= override → else compute from /trip/<slug> → fallback to inline */
+/* ---------- mission_text → structured fields ---------- */
+function inflateFromMission(data){
+  const out = {...data};
+  const txt = (data.mission_text||"").replace(/\r/g,'').trim();
+  if(!txt) return out;
+
+  // split by visible dividers "⸻" while keeping order
+  const parts = txt.split(/\n?\s*⸻\s*\n?/g);
+
+  // helpers
+  const grab = (label) => {
+    const re = new RegExp(`(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*⸻|$)`,'i');
+    const m = txt.match(re);
+    return m ? m[2].trim() : "";
+  };
+
+  // Expedition KV from top block (first part)
+  {
+    const head = parts[0]||"";
+    const kv = {};
+    const getLine = (k, aliasRE) => {
+      const m = head.match(new RegExp(`${aliasRE}:\\s*(.+)`, 'i'));
+      return m ? m[1].trim() : "";
+    };
+    kv.route = getLine("EXPEDITION ITINERARY","EXPEDITION\\s+ITINERARY");
+    kv.objective = getLine("PRIMARY OBJECTIVE","PRIMARY\\s+OBJECTIVE");
+    kv.duration = getLine("TRIP DURATION","TRIP\\s+DURATION");
+    kv.mileage = getLine("TOTAL ESTIMATED MILEAGE","TOTAL\\s+ESTIMATED\\s+MILEAGE");
+    kv.experience = getLine("EXPERIENCE LEVEL","EXPERIENCE\\s+LEVEL");
+    kv.terrain = getLine("TERRAIN TYPE","TERRAIN\\s+TYPE");
+    const elev = head.match(/Cumulative elevation[^:]*:\s*([^\n]+)/i)?.[1];
+    const th = head.match(/Start and end trailhead[^:]*:\s*([^\n]+)/i)?.[1];
+    const gps = head.match(/GPS coordinates[^:]*:\s*([^\n]+)/i)?.[1];
+    out.expedition_itinerary = {
+      route: kv.route, objective: kv.objective, duration: kv.duration,
+      mileage: kv.mileage, experience: kv.experience, terrain: kv.terrain,
+      elevation: elev||"", trailheads: th||"", gps: gps||""
+    };
+  }
+
+  // Simple section grabs
+  out.permits_entry         ||= grab("PERMITS\\s*&\\s*ENTRY");
+  out.shuttle_transportation||= grab("SHUTTLE\\s*/\\s*TRANSPORTATION");
+  out.multi_trailhead       ||= grab("MULTI-TRAILHEAD\\s+LOGISTICS");
+  out.key_considerations    ||= grab("KEY\\s+CONSIDERATIONS");
+  out.permit_timeline       ||= grab("PERMIT\\s*&\\s*SHUTTLE\\s+TIMELINE");
+  out.campsite_intel        ||= grab("CAMPSITE\\s+INTEL");
+  out.weather_altitude      ||= grab("WEATHER\\s*&\\s*ALTITUDE\\s+NOTES");
+  out.gear_checklist        ||= grab("GEAR\\s+CHECKLIST");
+  out.optional_mod          ||= grab("OPTIONAL\\s+MODIFICATION");
+  out.risk_matrix           ||= grab("RISK\\s+MATRIX\\s*&\\s*HAZARD\\s+TIMELINE");
+  out.conditions_watch      ||= grab("CONDITIONS\\s+WATCH");
+  out.bailout_summary       ||= grab("BAILOUT\\s+SUMMARY");
+  out.emergency             ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
+  out.final_brief           ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
+  out.field_disclaimer      ||= grab("FIELD\\s+DISCLAIMER");
+
+  // Days (match "DAY N: ..." blocks)
+  if(!Array.isArray(out.days) || out.days.length===0){
+    const dayBlocks = txt.split(/\n\s*⸻\s*\n/g).filter(s=>/^DAY\s*\d+/i.test(s));
+    out.days = dayBlocks.map(block=>{
+      const title = block.match(/^DAY\s*\d+:\s*(.+)$/mi)?.[0]?.trim() || "";
+      const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
+      // preview: until first bullet or blank line
+      const preview = afterTitle.split(/\n-\s/)[0].split(/\n{2,}/)[0].trim();
+
+      // chips
+      const pick = (re) => (afterTitle.match(re)?.[1]||"").trim();
+      const chips = {
+        distance: pick(/Distance[^:]*:\s*([^\n]+)/i) || pick(/Distance and elevation[^:]*:\s*([^,]+,[^\n]+)/i),
+        elevation: (()=>{
+          const s = pick(/Distance and elevation[^:]*:\s*([^\n]+)/i);
+          const m = s.match(/([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i);
+          return m ? m[1] : "";
+        })(),
+        campsite: pick(/Campsite location:\s*([^\n]+)/i),
+        trail: pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
+        terrain: pick(/Terrain:\s*([^\n]+)/i),
+        water: pick(/Key water sources:\s*([^\n]+)/i),
+        safety: pick(/Safety:\s*([^\n]+)/i),
+        decision: pick(/Decision point:\s*([^\n]+)/i),
+        morale: pick(/Morale marker:\s*([^\n]+)/i)
+      };
+      // clean distance if combined
+      if(!chips.distance){
+        const dm = afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i);
+        if(dm) chips.distance = dm[1];
+      }
+      return { title, preview, chips };
+    });
+  }
+
+  return out;
+}
+
+/* ---------- data loader ---------- */
 const SUPABASE_BASE = 'https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
 function computeSrc(){
-  const qp = new URLSearchParams(location.search).get('src');
-  if (qp) return qp;
+  const qp=new URLSearchParams(location.search).get('src');
+  if(qp) return qp;
   const m = location.pathname.match(/\/trip\/([^\/?#]+)\/?$/);
   const slug = m?.[1] || 'teton-crest-trail-expedition';
   return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
@@ -243,109 +342,91 @@ async function loadData(){
   const url = computeSrc();
   console.log('EI JSON URL →', url);
   try{
-    const res = await fetch(url, { cache:'no-store', headers:{ accept:'application/json' } });
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    return await res.json();
+    const res = await fetch(url,{cache:'no-store',headers:{accept:'application/json'}});
+    if(!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    const text = await res.text();
+    const raw = safeParse(text) ?? {};
+    return raw;
   }catch(err){
     console.warn('Falling back to inline JSON:', err);
-    return safeParse(document.getElementById('ei-data')?.textContent) || {};
+    return safeParse(document.getElementById('ei-data')?.textContent)||{};
   }
 }
 
-/* Debug + guard helpers */
-function safe(fn, label){
-  try { fn(); } catch(e){ console.error('[EI] render error →', label, e); }
-}
-
-/* -------- Main -------- */
+/* ---------- Main ---------- */
 (async ()=>{
   const status=$('status');
   let data={};
-  try{ data = await loadData(); }
-  catch(e){ console.error(e); status.textContent='Could not load expedition data.'; data = safeParse(document.getElementById('ei-data')?.textContent)||{}; }
+  try{ data = await loadData(); } catch(e){ console.error(e); status.textContent='Could not load expedition data.'; }
 
-  // Optional debug overlay: add ?debug=1 to URL
-  const debugOn = new URLSearchParams(location.search).get('debug') === '1';
-  if(debugOn){
-    const pre=document.createElement('pre');
-    pre.style.cssText='white-space:pre-wrap;background:#fff;padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:12px';
-    pre.textContent=JSON.stringify(data,null,2);
-    document.querySelector('.page').insertAdjacentElement('afterbegin', pre);
-    window.__ei = data; // quick console access
-  }
+  // Augment from mission_text so the page has the fields it expects
+  data = inflateFromMission(data);
 
   // Title/meta
-  safe(() => {
-    $('title').textContent = data.title||'';
-    document.title = data.title ? `Expedition – ${data.title}` : 'Expedition – Preview';
-    $('category').textContent = data.category||'';
-    $('season').textContent = data.season||'';
-    $('location').textContent = data.location||'';
-    const d=data.date||'';
-    $('date').textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : d;
-  }, 'meta');
+  $('title').textContent = data.title||'';
+  document.title = data.title ? `Expedition – ${data.title}` : 'Expedition – Preview';
+  $('category').textContent = data.category||'';
+  $('season').textContent = data.season||'';
+  $('location').textContent = data.location||'';
+  const d=data.date||'';
+  $('date').textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : d;
 
   // Hero + credit
-  safe(() => {
-    if(data.hero_image) $('hero').src = data.hero_image;
-    const creditName=data.image_credit||''; const creditLink=data.image_link||'';
-    $('credit').innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : '';
-    if(creditLink) $('heroLink').href = creditLink;
-  }, 'hero');
+  if(data.hero_image) $('hero').src = data.hero_image;
+  const creditName=data.image_credit||''; const creditLink=data.image_link||'';
+  $('credit').innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : '';
+  if(creditLink) { const a=$('heroLink'); a.href=creditLink; a.style.pointerEvents='auto'; } else { const a=$('heroLink'); a.removeAttribute('href'); a.style.pointerEvents='none'; }
 
-  // Expedition itinerary
-  safe(() => {
-    const ei=data.expedition_itinerary||{};
-    if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain){
-      $('expItin').style.display='block';
-      renderExpeditionKV(ei);
-      renderExpeditionChips(ei);
-    }
-  }, 'expedition_itinerary');
+  // Expedition itinerary block
+  const ei = data.expedition_itinerary||{};
+  if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain||ei.elevation||ei.trailheads||ei.gps){
+    $('expItin').style.display='block';
+    renderExpeditionKV(ei);
+    renderExpeditionChips(ei);
+  }
 
-  // Ordered sections
-  safe(() => kvOrParagraph('permits_entry', data.permits_entry), 'permits_entry');
-  safe(() => kvOrParagraph('shuttle_transportation', data.shuttle_transportation), 'shuttle_transportation');
-  safe(() => { if(data.shuttle_map_url) $('shuttle_map').src = data.shuttle_map_url; }, 'shuttle_map');
-  safe(() => kvOrParagraph('permit_timeline', data.permit_timeline), 'permit_timeline');
-  safe(() => kvOrParagraph('multi_trailhead', data.multi_trailhead), 'multi_trailhead');
-  safe(() => kvOrParagraph('key_considerations', data.key_considerations), 'key_considerations');
+  // Ordered sections (now filled even if they only existed in mission_text)
+  kvOrParagraph('permits_entry', data.permits_entry);
+  kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
+  // Google Map (supports either key)
+  const mapURL = data.map_embed_url || data.shuttle_map_url || "";
+  if (mapURL && $('shuttle_map')) $('shuttle_map').src = mapURL;
+
+  kvOrParagraph('permit_timeline', data.permit_timeline);
+  kvOrParagraph('multi_trailhead', data.multi_trailhead);
+  kvOrParagraph('key_considerations', data.key_considerations);
 
   // Days
-  safe(() => {
-    const days = Array.isArray(data.days)?data.days:[];
-    $('itineraryDays').innerHTML = days.map(renderDay).join('');
-  }, 'days');
+  const days = Array.isArray(data.days)?data.days:[];
+  $('itineraryDays').innerHTML = days.map(renderDay).join('');
 
-  // GPX (Mapbox token provided)
-  safe(() => {
-    const gpxURL=data.gpx_download_link||'';
-    if(gpxURL){
-      const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({
-        token:"pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg",
-        files:[gpxURL],
-        distanceUnits:"imperial"
-      }));
-      $('gpxStudio').src=studio; $('gpxStudioLink').href=studio; $('gpxBtn').href=gpxURL; $('gpxBtn').download='route.gpx';
-      const th=[data.start_trailhead,data.end_trailhead].filter(Boolean).join(' → ');
-      if(th) $('trailheads').textContent=th;
-    }else{
-      $('gpxEmbedWrap').innerHTML=`<div style="opacity:.7;font-size:14px">No GPX URL set.</div>`;
-      $('gpxActions').style.display='none';
-    }
-  }, 'gpx');
+  // GPX
+  const gpxURL=data.gpx_download_link||'';
+  if(gpxURL){
+    const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({
+      token:"pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg",
+      files:[gpxURL],
+      distanceUnits:"imperial"
+    }));
+    $('gpxStudio').src=studio; $('gpxStudioLink').href=studio; $('gpxBtn').href=gpxURL; $('gpxBtn').download=(data.slug||'route')+'.gpx';
+    const th=[data.start_trailhead,data.end_trailhead].filter(Boolean).join(' → ');
+    if(th) $('trailheads').textContent=th;
+  }else{
+    $('gpxEmbedWrap').innerHTML=`<div style="opacity:.7;font-size:14px">No GPX URL set.</div>`;
+    $('gpxActions').style.display='none';
+  }
 
   // Remaining text sections
-  safe(() => kvOrParagraph('campsite_intel', data.campsite_intel), 'campsite_intel');
-  safe(() => kvOrParagraph('weather_altitude', data.weather_altitude), 'weather_altitude');
-  safe(() => kvOrParagraph('gear_checklist', data.gear_checklist), 'gear_checklist');
-  safe(() => kvOrParagraph('optional_mod', data.optional_mod), 'optional_mod');
-  safe(() => kvOrParagraph('risk_matrix', data.risk_matrix), 'risk_matrix');
-  safe(() => kvOrParagraph('conditions_watch', data.conditions_watch), 'conditions_watch');
-  safe(() => kvOrParagraph('bailout_summary', data.bailout_summary), 'bailout_summary');
-  safe(() => kvOrParagraph('emergency', data.emergency), 'emergency');
-  safe(() => kvOrParagraph('final_brief', data.final_brief), 'final_brief');
-  safe(() => kvOrParagraph('field_disclaimer', data.field_disclaimer), 'field_disclaimer');
+  kvOrParagraph('campsite_intel', data.campsite_intel);
+  kvOrParagraph('weather_altitude', data.weather_altitude);
+  kvOrParagraph('gear_checklist', data.gear_checklist);
+  kvOrParagraph('optional_mod', data.optional_mod);
+  kvOrParagraph('risk_matrix', data.risk_matrix);
+  kvOrParagraph('conditions_watch', data.conditions_watch);
+  kvOrParagraph('bailout_summary', data.bailout_summary);
+  kvOrParagraph('emergency', data.emergency);
+  kvOrParagraph('final_brief', data.final_brief);
+  kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
