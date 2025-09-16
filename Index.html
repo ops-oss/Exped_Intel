@@ -589,7 +589,7 @@ function inflateFromMission(data){
   .split(/\n\s*⸻\s*\n/g)
   .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
     out.days = dayBlocks.map(block=>{
-      const title = block.match(/^DAY\s*\d+:\s*(.+)$/mi)?.[0]?.trim() || "";
+      const title = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
       const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
       const preview = afterTitle.split(/\n-\s/)[0].split(/\n{2,}/)[0].trim();
       const pick = (re) => (afterTitle.match(re)?.[1]||"").trim();
