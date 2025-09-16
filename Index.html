@@ -164,6 +164,48 @@
     object-fit: cover;
   }
 }
+
+/* ===== Slide-out nav (chip style) ===== */
+#tocToggle {
+  position: fixed;
+  top: 18px; right: 18px;
+  z-index: 1000;
+  background: var(--chip-fill);
+  border: 1px solid var(--chip-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* kill blue line */
+}
+#tocToggle svg { width:18px; height:18px; stroke:currentColor; }
+
+#tocPanel {
+  position: fixed;
+  top:0; right:0; bottom:0;
+  width: 260px;
+  background: var(--paper);
+  border-left: 1px solid var(--border);
+  box-shadow: -2px 0 6px rgba(0,0,0,.08);
+  padding: 24px 18px;
+  transform: translateX(100%);
+  transition: transform .3s ease;
+  z-index: 999;
+}
+#tocPanel.open { transform: translateX(0); }
+#tocPanel h4 { margin:0 0 12px; font-size:15px; font-weight:700; }
+#tocList { display:flex; flex-direction:column; gap:10px; }
+#tocList .chip {
+  display: inline-flex; align-items:center; gap:8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border:1.5px solid var(--chip-border);
+  border-radius:6px;
+  background:var(--chip-fill);
+  cursor:pointer;
+  text-decoration:none;
+}
+#tocList .chip svg { width:16px; height:16px; stroke:currentColor; }
 </style>
 </head>
 <body>
@@ -538,5 +580,116 @@ for (const s of document.querySelectorAll('.section')) {
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
 </script>
+ <script>
+(function(){
+  // Map your visible section headers to sprite IDs you already ship
+  const TOC_ICONS = {
+    "Expedition Itinerary": "#c-trail",
+    "Permits & Entry": "#c-decision",
+    "Shuttle / Transportation": "#i-map",
+    "Permit & Shuttle Timeline": "#i-calendar",
+    "Multi-Trailhead Logistics": "#c-gps",
+    "Key Considerations": "#c-safety",
+    "Itinerary Overview": "#c-distance",
+    "GPX Route & Elevation": "#c-elevation",
+    "Campsite Intel": "#c-campsite",
+    "Weather & Altitude Notes": "#i-sun",
+    "Gear Checklist": "#c-terrain",
+    "Optional Modification": "#c-decision",
+    "Risk Matrix & Hazard Timeline": "#c-safety",
+    "Conditions Watch": "#c-water",
+    "Bailout Summary": "#c-morale",
+    "Emergency Contacts & Numbers": "#i-pin",
+    "Final Brief Summary": "#c-morale",
+    "Field Disclaimer": "#i-print"
+  };
+
+  // Collect section headers and ensure stable IDs
+  const SECTIONS = Array.from(document.querySelectorAll('.section > h3')).map(h => {
+    const id = h.id || h.textContent.trim().toLowerCase()
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$|--+/g,'-');
+    if(!h.id) h.id = id;
+    return { id, label: h.textContent.trim() };
+  });
+
+  // If already exists, do nothing (avoids duplicates on re-init)
+  if (document.querySelector('.ei-toc-toggle')) return;
+
+  // Build UI
+  const toggle = document.createElement('button');
+  toggle.className = 'ei-toc-toggle'; toggle.type='button';
+  toggle.setAttribute('aria-label','Open sections');
+  toggle.innerHTML = '<span class="lines" aria-hidden="true"></span>';
+
+  const dim = document.createElement('div'); dim.className = 'ei-toc-dim';
+
+  const panel = document.createElement('aside');
+  panel.className = 'ei-toc-panel';
+  panel.setAttribute('aria-label','Section navigation');
+
+  const title = document.createElement('div');
+  title.className = 'ei-toc-title';
+  title.textContent = 'Sections';
+
+  const list = document.createElement('ul'); list.className = 'ei-toc-list';
+
+  SECTIONS.forEach(({id,label},i)=>{
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'ei-chip';
+    a.href = '#'+id;
+
+    const iconId = TOC_ICONS[label];
+    if(iconId){
+      const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      svg.setAttribute("class","ico");
+      const use = document.createElementNS("http://www.w3.org/2000/svg","use");
+      // Both href namespaces for broad browser support
+      use.setAttributeNS("http://www.w3.org/1999/xlink","href",iconId);
+      use.setAttribute("href", iconId);
+      svg.appendChild(use);
+      a.appendChild(svg);
+    }
+
+    const span = document.createElement('span');
+    span.textContent = label;
+    a.appendChild(span);
+
+    if (i===0) a.setAttribute('aria-current','true');
+    a.addEventListener('click', () => {
+      document.body.classList.remove('ei-open');
+      setTimeout(()=>a.blur(), 150);
+    });
+
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  panel.appendChild(title);
+  panel.appendChild(list);
+  document.body.appendChild(toggle);
+  document.body.appendChild(dim);
+  document.body.appendChild(panel);
+
+  // Toggle open/close
+  const close = ()=> document.body.classList.remove('ei-open');
+  toggle.addEventListener('click', () => document.body.classList.toggle('ei-open'));
+  dim.addEventListener('click', close);
+  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+
+  // Scroll-sync highlight
+  const links = Array.from(list.querySelectorAll('a'));
+  const heads = SECTIONS.map(s => document.getElementById(s.id));
+  const obs = new IntersectionObserver((entries)=>{
+    const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    if(!visible) return;
+    const id = visible.target.id;
+    links.forEach(a => a.removeAttribute('aria-current'));
+    const hit = links.find(a => a.hash === '#'+id);
+    if(hit) hit.setAttribute('aria-current','true');
+  }, { rootMargin: '-30% 0px -60% 0px', threshold: [0,1] });
+  heads.forEach(h => obs.observe(h));
+})();
+</script> 
 </body>
 </html>
