@@ -701,13 +701,23 @@ async function loadData(){
   kvOrParagraph('final_brief', data.final_brief);
   kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
-  /* === Hide empty sections === */
-  for (const s of document.querySelectorAll('.section')) {
-    const body = s.querySelector('div[id]');
-    if (body && !body.textContent.trim()) {
-      s.style.display = 'none';
-    }
-  }
+  function hideTrulyEmptySections(){
+  document.querySelectorAll('.section').forEach(s=>{
+    // Never hide the GPX section
+    if (s.querySelector('#gpxEmbedWrap')) return;
+
+    // Look for any real content: text, chips, links, or embeds
+    const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
+      return n.innerText.trim() ||
+             n.querySelector('iframe, a, .chip');
+    });
+
+    if (!hasContent) s.style.display = 'none';
+  });
+}
+
+// Call AFTER you've filled all sections + set the GPX iframe src
+hideTrulyEmptySections();
 
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
