@@ -69,143 +69,276 @@
     .row .labelB{width:100%}
   }
   #status{font-size:12px;opacity:.7;max-width:720px;margin:0 auto}
-  /* ===== HIERARCHY + DIVIDERS ===== */
 
-/* ===== Stronger section headers ===== */
-.section {
-  margin-top: 34px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(0,0,0,.08);
-}
+  /* ===== POLISH OVERRIDES (safe to paste below your existing styles) ===== */
+  :root{
+    --hdr-size-min: 24px;
+    --hdr-size-max: 32px;
+    --hdr-letter: -0.02em;
+    --hdr-weight: 700;
+    --hdr-var: 720;
+    --hdr-bottom: 22px;
 
-.section h3 {
-  font-size: clamp(24px, 4.6vw, 28px); /* slightly bigger */
-  font-weight: 700;                    /* bold but not chunky */
-  letter-spacing: -0.02em;
-  margin: 0 0 14px;
-  scroll-margin-top: 80px;
-  line-height: 1.2;
-}
+    --div: rgba(0,0,0,.10);
+    --div-soft: rgba(0,0,0,.06);
 
-/* Optional: if using Poppins Variable, gives a finer “not too thick” look */
-.section h3 {
-  font-weight: 600; /* keep nominal */
-  font-variation-settings: "wght" 650; /* in between 600 and 700 */
-}
+    --page-pad-sm: 20px;
 
-@media (max-width:720px) {
-  .section {
-    margin-top: 28px;
-    padding-top: 14px;
+    /* Slide-out menu */
+    --toc-accent: var(--accent, #fe5733);
+    --toc-ink: var(--ink, #1e1e1e);
+    --toc-border: rgba(0,0,0,.12);
+    --toc-bg: color-mix(in srgb, var(--paper, #fff) 86%, transparent);
+    --toc-panel-w: min(420px, 86vw);
+    --toc-top-pad: 14px;
+    --toc-right-pad: 16px;
   }
-  .section h3 {
-    font-size: clamp(22px, 5.2vw, 26px);
+
+  /* Stronger section headers + divider */
+  .section{
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--div);
+  }
+  .section > h3{
+    font-size: clamp(var(--hdr-size-min), 4.8vw, var(--hdr-size-max));
+    line-height: 1.18;
+    letter-spacing: var(--hdr-letter);
+    margin: 0 0 var(--hdr-bottom);
+    font-weight: var(--hdr-weight);
+    font-variation-settings: "wght" var(--hdr-var);
+    scroll-margin-top: 80px;
+    color: color-mix(in srgb, var(--ink) 92%, #000);
+  }
+
+  /* KV grid rhythm */
+  .kv{ column-gap:1rem; row-gap:1rem; }
+  .kv .k{ font-weight:700; opacity:.9; padding-block:6px; }
+  .kv .v{ opacity:.98; padding-block:6px; }
+  .kv > :nth-child(n+3){ border-top:1px dashed var(--div-soft); }
+
+  /* Day cards harmonized with sections */
+  .day{ margin:20px 0; border-radius:12px; background:rgba(255,255,255,.38); }
+  .row{ padding:10px 0; }
+  .chip{ line-height:1.1; }
+
+  /* Mobile tweaks */
+  @media (max-width:520px){
+    .page{ padding-left: var(--page-pad-sm); padding-right: var(--page-pad-sm); }
+    .section{ margin-top:32px; padding-top:14px; }
+    .section > h3{ margin-bottom:24px; }
+  }
+  @media (min-width:960px){
+    .section{ margin-top:42px; padding-top:20px; border-top:1px solid rgba(0,0,0,.11); }
+  }
+
+  /* Reduced motion + print */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+  @media print{
+    .section, .day{ break-inside:avoid; }
+    h3{ break-after:avoid; }
+    .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
+  }
+/* --- Hero: mobile full-bleed / tall --- */
+@media (max-width: 640px){
+  .fullbleed { width: 90vw; margin-left: calc(50% - 50vw); }
+  #hero {
+    width: 90vw;
+    height: 100svh;           /* fills the small-viewport height on mobile */
+    object-fit: cover;        /* crop to fill */
+    display: block;
   }
 }
-
-/* 2) Subheads (left-side labels) read as “tier 2” */
-.row .labelB{
-  font-weight: 600;
-  opacity: .85;
-  font-size: 15px;                  /* slightly smaller than before */
-  letter-spacing: .01em;
-}
-
-/* 3) Key/Value tables: keys a touch lighter than section h3 */
-.kv .k{
-  font-weight: 700;
-  opacity: .9;
-}
-.kv .v{
-  opacity: .98;
-}
-
-/* 4) Day cards: hierarchy within the card */
-.day{
-  padding: 18px 16px;
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  background: rgba(255,255,255,.38);
-}
-.day h4{
-  font-size: clamp(20px, 4.5vw, 24px);
-  font-weight: 600;
-  letter-spacing: -0.00em;
-  margin: 0 0 8px;
-}
-.day .preview{
-  font-size: 16.5px;
-  line-height: 1.6;
-  color: rgba(30,30,30,.80);
-}
-
-/* 5) Chip spacing: both in EI block + day rows */
+/* --- Expedition Itinerary chips: give them room & wrap nicely --- */
 #expChips{
-  display: flex; flex-wrap: wrap;
-  gap: 12px 14px;
-  margin-top: 14px !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;             /* breathing room */
+  margin-top: 12px !important;
 }
-.row .chip{ margin-top: 4px; }
-
-/* 6) Optional: faint separators between long rows */
-.row:not(:first-of-type){ border-top: 1px dashed rgba(0,0,0,.06); }
-
-/* 7) Mobile tweaks */
-@media (max-width:720px){
-  .section{ margin-top: 28px; padding-top: 14px; }
-  .section h3{ font-size: clamp(20px, 5.2vw, 24px); }
-  .row .labelB{ font-size: 14.5px; }
+#expChips .chip{ margin: 0; }  /* rely on gap, not margins */
+ /* === In-page nav — chip style === */
+.ei-toc-toggle{
+  position: fixed; top: 14px; right: 16px; z-index: 999;
+  width:34px; height:34px; border-radius:8px;
+  background: rgba(255,255,255,.55);
+  backdrop-filter: saturate(120%) blur(2px);
+  border: 1px solid var(--chip2-border);
+  display:grid; place-items:center; cursor:pointer;
 }
-
-/* ===== HERO (from last step; keep or refine) ===== */
-@media (max-width:640px){
-  #hero{
-    height: min(90svh, 100vw * 4 / 3); /* tall, ~3:4 feel */
-    object-fit: cover;
-  }
+.ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
+.ei-toc-toggle .lines::before,
+.ei-toc-toggle .lines::after{
+  content:""; position:absolute; left:0; right:0; height:2px;
+  background: currentColor; border-radius:2px; transition: transform .18s ease, opacity .18s ease;
 }
+.ei-toc-toggle .lines::before{ top:0; }
+.ei-toc-toggle .lines::after{ bottom:0; }
+.ei-open .ei-toc-toggle .lines::before{ transform: translateY(6px) rotate(45deg); }
+.ei-open .ei-toc-toggle .lines::after{ transform: translateY(-6px) rotate(-45deg); }
 
-/* ===== Slide-out nav (chip style) ===== */
-#tocToggle {
-  position: fixed;
-  top: 18px; right: 18px;
-  z-index: 1000;
-  background: var(--chip-fill);
-  border: 1px solid var(--chip-border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  display: flex; align-items: center; gap: 6px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent; /* kill blue line */
-}
-#tocToggle svg { width:18px; height:18px; stroke:currentColor; }
-
-#tocPanel {
-  position: fixed;
-  top:0; right:0; bottom:0;
-  width: 260px;
-  background: var(--paper);
-  border-left: 1px solid var(--border);
-  box-shadow: -2px 0 6px rgba(0,0,0,.08);
-  padding: 24px 18px;
+.ei-toc-panel{
+  position: fixed; inset: 0 0 0 auto; width: min(420px, 86vw);
   transform: translateX(100%);
-  transition: transform .3s ease;
-  z-index: 999;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border-left: 1px solid var(--chip2-border);
+  box-shadow: -16px 0 32px rgba(0,0,0,.06);
+  z-index: 998; transition: transform .22s ease;
+  display:flex; flex-direction:column; gap:12px; padding:16px 14px;
 }
-#tocPanel.open { transform: translateX(0); }
-#tocPanel h4 { margin:0 0 12px; font-size:15px; font-weight:700; }
-#tocList { display:flex; flex-direction:column; gap:10px; }
-#tocList .chip {
-  display: inline-flex; align-items:center; gap:8px;
-  padding: 8px 12px;
-  font-size: 14px;
+.ei-open .ei-toc-panel{ transform: translateX(0); }
+
+.ei-toc-dim{
+  position: fixed; inset:0; background: rgba(0,0,0,.12);
+  opacity:0; pointer-events:none; transition: opacity .22s ease; z-index: 997;
+}
+.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
+
+.ei-toc-title{
+  font-weight:700; letter-spacing:-.01em; opacity:.85;
+  margin:2px 4px 2px;
+}
+
+/* Chip-like links */
+.ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
+.ei-toc-list a{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
   border:1.5px solid var(--chip-border);
   border-radius:6px;
-  background:var(--chip-fill);
-  cursor:pointer;
+  background: var(--chip-fill);
+  color: color-mix(in srgb, var(--ink) 78%, #000);
   text-decoration:none;
 }
-#tocList .chip svg { width:16px; height:16px; stroke:currentColor; }
+.ei-toc-list a[aria-current="true"]{
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--chip-border));
+  background: color-mix(in srgb, var(--accent) 10%, var(--chip-fill));
+  color: var(--ink);
+}
+.ei-toc-list a:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+  .ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
+  .ei-toc-toggle .lines::before,
+  .ei-toc-toggle .lines::after{
+    content:""; position:absolute; left:0; right:0; height:2px;
+    background: var(--toc-ink); border-radius:2px; transition: transform .18s ease, opacity .18s ease;
+  }
+  
+  /* === EI TOC (chip-styled slideout) — force higher specificity === */
+:root{
+  --ei-toc-blur: 2px;
+  --ei-toc-w: min(420px, 86vw);
+}
+
+/* toggle button */
+body .ei-toc-toggle{
+  position: fixed; top: 14px; right: 16px; z-index: 9999;
+  width:34px; height:34px; border-radius:8px;
+  background: rgba(255,255,255,.55);
+  -webkit-backdrop-filter: saturate(120%) blur(var(--ei-toc-blur));
+  backdrop-filter: saturate(120%) blur(var(--ei-toc-blur));
+  border: 1px solid var(--chip2-border);
+  display:grid; place-items:center; cursor:pointer;
+  color: var(--ink);
+}
+body .ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
+body .ei-toc-toggle .lines::before,
+body .ei-toc-toggle .lines::after{
+  content:""; position:absolute; left:0; right:0; height:2px;
+  background: currentColor; border-radius:2px; transition: transform .18s ease, opacity .18s ease;
+}
+body .ei-toc-toggle .lines::before{ top:0; }
+body .ei-toc-toggle .lines::after{ bottom:0; }
+body.ei-open .ei-toc-toggle .lines::before{ transform: translateY(6px) rotate(45deg); }
+body.ei-open .ei-toc-toggle .lines::after{ transform: translateY(-6px) rotate(-45deg); }
+
+/* panel + dim */
+body .ei-toc-panel{
+  position: fixed; inset: 0 0 0 auto; width: var(--ei-toc-w);
+  transform: translateX(100%);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border-left: 1px solid var(--chip2-border);
+  box-shadow: -16px 0 32px rgba(0,0,0,.06);
+  z-index: 9998; transition: transform .22s ease;
+  display:flex; flex-direction:column; gap:12px; padding:16px 14px;
+}
+body.ei-open .ei-toc-panel{ transform: translateX(0); }
+
+body .ei-toc-dim{
+  position: fixed; inset:0; background: rgba(0,0,0,.12);
+  opacity:0; pointer-events:none; transition: opacity .22s ease; z-index: 9997;
+}
+body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
+
+/* title */
+body .ei-toc-title{
+  font-weight:700; letter-spacing:-.01em; opacity:.85;
+  margin:2px 6px 4px;
+}
+
+/* chip-like links (target either class or general a) */
+body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
+body .ei-toc-list a,
+body .ei-toc-list .ei-chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
+  border:1.5px solid var(--chip-border);
+  border-radius:6px;
+  background: var(--chip-fill);
+  color: color-mix(in srgb, var(--ink) 78%, #000);
+  text-decoration:none;
+}
+body .ei-toc-list a[aria-current="true"],
+body .ei-toc-list .ei-chip[aria-current="true"]{
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--chip-border));
+  background: color-mix(in srgb, var(--accent) 10%, var(--chip-fill));
+  color: var(--ink);
+}
+body .ei-toc-list a:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* nicer anchor target + remove blue tap highlight on headings only */
+* { -webkit-tap-highlight-color: transparent; }
+.section > h3:focus { outline: none; box-shadow: none; }
+  .ei-toc-toggle .lines::before{ top:0; }
+  .ei-toc-toggle .lines::after{ bottom:0; }
+  .ei-open .ei-toc-toggle .lines::before{ transform: translateY(6px) rotate(45deg); }
+  .ei-open .ei-toc-toggle .lines::after{ transform: translateY(-6px) rotate(-45deg); }
+
+  .ei-toc-panel{
+    position: fixed; inset: 0 0 0 auto; width: var(--toc-panel-w);
+    transform: translateX(100%);
+    background: var(--toc-bg);
+    border-left: 1px solid var(--toc-border);
+    box-shadow: -20px 0 40px rgba(0,0,0,.08);
+    z-index: 998; transition: transform .22s ease;
+    display:flex; flex-direction:column; gap:12px; padding:18px 16px;
+  }
+  .ei-open .ei-toc-panel{ transform: translateX(0); }
+
+  .ei-toc-dim{
+    position: fixed; inset:0; background: rgba(0,0,0,.22);
+    opacity:0; pointer-events:none; transition: opacity .22s ease; z-index: 997;
+  }
+  .ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
+
+  .ei-toc-title{ font-weight:700; letter-spacing:-.01em; margin:2px 2px 4px; }
+  .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:6px; overflow:auto; max-height:calc(100svh - 72px); }
+  .ei-toc-list a{
+    display:flex; align-items:center; gap:10px; text-decoration:none;
+    color: rgba(0,0,0,.70); border:1px solid var(--border); background: rgba(255,255,255,.75);
+    padding:11px 12px; border-radius:10px; font-weight:600; line-height:1;
+  }
+  .ei-toc-list a[aria-current="true"]{
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, #fff);
+  }
+  .ei-toc-list a:focus-visible{ outline:2px solid var(--accent); outline-offset: 2px; }
+  .ei-open{ overflow:hidden; }
 </style>
 </head>
 <body>
@@ -320,7 +453,6 @@ const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduc
   const KEY='ei_bookmarks';
   const url=location.href.split('#')[0];
 
-  // choose writable storage (incognito-safe fallback)
   const canWrite = (s)=>{ try{ s.setItem('__t','1'); s.removeItem('__t'); return true; }catch{ return false; } };
   const store = canWrite(localStorage) ? localStorage : (canWrite(sessionStorage) ? sessionStorage : null);
   let mem = new Set();
@@ -569,59 +701,208 @@ async function loadData(){
   kvOrParagraph('final_brief', data.final_brief);
   kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
-/* === Hide empty sections === */
-for (const s of document.querySelectorAll('.section')) {
-  const body = s.querySelector('div[id]');
-  if (body && !body.textContent.trim()) {
-    s.style.display = 'none';
+  /* === Hide empty sections === */
+  for (const s of document.querySelectorAll('.section')) {
+    const body = s.querySelector('div[id]');
+    if (body && !body.textContent.trim()) {
+      s.style.display = 'none';
+    }
   }
-}
-  
+
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
-</script>
- <script>
-(function(){
-  // Map your visible section headers to sprite IDs you already ship
-  const TOC_ICONS = {
-    "Expedition Itinerary": "#c-trail",
-    "Permits & Entry": "#c-decision",
-    "Shuttle / Transportation": "#i-map",
-    "Permit & Shuttle Timeline": "#i-calendar",
-    "Multi-Trailhead Logistics": "#c-gps",
-    "Key Considerations": "#c-safety",
-    "Itinerary Overview": "#c-distance",
-    "GPX Route & Elevation": "#c-elevation",
-    "Campsite Intel": "#c-campsite",
-    "Weather & Altitude Notes": "#i-sun",
-    "Gear Checklist": "#c-terrain",
-    "Optional Modification": "#c-decision",
-    "Risk Matrix & Hazard Timeline": "#c-safety",
-    "Conditions Watch": "#c-water",
-    "Bailout Summary": "#c-morale",
-    "Emergency Contacts & Numbers": "#i-pin",
-    "Final Brief Summary": "#c-morale",
-    "Field Disclaimer": "#i-print"
-  };
 
-  // Collect section headers and ensure stable IDs
-  const SECTIONS = Array.from(document.querySelectorAll('.section > h3')).map(h => {
-    const id = h.id || h.textContent.trim().toLowerCase()
-      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$|--+/g,'-');
-    if(!h.id) h.id = id;
-    return { id, label: h.textContent.trim() };
+/* ===== In-page nav: build the two-line toggle & panel from your h3s ===== */
+(() => {
+  const heads = [...document.querySelectorAll('.section > h3')];
+  if (!heads.length) return;
+
+  // Ensure stable ids + focusability
+  const sections = heads.map(h3 => {
+    let id = h3.id || h3.textContent.trim().toLowerCase()
+      .replace(/[^a-z0-9\s\-&]+/g,'')
+      .replace(/\s*&\s*/g,'-and-')
+      .replace(/\s+/g,'-');
+    if (!id) id = 'sec-' + Math.random().toString(36).slice(2,7);
+    if (document.getElementById(id) && h3.id !== id) { id += '-' + Math.random().toString(36).slice(2,4); }
+    h3.id = id;
+    if (!h3.hasAttribute('tabindex')) h3.setAttribute('tabindex','-1');
+    return { id, title: h3.textContent.trim() };
   });
 
-  // If already exists, do nothing (avoids duplicates on re-init)
+  // UI nodes
+  const btn = document.createElement('button');
+  btn.className = 'ei-toc-toggle';
+  btn.type = 'button';
+  btn.setAttribute('aria-label','Open section menu');
+  btn.innerHTML = '<span class="lines" aria-hidden="true"></span>';
+
+  const panel = document.createElement('aside');
+  panel.className = 'ei-toc-panel';
+  panel.setAttribute('aria-label','Sections');
+  panel.innerHTML = '<div class="ei-toc-title">Sections</div><ul class="ei-toc-list" role="list"></ul>';
+
+  const dim = document.createElement('div'); dim.className = 'ei-toc-dim';
+
+  // Populate list
+  const ul = panel.querySelector('.ei-toc-list');
+  sections.forEach(({id, title}) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#'+id;
+    a.textContent = title;
+    a.addEventListener('click', () => close(true));
+    li.appendChild(a); ul.appendChild(li);
+  });
+
+  document.body.append(btn, panel, dim);
+
+  // Open/close
+  const open = () => {
+    document.documentElement.classList.add('ei-open');
+    btn.setAttribute('aria-label','Close section menu');
+    (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
+  };
+  const close = (focusHeading) => {
+    document.documentElement.classList.remove('ei-open');
+    btn.setAttribute('aria-label','Open section menu');
+    if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
+  };
+
+  btn.addEventListener('click', () =>
+    document.documentElement.classList.contains('ei-open') ? close() : open()
+  );
+  dim.addEventListener('click', () => close());
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  // Active link highlight while scrolling
+  const links = [...panel.querySelectorAll('a')];
+  const byId = Object.fromEntries(sections.map(s => [s.id, links.find(a => a.hash === '#'+s.id)]));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const link = byId[entry.target.id];
+      if (!link) return;
+      if (entry.isIntersecting) {
+        links.forEach(a => a.removeAttribute('aria-current'));
+        link.setAttribute('aria-current','true');
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.001] });
+  heads.forEach(h => io.observe(h));
+})();
+</script>
+
+<!-- ========= Inline JSON sample so it renders instantly ========= -->
+<script id="ei-data" type="application/json">
+{
+  "title": "Teton Crest Trail Expedition",
+  "category": "Backpacking",
+  "season": "July–September",
+  "location": "Grand Teton National Park, WY",
+  "date": "2025-08-12",
+  "hero_image": "https://images.unsplash.com/photo-1508264165352-258a6b0c4b52?q=80&w=1600&auto=format&fit=crop",
+  "image_credit": "Photo: Grant Ritchie (Unsplash)",
+  "image_link": "https://unsplash.com/photos/green-grass-field-near-mountain-x1w_Q78xOEU",
+  "expedition_itinerary": {
+    "route": "Teton Crest Trail Traverse",
+    "objective": "End-to-End Traverse",
+    "duration": "4 days / 3 nights",
+    "mileage": "40–45 miles",
+    "experience": "Intermediate",
+    "terrain": "Alpine meadows, granite passes",
+    "elevation": "+7,800 ft / -7,600 ft",
+    "trailheads": "Phillips Pass → String Lake",
+    "gps": "43.655, -110.860"
+  },
+  "gpx_download_link": "https://example.com/tct-starter.gpx",
+  "start_trailhead": "Phillips Pass",
+  "end_trailhead": "String Lake",
+  "map_embed_url": "https://www.openstreetmap.org/export/embed.html?bbox=-110.95%2C43.55%2C-110.70%2C43.80&layer=mapnik",
+  "permits_entry": "Type: Wilderness permit\\nBooking: Opens 6 months out\\nPick-up: Moose Visitor Center (ID required)",
+  "shuttle_transportation": "Park at String Lake. Shuttle from String Lake to Phillips Pass trailhead (reserve ahead).",
+  "permit_timeline": "- 6 months out: Submit permit request\\n- 1 week out: Confirm group + pickup window\\n- Day 0: Collect permit; brief on bear activity",
+  "multi_trailhead": "One-way shuttle recommended; alternative: self-shuttle with two vehicles.",
+  "key_considerations": "- Bear canisters required\\n- Afternoon storms common; aim to crest passes by 2pm",
+  "days": [
+    {
+      "title": "DAY 1: Phillips Pass TH to Marion Lake",
+      "preview": "Warm-up traverse with big meadows and first Grand views.",
+      "chips": {
+        "distance": "9.8 mi",
+        "elevation": "+2,100 ft / -620 ft",
+        "campsite": "Marion Lake (permit)",
+        "trail": "Teton Crest Trail",
+        "terrain": "Alpine meadows, granite slabs",
+        "water": "Creeks at mi 4.5 & 8.7",
+        "safety": "Bear canisters; hang time awareness",
+        "decision": "Weather check near patrol hut",
+        "morale": "Sunset above Marion"
+      }
+    },
+    {
+      "title": "DAY 2: Marion Lake to Death Canyon Shelf",
+      "preview": "High-country cruise; wide-open shelf camping.",
+      "chips": {
+        "distance": "10.6 mi",
+        "elevation": "+1,950 ft / -1,100 ft",
+        "campsite": "Death Canyon Shelf (zones)",
+        "trail": "TCT + Alaska Basin Overlook spur (opt.)",
+        "terrain": "Open plateau, talus bands",
+        "water": "Reliable streams on shelf",
+        "safety": "Afternoon lightning risk",
+        "decision": "Bail via tram if storms build",
+        "morale": "Milky Way viewing"
+      }
+    },
+    {
+      "title": "DAY 3: Death Canyon Shelf to North Fork Cascade",
+      "preview": "Cathedral views; optional Hurricane Pass side trip.",
+      "chips": {
+        "distance": "11.2 mi",
+        "elevation": "+2,450 ft / -2,300 ft",
+        "campsite": "North Fork Cascade (zones)",
+        "trail": "TCT mainline",
+        "terrain": "Pass travel, glacial cirques",
+        "water": "Multiple crossings; treat",
+        "safety": "Snow patches linger early season",
+        "decision": "Skip side trips in poor weather",
+        "morale": "Grand Teton reveal"
+      }
+    }
+  ],
+  "campsite_intel": "Best wind protection at Marion Lake SE side; Shelf has exposed sites—use rock walls.",
+  "weather_altitude": "Typical: 75°F/40°F; expect rapid shifts. UV high at elevation.",
+  "gear_checklist": "- Bear canister\\n- Rain layers\\n- Warm midlayer\\n- Map + compass + GPX\\n- Sun and storm kit",
+  "optional_mod": "Add Hurricane Pass spur (+3 mi).",
+  "risk_matrix": "Lightning: Medium; Snow travel: Low–Med (early season); Water crossings: Low.",
+  "conditions_watch": "- Snow cornices on Hurricane Pass (early July)\\n- Bridge repairs near Cascade Creek",
+  "bailout_summary": "- Tram bailout on Day 2\\n- Cascade Canyon exit to Jenny Lake shuttle",
+  "emergency": "Teton Dispatch: 307-739-3301\\nPark Info: 307-739-3300",
+  "final_brief": "Early starts, steady pacing, turn-around time 2pm on pass days.",
+  "field_disclaimer": "Backcountry travel is inherently risky. You are responsible for your decisions."
+}
+</script>
+  <script>
+(function(){
+  const SECTIONS = Array.from(document.querySelectorAll('.section > h3'))
+    .map(h => {
+      const id = h.id || h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$|--+/g,'-');
+      if(!h.id) h.id = id;
+      return { id, label: h.textContent.trim() };
+    });
+
+  // If we already inserted one, bail.
   if (document.querySelector('.ei-toc-toggle')) return;
 
-  // Build UI
+  // Build DOM
   const toggle = document.createElement('button');
-  toggle.className = 'ei-toc-toggle'; toggle.type='button';
+  toggle.className = 'ei-toc-toggle';
+  toggle.type = 'button';
   toggle.setAttribute('aria-label','Open sections');
   toggle.innerHTML = '<span class="lines" aria-hidden="true"></span>';
 
-  const dim = document.createElement('div'); dim.className = 'ei-toc-dim';
+  const dim = document.createElement('div');
+  dim.className = 'ei-toc-dim';
 
   const panel = document.createElement('aside');
   panel.className = 'ei-toc-panel';
@@ -631,36 +912,20 @@ for (const s of document.querySelectorAll('.section')) {
   title.className = 'ei-toc-title';
   title.textContent = 'Sections';
 
-  const list = document.createElement('ul'); list.className = 'ei-toc-list';
+  const list = document.createElement('ul');
+  list.className = 'ei-toc-list';
 
   SECTIONS.forEach(({id,label},i)=>{
     const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.className = 'ei-chip';
+    const a = document.createElement('a');          // chip-like by CSS
+    a.className = 'ei-chip';                        // explicit class in case you prefer targeting
     a.href = '#'+id;
-
-    const iconId = TOC_ICONS[label];
-    if(iconId){
-      const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-      svg.setAttribute("class","ico");
-      const use = document.createElementNS("http://www.w3.org/2000/svg","use");
-      // Both href namespaces for broad browser support
-      use.setAttributeNS("http://www.w3.org/1999/xlink","href",iconId);
-      use.setAttribute("href", iconId);
-      svg.appendChild(use);
-      a.appendChild(svg);
-    }
-
-    const span = document.createElement('span');
-    span.textContent = label;
-    a.appendChild(span);
-
+    a.textContent = label;
     if (i===0) a.setAttribute('aria-current','true');
     a.addEventListener('click', () => {
       document.body.classList.remove('ei-open');
-      setTimeout(()=>a.blur(), 150);
+      setTimeout(()=>a.blur(), 200);
     });
-
     li.appendChild(a);
     list.appendChild(li);
   });
@@ -671,17 +936,23 @@ for (const s of document.querySelectorAll('.section')) {
   document.body.appendChild(dim);
   document.body.appendChild(panel);
 
-  // Toggle open/close
+  // Toggle handlers
   const close = ()=> document.body.classList.remove('ei-open');
-  toggle.addEventListener('click', () => document.body.classList.toggle('ei-open'));
+  const open  = ()=> document.body.classList.add('ei-open');
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('ei-open');
+  });
   dim.addEventListener('click', close);
   window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
 
-  // Scroll-sync highlight
+  // Current-section highlight on scroll
   const links = Array.from(list.querySelectorAll('a'));
   const heads = SECTIONS.map(s => document.getElementById(s.id));
   const obs = new IntersectionObserver((entries)=>{
-    const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    // pick the one nearest top & intersecting
+    const visible = entries
+      .filter(e=>e.isIntersecting)
+      .sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
     if(!visible) return;
     const id = visible.target.id;
     links.forEach(a => a.removeAttribute('aria-current'));
@@ -690,6 +961,6 @@ for (const s of document.querySelectorAll('.section')) {
   }, { rootMargin: '-30% 0px -60% 0px', threshold: [0,1] });
   heads.forEach(h => obs.observe(h));
 })();
-</script> 
+</script>
 </body>
 </html>
