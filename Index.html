@@ -536,9 +536,13 @@ function renderExpeditionChips(info){
 
 /* ---------- mission_text → structured fields ---------- */
 function inflateFromMission(data){
-  const out = {...data};
-  const txt = (data.mission_text||"").replace(/\r/g,'').trim();
-  if(!txt) return out;
+  const out = { ...data };
+  const txt = (data.mission_text || "")
+    .replace(/\r/g, '')
+    .replace(/\u2013/g, '-')  // en dash → hyphen
+    .replace(/\u2014/g, '-')  // em dash → hyphen
+    .trim();
+  if (!txt) return out;
 
   const parts = txt.split(/\n?\s*⸻\s*\n?/g);
   const grab = (label) => {
@@ -581,7 +585,9 @@ function inflateFromMission(data){
   out.field_disclaimer      ||= grab("FIELD\\s+DISCLAIMER");
 
   if(!Array.isArray(out.days) || out.days.length===0){
-    const dayBlocks = txt.split(/\n\s*⸻\s*\n/g).filter(s=>/^DAY\s*\d+/i.test(s));
+   const dayBlocks = txt
+  .split(/\n\s*⸻\s*\n/g)
+  .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
     out.days = dayBlocks.map(block=>{
       const title = block.match(/^DAY\s*\d+:\s*(.+)$/mi)?.[0]?.trim() || "";
       const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
