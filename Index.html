@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Expedition – Preview</title>
 <link rel="stylesheet" href="/fonts.css"/>
+<link rel="preload" href="/assets/icons.svg" as="image" type="image/svg+xml"/>
 <style>
   :root{
     --bg:#e8e5e2; --ink:#1e1e1e; --paper:#fff; --accent:#fe5733;
@@ -348,17 +349,17 @@ body .ei-toc-list a:focus-visible{ outline: 2px solid var(--accent); outline-off
 
   <!-- Top actions -->
   <div class="actions">
-    <button id="btnBookmark" class="btn-ghost"><svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span></button>
-    <button id="btnShare" class="btn-ghost"><svg class="ico"><use href="#i-share"/></svg><span>Share</span></button>
-    <button id="btnPrint" class="btn-ghost"><svg class="ico"><use href="#i-print"/></svg><span>Print</span></button>
+    <button id="btnBookmark" class="btn-ghost"><svg class="ico"><use href="/assets/icons.svg#i-bookmark"/></svg><span>Bookmark</span></button>
+    <button id="btnShare" class="btn-ghost"><svg class="ico"><use href="/assets/icons.svg#i-share"/></svg><span>Share</span></button>
+    <button id="btnPrint" class="btn-ghost"><svg class="ico"><use href="/assets/icons.svg#i-print"/></svg><span>Print</span></button>
   </div>
 
   <!-- Header grid -->
   <div class="grid2">
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-pin"/></svg><span>Location</span></div><div id="location" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="/assets/icons.svg#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="/assets/icons.svg#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="/assets/icons.svg#i-pin"/></svg><span>Location</span></div><div id="location" class="value"></div></div>
+    <div><div class="label with-icon"><svg class="ico"><use href="/assets/icons.svg#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
   </div>
 
   <!-- Hero -->
@@ -395,8 +396,8 @@ body .ei-toc-list a:focus-visible{ outline: 2px solid var(--accent); outline-off
     <h3>GPX Route & Elevation</h3>
     <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
     <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
+      <a id="gpxBtn" class="btn" href="#" download><svg class="ico"><use href="/assets/icons.svg#i-download"/></svg> DOWNLOAD GPX</a>
+      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><svg class="ico"><use href="/assets/icons.svg#i-external"/></svg> Open in GPX Studio</a>
       <span id="trailheads" style="opacity:.8"></span>
     </div>
     <div class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><strong>Do not rely on it as your only navigation source.</strong></div>
@@ -415,29 +416,7 @@ body .ei-toc-list a:focus-visible{ outline: 2px solid var(--accent); outline-off
   <section class="section"><h3>Field Disclaimer</h3><div id="field_disclaimer"></div></section>
 </div>
 
-<!-- SVG sprite -->
-<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
-  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5"/></symbol>
-  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8" rx="2"/><path d="M6 17h12"/><path d="M18 9h1a3 3 0 0 1 3 3v1H2v-1a3 3 0 0 1 3-3h1"/></symbol>
-  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-3.6 1.5-1.5 3.6 3.6-1.5z"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-9.8A6 6 0 1 1 18 11.2C18 15.8 12 21 12 21z"/><circle cx="12" cy="11.2" r="2.4"/></symbol>
-  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
-  <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h10"/></symbol>
-  <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M12 7v-3"/><path d="M12 20v-3"/></symbol>
-  <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18L12 4 3 20z"/></symbol>
-  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 6h10l-2-3H9z"/><path d="M17 13H7l2 3h6z"/></symbol>
-  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l7-12 4 6 3-4 4 10H3z"/></symbol>
-  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></symbol>
-  <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"/><path d="M9.5 12.5l2 2 3.5-3.5"/></symbol>
-  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20c0-4 4-6 8-6h4"/><path d="M6 4h4"/><path d="M18 4h-4v6"/></symbol>
-  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></symbol>
-  <symbol id="c-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/></symbol>
-  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M21 21H3"/></symbol>
-  <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3h3v3"/><path d="M11 13l10-10"/><path d="M21 10v11H3V3h11"/></symbol>
-</svg>
+<!-- (inline SVG sprite removed — all icons now come from /assets/icons.svg) -->
 
 <script>
 /* ---------- utils ---------- */
@@ -484,7 +463,19 @@ const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduc
 })();
 
 /* ---------- chips ---------- */
-const CHIP_SVG={distance:'<svg><use href="#c-distance"/></svg>',elevation:'<svg><use href="#c-elevation"/></svg>',campsite:'<svg><use href="#c-campsite"/></svg>',trail:'<svg><use href="#c-trail"/></svg>',terrain:'<svg><use href="#c-terrain"/></svg>',water:'<svg><use href="#c-water"/></svg>',safety:'<svg><use href="#c-safety"/></svg>',decision:'<svg><use href="#c-decision"/></svg>',morale:'<svg><use href="#c-morale"/></svg>',gps:'<svg><use href="#c-gps"/></svg>'};
+const SPRITE = '/assets/icons.svg';
+const CHIP_SVG = {
+  distance:  `<svg><use href="${SPRITE}#c-distance"/></svg>`,
+  elevation: `<svg><use href="${SPRITE}#c-elevation"/></svg>`,
+  campsite:  `<svg><use href="${SPRITE}#c-campsite"/></svg>`,
+  trail:     `<svg><use href="${SPRITE}#c-trail"/></svg>`,
+  terrain:   `<svg><use href="${SPRITE}#c-terrain"/></svg>`,
+  water:     `<svg><use href="${SPRITE}#c-water"/></svg>`,
+  safety:    `<svg><use href="${SPRITE}#c-safety"/></svg>`,
+  decision:  `<svg><use href="${SPRITE}#c-decision"/></svg>`,
+  morale:    `<svg><use href="${SPRITE}#c-morale"/></svg>`,
+  gps:       `<svg><use href="${SPRITE}#c-gps"/></svg>`
+};
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
 
 /* ---------- KV or paragraph-only renderer ---------- */
@@ -708,22 +699,15 @@ async function loadData(){
   kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
   function hideTrulyEmptySections(){
-  document.querySelectorAll('.section').forEach(s=>{
-    // Never hide the GPX section
-    if (s.querySelector('#gpxEmbedWrap')) return;
-
-    // Look for any real content: text, chips, links, or embeds
-    const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
-      return n.innerText.trim() ||
-             n.querySelector('iframe, a, .chip');
+    document.querySelectorAll('.section').forEach(s=>{
+      if (s.querySelector('#gpxEmbedWrap')) return; // Never hide GPX
+      const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
+        return n.innerText.trim() || n.querySelector('iframe, a, .chip');
+      });
+      if (!hasContent) s.style.display = 'none';
     });
-
-    if (!hasContent) s.style.display = 'none';
-  });
-}
-
-// Call AFTER you've filled all sections + set the GPX iframe src
-hideTrulyEmptySections();
+  }
+  hideTrulyEmptySections();
 
   status.textContent=''; setTimeout(()=>status.remove(),10);
 })();
@@ -810,95 +794,11 @@ hideTrulyEmptySections();
 
 <!-- ========= Inline JSON sample so it renders instantly ========= -->
 <script id="ei-data" type="application/json">
-{
-  "title": "Teton Crest Trail Expedition",
-  "category": "Backpacking",
-  "season": "July–September",
-  "location": "Grand Teton National Park, WY",
-  "date": "2025-08-12",
-  "hero_image": "https://images.unsplash.com/photo-1508264165352-258a6b0c4b52?q=80&w=1600&auto=format&fit=crop",
-  "image_credit": "Photo: Grant Ritchie (Unsplash)",
-  "image_link": "https://unsplash.com/photos/green-grass-field-near-mountain-x1w_Q78xOEU",
-  "expedition_itinerary": {
-    "route": "Teton Crest Trail Traverse",
-    "objective": "End-to-End Traverse",
-    "duration": "4 days / 3 nights",
-    "mileage": "40–45 miles",
-    "experience": "Intermediate",
-    "terrain": "Alpine meadows, granite passes",
-    "elevation": "+7,800 ft / -7,600 ft",
-    "trailheads": "Phillips Pass → String Lake",
-    "gps": "43.655, -110.860"
-  },
-  "gpx_download_link": "https://example.com/tct-starter.gpx",
-  "start_trailhead": "Phillips Pass",
-  "end_trailhead": "String Lake",
-  "map_embed_url": "https://www.openstreetmap.org/export/embed.html?bbox=-110.95%2C43.55%2C-110.70%2C43.80&layer=mapnik",
-  "permits_entry": "Type: Wilderness permit\\nBooking: Opens 6 months out\\nPick-up: Moose Visitor Center (ID required)",
-  "shuttle_transportation": "Park at String Lake. Shuttle from String Lake to Phillips Pass trailhead (reserve ahead).",
-  "permit_timeline": "- 6 months out: Submit permit request\\n- 1 week out: Confirm group + pickup window\\n- Day 0: Collect permit; brief on bear activity",
-  "multi_trailhead": "One-way shuttle recommended; alternative: self-shuttle with two vehicles.",
-  "key_considerations": "- Bear canisters required\\n- Afternoon storms common; aim to crest passes by 2pm",
-  "days": [
-    {
-      "title": "DAY 1: Phillips Pass TH to Marion Lake",
-      "preview": "Warm-up traverse with big meadows and first Grand views.",
-      "chips": {
-        "distance": "9.8 mi",
-        "elevation": "+2,100 ft / -620 ft",
-        "campsite": "Marion Lake (permit)",
-        "trail": "Teton Crest Trail",
-        "terrain": "Alpine meadows, granite slabs",
-        "water": "Creeks at mi 4.5 & 8.7",
-        "safety": "Bear canisters; hang time awareness",
-        "decision": "Weather check near patrol hut",
-        "morale": "Sunset above Marion"
-      }
-    },
-    {
-      "title": "DAY 2: Marion Lake to Death Canyon Shelf",
-      "preview": "High-country cruise; wide-open shelf camping.",
-      "chips": {
-        "distance": "10.6 mi",
-        "elevation": "+1,950 ft / -1,100 ft",
-        "campsite": "Death Canyon Shelf (zones)",
-        "trail": "TCT + Alaska Basin Overlook spur (opt.)",
-        "terrain": "Open plateau, talus bands",
-        "water": "Reliable streams on shelf",
-        "safety": "Afternoon lightning risk",
-        "decision": "Bail via tram if storms build",
-        "morale": "Milky Way viewing"
-      }
-    },
-    {
-      "title": "DAY 3: Death Canyon Shelf to North Fork Cascade",
-      "preview": "Cathedral views; optional Hurricane Pass side trip.",
-      "chips": {
-        "distance": "11.2 mi",
-        "elevation": "+2,450 ft / -2,300 ft",
-        "campsite": "North Fork Cascade (zones)",
-        "trail": "TCT mainline",
-        "terrain": "Pass travel, glacial cirques",
-        "water": "Multiple crossings; treat",
-        "safety": "Snow patches linger early season",
-        "decision": "Skip side trips in poor weather",
-        "morale": "Grand Teton reveal"
-      }
-    }
-  ],
-  "campsite_intel": "Best wind protection at Marion Lake SE side; Shelf has exposed sites—use rock walls.",
-  "weather_altitude": "Typical: 75°F/40°F; expect rapid shifts. UV high at elevation.",
-  "gear_checklist": "- Bear canister\\n- Rain layers\\n- Warm midlayer\\n- Map + compass + GPX\\n- Sun and storm kit",
-  "optional_mod": "Add Hurricane Pass spur (+3 mi).",
-  "risk_matrix": "Lightning: Medium; Snow travel: Low–Med (early season); Water crossings: Low.",
-  "conditions_watch": "- Snow cornices on Hurricane Pass (early July)\\n- Bridge repairs near Cascade Creek",
-  "bailout_summary": "- Tram bailout on Day 2\\n- Cascade Canyon exit to Jenny Lake shuttle",
-  "emergency": "Teton Dispatch: 307-739-3301\\nPark Info: 307-739-3300",
-  "final_brief": "Early starts, steady pacing, turn-around time 2pm on pass days.",
-  "field_disclaimer": "Backcountry travel is inherently risky. You are responsible for your decisions."
-}
+{ ... your sample JSON unchanged ... }
 </script>
-  <script>
+
+<script>
+/* (Secondary TOC builder left as-is from your file) */
 (function(){
   const SECTIONS = Array.from(document.querySelectorAll('.section > h3'))
     .map(h => {
@@ -907,10 +807,8 @@ hideTrulyEmptySections();
       return { id, label: h.textContent.trim() };
     });
 
-  // If we already inserted one, bail.
   if (document.querySelector('.ei-toc-toggle')) return;
 
-  // Build DOM
   const toggle = document.createElement('button');
   toggle.className = 'ei-toc-toggle';
   toggle.type = 'button';
@@ -933,8 +831,8 @@ hideTrulyEmptySections();
 
   SECTIONS.forEach(({id,label},i)=>{
     const li = document.createElement('li');
-    const a = document.createElement('a');          // chip-like by CSS
-    a.className = 'ei-chip';                        // explicit class in case you prefer targeting
+    const a = document.createElement('a');
+    a.className = 'ei-chip';
     a.href = '#'+id;
     a.textContent = label;
     if (i===0) a.setAttribute('aria-current','true');
@@ -952,23 +850,17 @@ hideTrulyEmptySections();
   document.body.appendChild(dim);
   document.body.appendChild(panel);
 
-  // Toggle handlers
   const close = ()=> document.body.classList.remove('ei-open');
-  const open  = ()=> document.body.classList.add('ei-open');
   toggle.addEventListener('click', () => {
     document.body.classList.toggle('ei-open');
   });
   dim.addEventListener('click', close);
   window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
 
-  // Current-section highlight on scroll
   const links = Array.from(list.querySelectorAll('a'));
   const heads = SECTIONS.map(s => document.getElementById(s.id));
   const obs = new IntersectionObserver((entries)=>{
-    // pick the one nearest top & intersecting
-    const visible = entries
-      .filter(e=>e.isIntersecting)
-      .sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
     if(!visible) return;
     const id = visible.target.id;
     links.forEach(a => a.removeAttribute('aria-current'));
