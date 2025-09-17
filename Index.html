@@ -505,7 +505,7 @@ const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduc
   const store = canWrite(localStorage) ? localStorage : (canWrite(sessionStorage) ? sessionStorage : null);
   let mem = new Set();
   const read = ()=> store ? new Set(JSON.parse(store.getItem(KEY)||'[]')) : mem;
-  const write = (set)=> { if(store){ try{ store.setItem(KEY, JSON.stringify([...set])); return; }catch{} } mem = new Set(set); };
+  const write = (set)=> { if(store){ try{ store.setItem(KEY, JSON.stringify([...set])); return; }catch{} } mem = a new Set(set); };
 
   const setUI = (on)=>{ btnBm.dataset.active = on ? 'true' : 'false'; btnBm.setAttribute('aria-pressed', on?'true':'false'); btnBm.querySelector('span').textContent = on ? 'Bookmarked' : 'Bookmark'; };
   setUI(read().has(url));
