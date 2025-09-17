@@ -1108,7 +1108,29 @@ hideTrulyEmptySections();
     <circle cx="12" cy="12" r="2"/>
     <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/>
   </symbol>
-</svg>
+  
+<script>
+(function(){
+  const XLINK = 'http://www.w3.org/1999/xlink';
+  function fix(root){
+    root.querySelectorAll('use[href^="#"]:not([xlink\\:href])').forEach(u=>{
+      try{ u.setAttributeNS(XLINK, 'xlink:href', u.getAttribute('href')); }catch(e){}
+    });
+  }
+  const boot = () => fix(document);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else boot();
+
+  // Also patch any <use> nodes added later (your chip HTML)
+  new MutationObserver(muts=>{
+    for (const m of muts){
+      for (const n of m.addedNodes||[]){
+        if (n.nodeType === 1) fix(n);
+      }
+    }
+  }).observe(document.documentElement, { subtree:true, childList:true });
+})();
 </script>
 </body>
 </html>
