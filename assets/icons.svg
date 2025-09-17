@@ -1,200 +1,84 @@
 <!-- /assets/icons.svg -->
-<svg aria-hidden="true"
-     xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     style="position:absolute;width:0;height:0;overflow:hidden">
-  <!-- ===== UI: top actions ===== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!-- ===== Header/action icons ===== -->
   <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M6 3h12a2 2 0 0 1 2 2v16l-8-5-8 5V5a2 2 0 0 1 2-2z"/>
+    <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/>
   </symbol>
 
   <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="18" cy="5" r="3"/>
-    <circle cx="6" cy="12" r="3"/>
-    <circle cx="18" cy="19" r="3"/>
-    <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
+    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+    <path d="M8.6 13.5 15.4 16.5M15.4 7.5 8.6 10.5"/>
   </symbol>
 
   <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="6 9 6 3 18 3 18 9"/>
-    <rect x="6" y="14" width="12" height="7" rx="2"/>
-    <path d="M6 18H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1"/>
+    <path d="M7 8V3h10v5"/><rect x="5" y="12" width="14" height="8" rx="2"/><path d="M7 12h10M7 16h10"/>
   </symbol>
 
-  <!-- ===== Meta header icons ===== -->
   <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="9"/>
-    <polygon points="15 9 13 15 9 13 15 9"/>
+    <circle cx="12" cy="12" r="10"/><path d="m16 8-3.5 7.5L8 16l4-8z"/>
   </symbol>
 
   <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="4"/>
-    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M4.6 19.4l1.4-1.4M18 6l1.4-1.4"/>
+    <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l-1.5-1.5M20.5 20.5 19 19M5 19l-1.5 1.5M20.5 3.5 19 5"/>
   </symbol>
 
   <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 22s-7-5-7-11a7 7 0 1 1 14 0c0 6-7 11-7 11z"/>
-    <circle cx="12" cy="11" r="3"/>
+    <path d="M12 22s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"/><circle cx="12" cy="10" r="3"/>
   </symbol>
 
   <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="5" width="18" height="16" rx="2"/>
-    <path d="M16 3v4M8 3v4M3 11h18"/>
+    <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>
   </symbol>
 
   <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 4v10"/>
-    <path d="M7 10l5 5 5-5"/>
-    <path d="M4 19h16"/>
+    <path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 20h16"/>
   </symbol>
 
   <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 3h7v7"/>
-    <path d="M10 14L21 3"/>
-    <rect x="3" y="7" width="14" height="14" rx="2"/>
+    <path d="M14 4h6v6"/><path d="M10 14 20 4"/><path d="M18 14v6H4V6h6"/>
   </symbol>
 
-  <!-- ===== Section header icons (h-*) ===== -->
-  <symbol id="h-permits" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="4" y="4" width="12" height="16" rx="2"/>
-    <path d="M8 8h6M8 12h6M8 16h4"/>
-    <path d="M18 8h2M18 12h2M18 16h2"/>
-  </symbol>
-
-  <symbol id="h-shuttle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="7" cy="17" r="2"/>
-    <circle cx="17" cy="17" r="2"/>
-    <path d="M5 17h12M3 12h18M5 12V8a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v4"/>
-  </symbol>
-
-  <symbol id="h-timeline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="6" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="6" r="2"/>
-    <path d="M8 16l2-2M14 10l2-2"/>
-  </symbol>
-
-  <symbol id="h-multitrail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 18h7a4 4 0 0 0 4-4V6"/>
-    <path d="M21 6h-7a4 4 0 0 0-4 4v8"/>
-  </symbol>
-
-  <symbol id="h-considerations" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="4" width="18" height="16" rx="2"/>
-    <path d="M7 8h10M7 12h10M7 16h6"/>
-  </symbol>
-
-  <symbol id="h-itinerary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M6 3h8a2 2 0 0 1 2 2v14l-4-2-4 2V5a2 2 0 0 1 2-2z"/>
-    <path d="M10 7h4M10 11h3"/>
-  </symbol>
-
-  <symbol id="h-gpx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 19l6-12 4 7 5-10 3 6"/>
-    <path d="M3 19h18"/>
-  </symbol>
-
-  <symbol id="h-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 4l8 14H4l8-14z"/>
-    <path d="M9 18h6"/>
-  </symbol>
-
-  <symbol id="h-weather" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M7 18a5 5 0 1 1 2-9 6 6 0 0 1 11 2h1a4 4 0 0 1 0 8H7z"/>
-    <path d="M13 14l-2 4h3l-2 4"/>
-  </symbol>
-
-  <symbol id="h-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1-2-3-2 1a7.8 7.8 0 0 0-1.7-1l-.3-2h-4l-.3 2a7.8 7.8 0 0 0-1.7 1l-2-1-2 3 2 1a7.8 7.8 0 0 0 .1 2l-2 1 2 3 2-1a7.8 7.8 0 0 0 1.7 1l.3 2h4l.3-2a7.8 7.8 0 0 0 1.7-1l2 1 2-3-2-1z"/>
-  </symbol>
-
-  <symbol id="h-optional" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="4" y="8" width="4" height="4"/><rect x="10" y="4" width="4" height="4"/><rect x="10" y="14" width="4" height="4"/><rect x="16" y="9" width="4" height="4"/>
-  </symbol>
-
-  <symbol id="h-risk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 3l9 4v5c0 5-4 9-9 10-5-1-9-5-9-10V7l9-4z"/>
-    <path d="M12 8v6M12 18h.01"/>
-  </symbol>
-
-  <symbol id="h-conditions" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="1"/>
-    <path d="M5 12a7 7 0 1 1 7 7M5 12a7 7 0 0 0 7 7"/>
-  </symbol>
-
-  <symbol id="h-bailout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="4" width="14" height="18" rx="2"/>
-    <path d="M10 8h4M10 12h3M10 16h2"/>
-    <path d="M17 8h4M21 8l-3-3M21 8l-3 3"/>
-  </symbol>
-
-  <symbol id="h-emergency" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 6v12M6 12h12"/>
-    <circle cx="12" cy="12" r="9"/>
-  </symbol>
-
-  <symbol id="h-final" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="4" y="5" width="12" height="16" rx="2"/>
-    <path d="M8 9h6M8 13h4"/>
-    <circle cx="18" cy="18" r="4"/>
-    <path d="M18 16v4M16 18h4"/>
-  </symbol>
-
-  <symbol id="h-disclaimer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6A2 2 0 0 0 22 18l-8.3-14.1a2 2 0 0 0-3.4 0z"/>
-    <path d="M12 9v5M12 17h.01"/>
-  </symbol>
-
-  <!-- ===== Chips (c-*) ===== -->
+  <!-- ===== Chip icons (c-*) ===== -->
   <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M4 12h16"/>
-    <path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/>
+    <path d="M3 12h18"/><circle cx="3" cy="12" r="2"/><circle cx="21" cy="12" r="2"/>
   </symbol>
 
   <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 17l6-7 4 5 8-10"/>
-    <path d="M14 6h7v7"/>
-  </symbol>
-
-  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M4 7h12l4 3-4 3H8l-4 4"/>
-    <path d="M12 7v6M8 13v4"/>
-  </symbol>
-
-  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="6" cy="6" r="1"/><circle cx="12" cy="6" r="1"/><circle cx="18" cy="6" r="1"/>
-    <circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>
-    <circle cx="6" cy="18" r="1"/><circle cx="12" cy="18" r="1"/><circle cx="18" cy="18" r="1"/>
-  </symbol>
-
-  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 12h9a4 4 0 0 1 4 4v5"/>
-    <path d="M16 3h5v5"/>
-    <path d="M21 3l-7 7"/>
-  </symbol>
-
-  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="7" width="18" height="13" rx="2"/>
-    <circle cx="12" cy="13.5" r="3.5"/>
-    <path d="M8 7l2-3h4l2 3"/>
-  </symbol>
-
-  <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 3l8 4v6c0 5-4 9-8 10-4-1-8-5-8-10V7l8-4z"/>
-    <path d="M9 12l2 2 4-4"/>
-  </symbol>
-
-  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 3l5.2 7.7a6.5 6.5 0 1 1-10.4 0L12 3z"/>
+    <path d="m3 17 6-8 4 5 4-6 4 9"/><path d="M3 21h18"/>
   </symbol>
 
   <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 6l7 12H5l7-12z"/>
-    <path d="M10 18h4"/>
+    <path d="m12 4 8 16H4l8-16z"/><path d="M1 20h22"/>
+  </symbol>
+
+  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 20c6-3 12-3 18 0M3 4c6 3 12 3 18 0"/>
+  </symbol>
+
+  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 18 9 6l6 12 3-6 3 6H3z"/>
+  </symbol>
+
+  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3s7 8 7 12a7 7 0 0 1-14 0c0-4 7-12 7-12z"/>
+  </symbol>
+
+  <symbol id="c-safety" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 21c-6-2-9-5-9-9V5l9-3 9 3v7c0 4-3 7-9 9z"/>
+    <path d="M9 12l2 2 4-4"/>
+  </symbol>
+
+  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 8h7a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H6z"/><path d="M6 8V5M6 20v-4"/>
+  </symbol>
+
+  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 10h0M15 10h0"/>
   </symbol>
 
   <symbol id="c-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="8"/>
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+    <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+    <circle cx="12" cy="12" r="9"/>
   </symbol>
 </svg>
