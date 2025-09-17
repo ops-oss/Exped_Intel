@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Expedition – Preview</title>
 <link rel="stylesheet" href="/fonts.css"/>
+<link rel="preload" href="/assets/icons.svg?v=2" as="image" type="image/svg+xml">
 <style>
   :root{
     --bg:#e8e5e2; --ink:#1e1e1e; --paper:#fff; --accent:#fe5733;
@@ -462,7 +463,7 @@ const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduc
 })();
 
 /* ---------- chips ---------- */
-const SPRITE = '/assets/icons.svg';
+const SPRITE = '/assets/icons.svg?v=2';
 const CHIP_SVG = {
   distance:  `<svg><use href="${SPRITE}#c-distance"/></svg>`,
   elevation: `<svg><use href="${SPRITE}#c-elevation"/></svg>`,
@@ -867,6 +868,24 @@ async function loadData(){
     if(hit) hit.setAttribute('aria-current','true');
   }, { rootMargin: '-30% 0px -60% 0px', threshold: [0,1] });
   heads.forEach(h => obs.observe(h));
+})();
+</script>
+<script>
+/* Force-refresh the sprite and add a Safari-friendly xlink:href */
+(function(){
+  const VERSION = 'v=2';
+  // Upgrade all existing <use href="/assets/icons.svg#..."> to add ?v=2
+  document.querySelectorAll('use[href^="/assets/icons.svg"]').forEach(u=>{
+    const h = u.getAttribute('href');
+    if (!h.includes('?v=')) u.setAttribute('href', h.replace('#', `?${VERSION}#`));
+  });
+  // Safari compatibility: mirror href -> xlink:href
+  const XLINK = 'http://www.w3.org/1999/xlink';
+  document.querySelectorAll('use[href]').forEach(u=>{
+    if (!u.getAttribute('xlink:href')) {
+      u.setAttributeNS(XLINK, 'xlink:href', u.getAttribute('href'));
+    }
+  });
 })();
 </script>
 </body>
