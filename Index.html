@@ -682,16 +682,17 @@ async function loadData(){
     return safeParse(document.getElementById('ei-data')?.textContent)||{};
   }
 }
-<script>
-  (function(){
-    var XLINK = 'http://www.w3.org/1999/xlink';
-    document.querySelectorAll('use[href^="#"]').forEach(function(u){
-      if (!u.getAttributeNS(XLINK, 'href')) {
-        u.setAttributeNS(XLINK, 'href', u.getAttribute('href'));
-      }
-    });
-  })();
-</script>
+  
+// === Patch 2: xlink:href shim ===
+(function(){
+  var XLINK = 'http://www.w3.org/1999/xlink';
+  document.querySelectorAll('use[href^="#"]').forEach(function(u){
+    if (!u.getAttributeNS(XLINK, 'href')) {
+      u.setAttributeNS(XLINK, 'href', u.getAttribute('href'));
+    }
+  });
+})();
+
 /* ---------- Main ---------- */
 (async ()=>{
   const status=$('status');
