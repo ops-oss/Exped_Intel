@@ -888,5 +888,49 @@ async function loadData(){
   });
 })();
 </script>
+<!-- === Inline the external /assets/icons.svg into the page, then retarget <use> === -->
+<script>
+(async () => {
+  const SPRITE_URL = '/assets/icons.svg?v=3'; // bump version anytime you ship new icons
+
+  // 1) Fetch the sprite file
+  let text;
+  try {
+    const res = await fetch(SPRITE_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    text = await res.text();
+  } catch (e) {
+    console.error('Could not fetch icons.svg:', e);
+    return;
+  }
+
+  // 2) Inject it at the top of <body> (hidden)
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'absolute';
+  wrapper.style.width = '0';
+  wrapper.style.height = '0';
+  wrapper.style.overflow = 'hidden';
+  wrapper.style.pointerEvents = 'none';
+  wrapper.innerHTML = text.trim();
+  const svg = wrapper.firstElementChild?.tagName.toLowerCase() === 'svg'
+    ? wrapper.firstElementChild
+    : null;
+  if (!svg) { console.error('icons.svg did not contain a root <svg>'); return; }
+  document.body.prepend(svg); // put <svg><symbol …/></svg> into the DOM
+
+  // 3) Retarget any external <use href="/assets/icons.svg#…"> to local "#…"
+  const uses = document.querySelectorAll('use[href^="/assets/icons.svg"]');
+  uses.forEach(u => {
+    const frag = u.getAttribute('href').split('#')[1];
+    if (frag) u.setAttribute('href', '#' + frag);
+    // Safari fallback
+    if (!u.getAttribute('xlink:href')) {
+      u.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#' + frag);
+    }
+  });
+
+  console.log('Sprite inlined and <use> retargeted.');
+})();
+</script>
 </body>
 </html>
