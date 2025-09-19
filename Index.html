@@ -165,8 +165,8 @@
 }
 .row .labelB + div .chip{
   margin:0;
-  /* optional: encourage ~2 chips per row when space allows */
-  flex:1 1 260px;
+  flex:0 0 auto;   /* don't stretch; size to content */
+  max-width:100%;
 }
 
   /* TOC (chip-styled slideout) */
