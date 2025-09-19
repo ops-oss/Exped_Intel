@@ -157,6 +157,18 @@
   #expChips{ display:flex; flex-wrap:wrap; gap:10px 12px; margin-top:12px !important; }
   #expChips .chip{ margin:0; }
 
+  /* Day fields: let chip groups wrap cleanly */
+.row .labelB + div{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 10px;   /* row gap / column gap */
+}
+.row .labelB + div .chip{
+  margin:0;
+  /* optional: encourage ~2 chips per row when space allows */
+  flex:1 1 260px;
+}
+
   /* TOC (chip-styled slideout) */
   :root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
   body .ei-toc-toggle{
