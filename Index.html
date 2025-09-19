@@ -134,18 +134,15 @@
     .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
   }
 
-/* Mobile hero: square crop */
+/* Mobile hero: square and aligned to content column */
 @media (max-width: 640px){
-  .fullbleed{
-    width: 90vw;
-    margin-left: calc(50% - 50vw);
-  }
+  .fullbleed{ width:100%; margin-left:0; }
   #hero{
-    width: 90vw;
-    aspect-ratio: 1 / 1;   /* square */
-    height: auto;          /* computed from aspect-ratio */
-    object-fit: cover;     /* crop to fill the square */
-    display: block;
+    width:100%;
+    aspect-ratio:1/1;   /* square */
+    height:auto;
+    object-fit:cover;
+    display:block;
   }
 }
 
