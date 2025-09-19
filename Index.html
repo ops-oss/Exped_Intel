@@ -945,19 +945,19 @@ async function loadData(){
   document.body.append(btn, panel, dim);
 
   const open = () => {
-    document.documentElement.classList.add('ei-open');
+    document.body.classList.add('ei-open');
     btn.setAttribute('aria-label','Close section menu');
     (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
   };
   const close = (focusHeading) => {
-    document.documentElement.classList.remove('ei-open');
+    document.body.classList.remove('ei-open');
     btn.setAttribute('aria-label','Open section menu');
     if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
   };
 
   btn.addEventListener('click', () =>
-    document.documentElement.classList.contains('ei-open') ? close() : open()
-  );
+  document.body.classList.contains('ei-open') ? close() : open()
+);
   dim.addEventListener('click', () => close());
   window.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
