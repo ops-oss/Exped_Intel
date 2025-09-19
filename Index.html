@@ -168,7 +168,20 @@
   flex:0 0 auto;   /* don't stretch; size to content */
   max-width:100%;
 }
+/* Lock background scroll when the TOC is open */
+body.ei-open{
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
 
+/* Make the slideout itself scrollable */
+body .ei-toc-panel{
+  max-height: 100vh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
   /* TOC (chip-styled slideout) */
   :root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
   body .ei-toc-toggle{
@@ -1102,17 +1115,24 @@ ul.appendChild(li);
 
   document.body.append(btn, panel, dim);
 
-  const open = () => {
-    document.body.classList.add('ei-open');
-    btn.setAttribute('aria-label','Close section menu');
-    (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
-  };
-  const close = (focusHeading) => {
-    document.body.classList.remove('ei-open');
-    btn.setAttribute('aria-label','Open section menu');
-    if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
-  };
+const open = () => {
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.dataset.eiScrollY = String(y);
+  document.body.style.top = `-${y}px`;
+  document.body.classList.add('ei-open');
+  btn.setAttribute('aria-label','Close section menu');
+  (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
+};
 
+const close = (focusHeading) => {
+  const y = +(document.body.dataset.eiScrollY || 0);
+  document.body.classList.remove('ei-open');
+  document.body.style.top = '';
+  delete document.body.dataset.eiScrollY; // tidy up
+  window.scrollTo(0, y);
+  btn.setAttribute('aria-label','Open section menu');
+  if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
+};
   btn.addEventListener('click', () =>
   document.body.classList.contains('ei-open') ? close() : open()
 );
