@@ -973,12 +973,22 @@ async function loadData(){
   const d=data.date||'';
   $('date').textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : d;
 
-  // Hero + credit
-  if(data.hero_image) $('hero').src = data.hero_image;
-  const creditName=data.image_credit||''; const creditLink=data.image_link||'';
-  $('credit').innerHTML = creditName ? (creditLink ? `<a href="${creditLink}" target="_blank" rel="noopener">${creditName}</a>` : creditName) : '';
-  if(creditLink) { const a=$('heroLink'); a.href=creditLink; a.style.pointerEvents='auto'; } else { const a=$('heroLink'); a.removeAttribute('href'); a.style.pointerEvents='none'; }
+// Hero + credit
+if (data.hero_image) $('hero').src = data.hero_image;
 
+// Drop the prebuilt HTML from Zapier directly
+$('credit').innerHTML = data.image_credit || '';
+
+// Remove the old single-link wrapper logic (no need for image_link here)
+if (data.image_link) {
+  const a = $('heroLink');
+  a.href = data.image_link;
+  a.style.pointerEvents = 'auto';
+} else {
+  const a = $('heroLink');
+  a.removeAttribute('href');
+  a.style.pointerEvents = 'none';
+}
   // Expedition itinerary
   const ei = data.expedition_itinerary||{};
   if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain||ei.elevation||ei.trailheads||ei.gps){
