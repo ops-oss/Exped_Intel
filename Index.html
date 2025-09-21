@@ -175,13 +175,8 @@ html, body{ overflow-x:hidden; }
     *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
   }
   @media print{
-    .section, .day{ break-inside:avoid; }
-    h3{ break-after:avoid; }
-    .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
-  }
-
-  @media print{
-  /* if TOC was open, un-freeze the page so it can paginate */
+  /* if the TOC was open, un-freeze the page so it can paginate */
+  body,
   body.ei-open{
     position: static !important;
     overflow: visible !important;
@@ -189,6 +184,26 @@ html, body{ overflow-x:hidden; }
     top: auto !important;
     padding-right: 0 !important;
   }
+
+  /* hide the slideout UI in print */
+  .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
+
+  /* put each section on its own page (like before) */
+  .section{
+    break-before: page;
+    page-break-before: always;      /* older engines */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .section:first-of-type{
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* keep day cards intact and headers with their content */
+  .day{ break-inside: avoid; page-break-inside: avoid; }
+  h3{ break-after: avoid; page-break-after: avoid; }
+}
 
   /* put each section on its own page (like before) */
   .section{ break-before: page; break-inside: avoid; }
