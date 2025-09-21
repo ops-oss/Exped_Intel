@@ -38,31 +38,6 @@
   /* === lock layout to the page column === */
 .page{ max-width:1120px; margin-inline:auto; padding-inline:16px; }
 
-/* kill viewport-bleed hero */
-.fullbleed{
-  width:100%;
-  margin-left:0;
-  overflow:hidden;            /* prevents overscroll from wide images */
-}
-
-#hero{
-  display:block;
-  width:100%;
-  aspect-ratio:16/9;          /* lock frame */
-  height:auto;
-  object-fit:cover;           /* crop consistently */
-  object-position:center;
-}
-
-/* keep credit inside the column */
-#credit, .credit{
-  max-width:1120px;
-  margin:4px auto 0;
-  padding:0 16px;
-  text-align:right;
-  font-style:italic;
-}
-
 /* chips/days can’t force horizontal scroll */
 img, iframe, .embed{ max-width:100%; display:block; }
 #expChips .row{ min-width:0; }
@@ -79,16 +54,6 @@ img, iframe, .embed{ max-width:100%; display:block; }
 /* belt & suspenders */
 html, body{ overflow-x:hidden; }
   #heroLink{display:block}
-/* Keep hero credit inside the page column */
-.credit{
-  text-align:right;
-  font-size:14px;
-  margin:8px auto 0;
-  color:var(--accent);
-  padding:0 16px;
-  max-width:1120px; /* match .page */
-}
-.fullbleed{ overflow:hidden; } /* prevents tiny overhangs */
   .section{margin-top:26px}
   .section h3{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px;font-weight:700;letter-spacing:-0.01em}
   .kv{display:grid;grid-template-columns:minmax(12ch,1fr) minmax(0,2fr);row-gap:.75rem;column-gap:1rem;align-items:start;grid-auto-rows:minmax(1.6em,auto)}
@@ -174,26 +139,6 @@ html, body{ overflow-x:hidden; }
   @media (min-width:960px){
     .section{ margin-top:42px; padding-top:20px; border-top:1px solid rgba(0,0,0,.11); }
   }
-
-/* Desktop: make the hero truly full-bleed, keep mobile column-aligned */
-@media (min-width: 960px){
-  .fullbleed{
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
-    overflow: hidden;
-  }
-  #hero{
-    width: 100%;
-    max-width: none;
-    display: block;
-    padding: 0;               /* remove mobile gutters */
-    aspect-ratio: 16 / 9;     /* consistent frame on desktop too */
-    height: auto;
-    object-fit: cover;
-    object-position: center;
-  }
-}
   
   @media (prefers-reduced-motion:reduce){
     *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
@@ -227,36 +172,6 @@ html, body{ overflow-x:hidden; }
   /* keep day cards intact and headers with their content */
   .day{ break-inside: avoid; page-break-inside: avoid; }
   h3{ break-after: avoid; page-break-after: avoid; }
-}
-
-  /* put each section on its own page (like before) */
-  .section{ break-before: page; break-inside: avoid; }
-  .section:first-of-type{ break-before: auto; }  /* don't break before the first */
-  .day{ break-inside: avoid; }
-  h3{ break-after: avoid; }  /* keep the header with its content */
-}
-
-/* Mobile hero: square and aligned to content column */
-@media (max-width: 640px){
-  .fullbleed {
-    width: 100%;
-    margin-left: 0;
-  }
-  #hero {
-    width: 100%;
-    aspect-ratio: 1/1;       /* keep square */
-    height: auto;
-    object-fit: cover;
-    display: block;
-    padding: 0 16px;         /* add gutters left/right */
-    box-sizing: border-box;
-  }
-}
-/* Fallback for very old browsers without aspect-ratio */
-@supports not (aspect-ratio: 1 / 1){
-  @media (max-width: 640px){
-    #hero{ height: 90vw; } /* forces a square using vw */
-  }
 }
 
 /* Hide the redundant KV table for Expedition Itinerary */
@@ -410,31 +325,6 @@ body .ei-toc-list .ico *{ fill:none; }
   #expChips .row:first-child{ border-top:0; }
 }
 
-/* 3) Desktop hero = full-bleed again (mobile keeps square + gutters) */
-@media (min-width: 960px){
-  .fullbleed{
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-  }
-  #hero{
-    padding: 0;
-    aspect-ratio: auto;
-  }
-}
-
-/* 4) Image credit: small & subtle, aligned to page column */
-.credit{
-  font-size: 12.5px;
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
-  opacity: .9;
-  font-style: italic;
-  text-align: right;
-  max-width: 1120px;
-  margin: 8px auto 0;
-  padding: 0 16px;
-}
-
 /* (5) More breathing room — match Day cards */
 #expItin{                 /* card padding */
   padding: 22px 16px 22px;
@@ -457,13 +347,6 @@ body .ei-toc-list .ico *{ fill:none; }
 
 /* Extra gap ABOVE the card (outside the card) */
 #expItin.section{ margin-top:32px !important; }
-
-/* Keep the photo credit small with a little breathing room */
-#credit, .credit{
-  font-size:12.5px !important;
-  opacity:.9;
-  margin:8px auto 10px !important;
-}
 
 /* ===== Hero image: consistent frame, no overflow ===== */
 :root{
@@ -509,14 +392,6 @@ html, body { overflow-x: hidden; } /* guardrail, won’t mask real bugs because 
 /* Keep non-hero content images sane too */
 img{ max-width: 100%; height: auto; }
 
-/* Optional: desktop full-bleed without causing horizontal scroll */
-@media (min-width: 1200px){
-  .hero {
-    /* center within content width; remove if you truly want edge-to-edge */
-    max-width: 1120px;
-    margin: 0 auto;
-  }
-
 /* 1) Make the title use safe viewport units and allow mid-word wrapping */
 .title{
   /* svw = “small viewport width”, fixes the iOS URL-bar/rounding issue */
@@ -535,18 +410,50 @@ img{ max-width: 100%; height: auto; }
 .page, .grid2, .actions, .fullbleed, .row, .value, .title { min-width: 0; }
 img, iframe { max-width: 100%; display: block; }
 
-/* 3) Mobile hero: consistent square/portrait crop */
-@media (max-width: 640px){
-  .fullbleed{ margin-inline: 0; }
-  #hero{
-    width: 100%;
-    aspect-ratio: 4 / 5;     /* make it square (change to 4/5 for portrait) */
-    height: auto;
-    object-fit: cover;        /* clean, consistent crop */
-    display: block;
-    padding: 0;               /* no mobile gutters inside the image */
-  }
+/* === FINAL HERO PATCH — single source of truth ========================== */
+:root{
+  --hero-aspect-mobile: 4 / 5;   /* portrait on phones (change to 1/1 if you prefer square) */
+  --hero-aspect-desktop: 16 / 9; /* banner on desktop */
 }
+
+/* Base */
+.fullbleed{ width:100%; margin-left:0; margin-right:0; overflow:hidden; }
+#hero{
+  display:block; width:100%; height:auto;
+  object-fit:cover; object-position:center;
+  padding:0; max-width:none;
+}
+
+/* Phones */
+@media (max-width:640px){
+  #hero{ aspect-ratio: var(--hero-aspect-mobile) !important; }
+}
+
+/* Desktop/tablet: true full-bleed + fixed frame */
+@media (min-width:960px){
+  .fullbleed{
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
+    overflow:hidden;
+  }
+  #hero{ aspect-ratio: var(--hero-aspect-desktop) !important; }
+}
+
+/* Fallback for engines without aspect-ratio */
+@supports not (aspect-ratio: 1 / 1){
+  @media (max-width:640px){ #hero{ height:125vw !important; } }              /* ~4:5 */
+  @media (min-width:960px){ #hero{ height:calc(100vw * 9 / 16) !important; } }/* 16:9 */
+}
+
+/* Keep photo credit inside the page column */
+#credit, .credit{
+  max-width:1120px; margin:8px auto 10px; padding:0 16px;
+  text-align:right; font-size:12.5px; opacity:.9;
+}
+
+/* Guardrail */
+html,body{ overflow-x:hidden; }
 </style>
 </head>
 <body>
