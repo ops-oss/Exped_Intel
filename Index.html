@@ -173,16 +173,28 @@
 #expChips{ margin-top:12px !important; }        /* stack by default (mobile) */
 #expChips .chip{ margin:0; }
 
-/* Desktop grid: first 3 share one row, next 4 flow two-per-row */
+/* Expedition Itinerary card look (like a Day) */
+#expItin{
+  border: 1px solid var(--div);
+  border-radius: 12px;
+  background: rgba(255,255,255,.38);
+  padding: 16px;
+}
+
+/* Chips block */
+#expChips{ margin-top:12px !important; }
+#expChips .row{ padding:10px 0; border-top:1px dashed var(--div-soft); }
+#expChips .row:first-child{ border-top:0; }
+#expChips .chip{ margin:0; }
+
+/* Desktop: simple two-column layout */
 @media (min-width: 960px){
   #expChips{
     display:grid;
-    grid-template-columns: repeat(6, 1fr);      /* 3 across top, 2 across bottom */
-    gap:12px 22px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 22px;
   }
   #expChips .row{ border-top:0; padding:0; }
-  #expChips .row.top{ grid-column: span 2; }    /* Duration, Mileage, Elevation */
-  #expChips .row.bottom{ grid-column: span 3; } /* Trailheads, GPS, Terrain, Experience */
 }
 
 /* Keep labeled-row look on mobile */
