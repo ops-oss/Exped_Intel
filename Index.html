@@ -24,7 +24,6 @@
   img{display:block;width:100%;height:auto}
   a{color:inherit;text-underline-offset:2px}
   .page{max-width:1120px;margin:0 auto;padding:24px 16px 40px;display:grid;row-gap:20px}
-  .title{font-size:var(--h1);line-height:1.02;font-weight:700;letter-spacing:-0.02em}
   .actions{display:flex;gap:18px;flex-wrap:wrap}
   .btn-ghost{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:transparent;color:inherit;border:1px solid var(--border);border-radius:8px;font-weight:600;text-decoration:none;cursor:pointer}
   .btn-ghost .ico{width:20px;height:20px;stroke:currentColor}
@@ -392,15 +391,6 @@ html, body { overflow-x: hidden; } /* guardrail, won’t mask real bugs because 
 /* Keep non-hero content images sane too */
 img{ max-width: 100%; height: auto; }
 
-/* 1) Make the title use safe viewport units and allow mid-word wrapping */
-.title{
-  /* svw = “small viewport width”, fixes the iOS URL-bar/rounding issue */
-  font-size: clamp(40px, 18svw, 88px);
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
-}
-
 /* Fallback for older browsers that don’t know svw */
 @supports not (width: 1svw){
   .title{ font-size: clamp(40px, 18vw, 88px); }
@@ -454,6 +444,28 @@ img, iframe { max-width: 100%; display: block; }
 
 /* Guardrail */
 html,body{ overflow-x:hidden; }
+
+/* Column-scoped title, no hyphens, balanced lines */
+.page{ container-type:inline-size; } /* enables cqw for the column */
+
+.title{
+  font-size: clamp(34px, 16cqw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+
+  /* stop hyphenation & ugly breaks */
+  overflow-wrap: normal;
+  word-break: keep-all;       /* ← prevents opportunistic breaks in WebKit */
+  hyphens: none;
+  -webkit-hyphens: none;
+  text-wrap: balance;         /* nicer multi-line heads where supported */
+}
+
+/* Fallback when cqw isn’t supported */
+@supports not (font-size: 1cqw){
+  .title{ font-size: clamp(34px, 18svw, 88px); }
+}
 </style>
 </head>
 <body>
