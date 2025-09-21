@@ -136,13 +136,26 @@
 
 /* Mobile hero: square and aligned to content column */
 @media (max-width: 640px){
-  .fullbleed{ width:100%; margin-left:0; }
-  #hero{
-    width:100%;
-    aspect-ratio:1/1;   /* square */
-    height:auto;
-    object-fit:cover;
-    display:block;
+  .fullbleed {
+    width: 100%;
+    margin-left: 0;
+  }
+  #hero {
+    width: 100%;
+    aspect-ratio: 1/1;       /* keep square */
+    height: auto;
+    object-fit: cover;
+    display: block;
+    padding: 0 16px;         /* add gutters left/right */
+    box-sizing: border-box;
+  }
+  #credit {
+    font-size: 0.7rem;       /* smaller, metadata feel */
+    line-height: 1.2;
+    color: color-mix(in srgb, var(--ink) 50%, transparent);
+    text-align: right;
+    margin: 4px 16px 0 0;    /* align to right gutter */
+    font-style: italic;      /* optional */
   }
 }
 
@@ -153,6 +166,9 @@
   }
 }
 
+/* Hide the redundant KV table for Expedition Itinerary */
+#expKV{ display:none; }
+  
   /* Chips wrap */
   #expChips{ display:flex; flex-wrap:wrap; gap:10px 12px; margin-top:12px !important; }
   #expChips .chip{ margin:0; }
@@ -597,6 +613,16 @@ body .ei-toc-list .ico *{ fill:none; }
     <path d="M20 12l2 0"/>
     <path d="M2 12l2 0"/>
   </symbol>
+  
+  <symbol id="c-duration" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+  <path d="M9 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+  <path d="M15 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+  <path d="M4 20h14" />
+</symbol>
 </svg>
 
 <div class="page">
@@ -728,6 +754,7 @@ const CHIP_SVG={
   decision:'<svg><use href="#c-decision"/></svg>',
   morale:'<svg><use href="#c-morale"/></svg>',
   gps:'<svg><use href="#c-gps"/></svg>'
+  duration:'<svg><use href="#c-duration"/></svg>'
 };
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
 
@@ -813,12 +840,32 @@ function renderExpeditionKV(info){
   add("TERRAIN TYPE", info.terrain||"");
 }
 function renderExpeditionChips(info){
-  const host=$('expChips'); if(!host) return;
-  const chips=[];
-  if(info.elevation) chips.push(chipHTML('elevation', info.elevation));
-  if(info.trailheads) chips.push(chipHTML('trail', info.trailheads, true));
-  if(info.gps) chips.push(chipHTML('gps', info.gps));
-  host.innerHTML = chips.join(' ');
+  const host = $('expChips');
+  if (!host) return;
+  host.innerHTML = '';
+
+  // Helper: add one row exactly like Days markup
+  const addRow = (label, chipKey, text, secondary=false) => {
+    if (!text) return;
+    host.insertAdjacentHTML(
+      'beforeend',
+      `<div class="row">
+         <div class="labelB">${label}:</div>
+         <div>${chipHTML(chipKey, text, secondary)}</div>
+       </div>`
+    );
+  };
+
+  // === Top 3 (read together) ===
+  addRow('Duration',                 'duration',  info.duration);
+  addRow('Total estimated mileage',  'distance',  info.mileage);   // uses the same ruler icon as Days
+  addRow('Elevation Gain/Loss',      'elevation', info.elevation);
+
+  // === Bottom 4 ===
+  addRow('Start and end trailhead',  'trail',     info.trailheads, true);
+  addRow('GPS',                      'gps',       info.gps,        true);
+  addRow('Terrain type',             'terrain',   info.terrain,    true);
+  addRow('Experience level',         '',          info.experience, true); // text-only chip (no icon)
 }
 
 /* ---------- mission_text → structured fields ---------- */
