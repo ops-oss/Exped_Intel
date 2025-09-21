@@ -42,12 +42,16 @@
 .fullbleed{
   width:100%;
   margin-left:0;
-  overflow:hidden;   /* ← add this */
+  overflow:hidden;            /* prevents overscroll from wide images */
 }
+
 #hero{
   display:block;
   width:100%;
+  aspect-ratio:16/9;          /* lock frame */
   height:auto;
+  object-fit:cover;           /* crop consistently */
+  object-position:center;
 }
 
 /* keep credit inside the column */
@@ -439,6 +443,59 @@ body .ei-toc-list .ico *{ fill:none; }
   font-size:12.5px !important;
   opacity:.9;
   margin:8px auto 10px !important;
+}
+
+/* ===== Hero image: consistent frame, no overflow ===== */
+:root{
+  /* pick the frame you want: 16/9, 3/2, 21/9, etc. */
+  --hero-aspect: 16/9;
+  --hero-radius: 12px;
+}
+
+/* Prevent any layout from exceeding the viewport */
+html, body { overflow-x: hidden; } /* guardrail, won’t mask real bugs because images won’t overflow anymore */
+
+/* Reset figure defaults so margins don't push width > 100% */
+.hero { margin: 0; }
+.hero .credit { 
+  font-size: 12.5px;
+  opacity: .9;
+  text-align: center;
+  margin: 8px 16px 0; /* small, even padding */
+}
+
+/* The frame that enforces size/crop */
+.hero-media{
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--hero-aspect);
+  overflow: hidden;
+  border-radius: var(--hero-radius);
+  background: color-mix(in srgb, var(--ink) 5%, transparent); /* subtle fallback bg */
+}
+
+/* Make every image fill the frame and crop politely */
+.hero-media > img{
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* << key: consistent crop */
+  object-position: center;/* tweak per-image if needed */
+  max-width: none;        /* ignore intrinsic width so it never overflows */
+}
+
+/* Keep non-hero content images sane too */
+img{ max-width: 100%; height: auto; }
+
+/* Optional: desktop full-bleed without causing horizontal scroll */
+@media (min-width: 1200px){
+  .hero {
+    /* center within content width; remove if you truly want edge-to-edge */
+    max-width: 1120px;
+    margin: 0 auto;
+  }
 }
 </style>
 </head>
