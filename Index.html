@@ -379,9 +379,21 @@ body .ei-toc-list .ico *{ fill:none; }
   padding: 0 16px;
 }
 
-/* 5) Slightly more room under the card header */
-#expItin{ padding: 18px 16px 16px; }
-#expItin > h3{ margin-bottom: 14px; }
+/* (5) More breathing room — match Day cards */
+#expItin{                 /* card padding */
+  padding: 22px 16px 22px;
+}
+#expItin > h3{            /* space under the card title */
+  margin: 0 0 20px;
+}
+
+/* Same vertical rhythm as .day rows */
+#expChips .row{
+  padding: 12px 0;        /* was 10px */
+}
+#expChips .row:first-child{
+  border-top: 0;          /* keep the first row clean */
+}
 </style>
 </head>
 <body>
