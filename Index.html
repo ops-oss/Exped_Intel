@@ -169,9 +169,25 @@
 /* Hide the redundant KV table for Expedition Itinerary */
 #expKV{ display:none; }
   
-  /* Chips wrap */
-  #expChips{ display:flex; flex-wrap:wrap; gap:10px 12px; margin-top:12px !important; }
-  #expChips .chip{ margin:0; }
+/* Chips block */
+#expChips{ margin-top:12px !important; }        /* stack by default (mobile) */
+#expChips .chip{ margin:0; }
+
+/* Desktop grid: first 3 share one row, next 4 flow two-per-row */
+@media (min-width: 960px){
+  #expChips{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);      /* 3 across top, 2 across bottom */
+    gap:12px 22px;
+  }
+  #expChips .row{ border-top:0; padding:0; }
+  #expChips .row.top{ grid-column: span 2; }    /* Duration, Mileage, Elevation */
+  #expChips .row.bottom{ grid-column: span 3; } /* Trailheads, GPS, Terrain, Experience */
+}
+
+/* Keep labeled-row look on mobile */
+#expChips .row{ padding:10px 0; border-top:1px dashed var(--div-soft); }
+#expChips .row:first-child{ border-top:0; }
 
   /* Day fields: let chip groups wrap cleanly */
 .row .labelB + div{
@@ -754,7 +770,8 @@ const CHIP_SVG = {
   decision:'<svg><use href="#c-decision"/></svg>',
   morale:'<svg><use href="#c-morale"/></svg>',
   gps:'<svg><use href="#c-gps"/></svg>',   // ✅ comma added
-  duration:'<svg><use href="#c-duration"/></svg>'
+  duration:'<svg><use href="#i-calendar"/></svg>',     // calendar for “4 days”
+  experience:'<svg><use href="#c-duration"/></svg>'     // 3-bar icon = level
 };
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
 
@@ -844,28 +861,28 @@ function renderExpeditionChips(info){
   if (!host) return;
   host.innerHTML = '';
 
-  // Helper: add one row exactly like Days markup
-  const addRow = (label, chipKey, text, secondary=false) => {
+  // Add one labeled row (same structure as Days)
+  const addRow = (label, chipKey, text, secondary=false, rowClass='') => {
     if (!text) return;
     host.insertAdjacentHTML(
       'beforeend',
-      `<div class="row">
+      `<div class="row ${rowClass}">
          <div class="labelB">${label}:</div>
          <div>${chipHTML(chipKey, text, secondary)}</div>
        </div>`
     );
   };
 
-  // === Top 3 (read together) ===
-  addRow('Duration',                 'duration',  info.duration);
-  addRow('Total estimated mileage',  'distance',  info.mileage);   // uses the same ruler icon as Days
-  addRow('Elevation Gain/Loss',      'elevation', info.elevation);
+  // Top 3 (read together)
+  addRow('Duration',                'duration',  info.duration,  false, 'top');
+  addRow('Total estimated mileage', 'distance',  info.mileage,   false, 'top');
+  addRow('Elevation Gain/Loss',     'elevation', info.elevation, false, 'top');
 
-  // === Bottom 4 ===
-  addRow('Start and end trailhead',  'trail',     info.trailheads, true);
-  addRow('GPS',                      'gps',       info.gps,        true);
-  addRow('Terrain type',             'terrain',   info.terrain,    true);
-  addRow('Experience level',         '',          info.experience, true); // text-only chip (no icon)
+  // Bottom 4
+  addRow('Start and end trailhead', 'trail',     info.trailheads, true,  'bottom');
+  addRow('GPS',                     'gps',       info.gps,        true,  'bottom');
+  addRow('Terrain type',            'terrain',   info.terrain,    true,  'bottom');
+  addRow('Experience level',        'experience',info.experience, true,  'bottom');
 }
 
 /* ---------- mission_text → structured fields ---------- */
