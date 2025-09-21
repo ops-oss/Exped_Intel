@@ -180,6 +180,23 @@ html, body{ overflow-x:hidden; }
     .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
   }
 
+  @media print{
+  /* if TOC was open, un-freeze the page so it can paginate */
+  body.ei-open{
+    position: static !important;
+    overflow: visible !important;
+    width: auto !important;
+    top: auto !important;
+    padding-right: 0 !important;
+  }
+
+  /* put each section on its own page (like before) */
+  .section{ break-before: page; break-inside: avoid; }
+  .section:first-of-type{ break-before: auto; }  /* don't break before the first */
+  .day{ break-inside: avoid; }
+  h3{ break-after: avoid; }  /* keep the header with its content */
+}
+
 /* Mobile hero: square and aligned to content column */
 @media (max-width: 640px){
   .fullbleed {
@@ -395,9 +412,19 @@ body .ei-toc-list .ico *{ fill:none; }
   border-top: 0;          /* keep the first row clean */
 }
 
-/* Card header spacing — match Day cards */
-#expItin{ padding:30px 16px 16px; }      /* ↑ more top padding */
-#expItin > h3{ margin:0 0 16px; }        /* a touch more space under the title */
+/* Expedition Itinerary card spacing (inside the card) */
+#expItin{ padding:34px 16px 18px !important; }   /* more top air */
+#expItin > h3{ margin:0 0 18px !important; }     /* space under title */
+
+/* Extra gap ABOVE the card (outside the card) */
+#expItin.section{ margin-top:32px !important; }
+
+/* Keep the photo credit small with a little breathing room */
+#credit, .credit{
+  font-size:12.5px !important;
+  opacity:.9;
+  margin:8px auto 10px !important;
+}
 </style>
 </head>
 <body>
@@ -1337,6 +1364,13 @@ const close = (focusHeading) => {
   }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.001] });
   heads.forEach(h => io.observe(h));
 })();
+
+// Ensure printing never happens while the body is "frozen" for the TOC
+window.addEventListener('beforeprint', () => {
+  document.body.classList.remove('ei-open');
+  document.body.style.top = '';
+  delete document.body.dataset.eiScrollY;
+});
 
 /* ===== Section header icons (Tabler ids) ===== */
 (() => {
