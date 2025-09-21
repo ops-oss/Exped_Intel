@@ -516,6 +516,36 @@ img{ max-width: 100%; height: auto; }
     max-width: 1120px;
     margin: 0 auto;
   }
+
+/* 1) Make the title use safe viewport units and allow mid-word wrapping */
+.title{
+  /* svw = “small viewport width”, fixes the iOS URL-bar/rounding issue */
+  font-size: clamp(40px, 18svw, 88px);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Fallback for older browsers that don’t know svw */
+@supports not (width: 1svw){
+  .title{ font-size: clamp(40px, 18vw, 88px); }
+}
+
+/* 2) Guardrails so nothing can force wider than the screen */
+.page, .grid2, .actions, .fullbleed, .row, .value, .title { min-width: 0; }
+img, iframe { max-width: 100%; display: block; }
+
+/* 3) Mobile hero: consistent square/portrait crop */
+@media (max-width: 640px){
+  .fullbleed{ margin-inline: 0; }
+  #hero{
+    width: 100%;
+    aspect-ratio: 4 / 5;     /* make it square (change to 4/5 for portrait) */
+    height: auto;
+    object-fit: cover;        /* clean, consistent crop */
+    display: block;
+    padding: 0;               /* no mobile gutters inside the image */
+  }
 }
 </style>
 </head>
