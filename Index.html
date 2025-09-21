@@ -35,10 +35,56 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;align-items:start;margin-top:8px}
   @media (min-width:960px){.grid2{grid-template-columns:repeat(4,1fr)}}
   .value{font-size:clamp(18px,2.6vw,28px);line-height:1.28}
-  .fullbleed{width:100vw;margin-left:calc(50% - 50vw)}
+  /* === lock layout to the page column === */
+.page{ max-width:1120px; margin-inline:auto; padding-inline:16px; }
+
+/* kill viewport-bleed hero */
+.fullbleed{
+  width:100%;
+  margin-left:0;
+  overflow:hidden;   /* ← add this */
+}
+#hero{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* keep credit inside the column */
+#credit, .credit{
+  max-width:1120px;
+  margin:4px auto 0;
+  padding:0 16px;
+  text-align:right;
+  font-style:italic;
+}
+
+/* chips/days can’t force horizontal scroll */
+img, iframe, .embed{ max-width:100%; display:block; }
+#expChips .row{ min-width:0; }
+.row .labelB + div{ min-width:0; overflow-wrap:anywhere; }
+
+/* grids: allow content to shrink */
+.grid2{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+@media (min-width:960px){
+  .grid2{ grid-template-columns:repeat(4, minmax(0,1fr)); }
+  #expChips{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 28px; }
+  #expChips .row{ border-top:0; padding:0; }
+}
+
+/* belt & suspenders */
+html, body{ overflow-x:hidden; }
   #heroLink{display:block}
-  .credit{text-align:right;font-size:14px;margin-top:8px;color:var(--accent);padding-right:16px}
-  .credit a{text-decoration:underline;cursor:pointer}
+/* Keep hero credit inside the page column */
+.credit{
+  text-align:right;
+  font-size:14px;
+  margin:8px auto 0;
+  color:var(--accent);
+  padding:0 16px;
+  max-width:1120px; /* match .page */
+}
+.fullbleed{ overflow:hidden; } /* prevents tiny overhangs */
   .section{margin-top:26px}
   .section h3{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px;font-weight:700;letter-spacing:-0.01em}
   .kv{display:grid;grid-template-columns:minmax(12ch,1fr) minmax(0,2fr);row-gap:.75rem;column-gap:1rem;align-items:start;grid-auto-rows:minmax(1.6em,auto)}
@@ -149,16 +195,7 @@
     padding: 0 16px;         /* add gutters left/right */
     box-sizing: border-box;
   }
-  #credit {
-    font-size: 0.7rem;       /* smaller, metadata feel */
-    line-height: 1.2;
-    color: color-mix(in srgb, var(--ink) 50%, transparent);
-    text-align: right;
-    margin: 4px 16px 0 0;    /* align to right gutter */
-    font-style: italic;      /* optional */
-  }
 }
-
 /* Fallback for very old browsers without aspect-ratio */
 @supports not (aspect-ratio: 1 / 1){
   @media (max-width: 640px){
@@ -173,28 +210,21 @@
 #expChips{ margin-top:12px !important; }        /* stack by default (mobile) */
 #expChips .chip{ margin:0; }
 
-/* Expedition Itinerary card look (like a Day) */
+/* Make Expedition Itinerary a card */
+#expItin.section{            /* override the section divider for this one */
+  border-top:0;
+  padding-top:0;
+}
+
 #expItin{
-  border: 1px solid var(--div);
-  border-radius: 12px;
   background: rgba(255,255,255,.38);
+  border: 1px solid rgba(0,0,0,.11);
+  border-radius: 12px;
   padding: 16px;
 }
 
-/* Chips block */
-#expChips{ margin-top:12px !important; }
-#expChips .row{ padding:10px 0; border-top:1px dashed var(--div-soft); }
-#expChips .row:first-child{ border-top:0; }
-#expChips .chip{ margin:0; }
-
-/* Desktop: simple two-column layout */
-@media (min-width: 960px){
-  #expChips{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px 22px;
-  }
-  #expChips .row{ border-top:0; padding:0; }
+#expItin > h3{
+  margin: 0 0 12px;
 }
 
 /* Keep labeled-row look on mobile */
@@ -217,6 +247,7 @@ body.ei-open{
   overflow: hidden;
   position: fixed;
   width: 100%;
+  padding-right: calc(100vw - 100%);  /* ← Patch 2: prevent right-shift */
 }
 
 /* Make the slideout itself scrollable */
