@@ -175,6 +175,26 @@ html, body{ overflow-x:hidden; }
     .section{ margin-top:42px; padding-top:20px; border-top:1px solid rgba(0,0,0,.11); }
   }
 
+/* Desktop: make the hero truly full-bleed, keep mobile column-aligned */
+@media (min-width: 960px){
+  .fullbleed{
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    overflow: hidden;
+  }
+  #hero{
+    width: 100%;
+    max-width: none;
+    display: block;
+    padding: 0;               /* remove mobile gutters */
+    aspect-ratio: 16 / 9;     /* consistent frame on desktop too */
+    height: auto;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+  
   @media (prefers-reduced-motion:reduce){
     *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
   }
