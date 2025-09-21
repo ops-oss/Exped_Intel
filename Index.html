@@ -743,7 +743,7 @@ const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduc
 })();
 
 /* ---------- chips ---------- */
-const CHIP_SVG={
+const CHIP_SVG = {
   distance:'<svg><use href="#c-distance"/></svg>',
   elevation:'<svg><use href="#c-elevation"/></svg>',
   campsite:'<svg><use href="#c-campsite"/></svg>',
@@ -753,7 +753,7 @@ const CHIP_SVG={
   safety:'<svg><use href="#c-safety"/></svg>',
   decision:'<svg><use href="#c-decision"/></svg>',
   morale:'<svg><use href="#c-morale"/></svg>',
-  gps:'<svg><use href="#c-gps"/></svg>'
+  gps:'<svg><use href="#c-gps"/></svg>',   // ✅ comma added
   duration:'<svg><use href="#c-duration"/></svg>'
 };
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
