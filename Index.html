@@ -2074,6 +2074,13 @@ function mergeDaysWithBaseline(baseDaysRaw=[], scenDaysRaw=[], strategy='patch')
   return res;
 }
 
+// --- helper to align days by label/number ---
+function normDayKey(d, i){
+  const lbl = String(d?.label || '').toLowerCase();
+  const m = lbl.match(/day\s*(\d+)/);
+  return m ? `d${m[1]}` : `idx-${i}`;
+}
+
 function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
   const baseMap=new Map(); adaptedBaseline.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), d));
   const chipKeys=['trail','terrain','features','water','safety','tip','decision','bailout','morale','campsite'];
@@ -2192,21 +2199,13 @@ function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
       $('expItin').style.display = 'none';
     }
 
-// // 3) Days — prefer scenario.days; fall back to baseline; support patch/replace
-const fromScenario = getDays(raw || {});        // your existing helper
-const fromBase     = getDays(base || {});       // your existing helper
-const baseDaysRaw  = Array.isArray(fromBase)     ? fromBase     : [];
-const scenDaysRaw  = Array.isArray(fromScenario) ? fromScenario : [];
-
-// Respect optional strategy flags coming from GPT
+// 3) Days — build scenario days with patch/replace strategy (no external helper)
+const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
+const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
 const daysStrategy =
-  (raw?.days_strategy === 'replace' || raw?._replaceDays === true) ? 'replace' : 'patch';
-
-// Normalizes a “key” for a day so patching lines up by day number if present
-function normDayKey(d, i){
-  const m = String(d?.label || '').match(/(\d+)/);
-  return m ? `day-${m[1]}` : `idx-${i}`;
-}
+  (raw?.days_strategy === 'replace' || raw?.replaceDays === true)
+    ? 'replace'
+    : 'patch';
 
 // Build final day list (raw objects)
 let finalDaysRaw;
@@ -2221,8 +2220,7 @@ if (scenDaysRaw.length === 0) {
   const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
   finalDaysRaw = scenDaysRaw.map((d, i) => {
     const b = baseMap.get(normDayKey(d, i)) || {};
-    const out = { ...b, ...d };          // scenario overrides baseline
-    // ensure preview + chips exist
+    const out = { ...b, ...d };                 // scenario overrides baseline
     if (!out.preview && b.preview) out.preview = b.preview;
     if (!out.chips) out.chips = {};
     if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
@@ -2231,7 +2229,7 @@ if (scenDaysRaw.length === 0) {
 }
 
 // Adapt for renderer and draw
-const finalDays = (finalDaysRaw || []).map(adaptDay);   // you already have adaptDay
+const finalDays = (finalDaysRaw || []).map(adaptDay);  // you already have adaptDay
 if ($('#itineraryDays')){
   $('#itineraryDays').innerHTML = finalDays.map(renderDay).join('');
   const reinit = () => {
