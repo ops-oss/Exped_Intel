@@ -2102,35 +2102,45 @@ function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
   const rawTitle = d.title || d.day_title || d.label || '';
   const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
 
-  // 2) Prefer explicit title; otherwise derive title from description
-  let parsed = parseLineForTitleAndChips(rawTitle || rawDesc);
+// 2) Build a better source string for parsing the route title.
+// If the title is just "Day N", use the description instead.
+const isBareDay = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
+const sourceForTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
 
-  // 3) Distance/elevation may also be in distance_and_elevation
-  const chips = { ...parsed.chips };
-  if (typeof d.distance_and_elevation === 'string' && !chips.distance){
-    const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
-    if (mm){ chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
-    else   { chips.distance = d.distance_and_elevation.trim(); }
-  }
+// Parse "<Route>, 10 miles, +A ft / -B ft" if present.
+let parsed = parseLineForTitleAndChips(sourceForTitle);
 
-  // 4) Map common zap keys → chips
-  if (d.primary_trail)     chips.trail     = d.primary_trail;
-  if (d.terrain)           chips.terrain   = d.terrain;
-  if (d.notable_features)  chips.features  = d.notable_features;
-  if (d.key_features)      chips.features  = chips.features || d.key_features;
-  if (d.key_water_sources) chips.water     = d.key_water_sources;
-  if (d.campsite_location) chips.campsite  = d.campsite_location;
-  if (d.safety)            chips.safety    = d.safety;
-  if (d.trail_tip)         chips.tip       = d.trail_tip;
-  if (d.bailout)           chips.bailout   = d.bailout;
-  if (d.decision_point)    chips.decision  = d.decision_point;
-  if (d.morale_marker)     chips.morale    = d.morale_marker;
-
-  const finalTitle = parsed.title || rawTitle || 'Itinerary Day';
-  const preview    = rawDesc;
-
-  return { title: finalTitle, preview, chips };
+// If no good route-like title yet, take the first sentence of the description.
+if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
+  const firstSentence = String(rawDesc).split('.').shift().trim();
+  if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
 }
+
+// 3) Distance/elevation may also be in distance_and_elevation
+const chips = { ...parsed.chips };
+if (typeof d.distance_and_elevation === 'string' && !chips.distance){
+  const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
+  if (mm){ chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
+  else   { chips.distance = d.distance_and_elevation.trim(); }
+}
+
+// 4) Map common zap keys → chips
+if (d.primary_trail)     chips.trail     = d.primary_trail;
+if (d.terrain)           chips.terrain   = d.terrain;
+if (d.notable_features)  chips.features  = d.notable_features;
+if (d.key_features)      chips.features  = chips.features || d.key_features;
+if (d.key_water_sources) chips.water     = d.key_water_sources;
+if (d.campsite_location) chips.campsite  = d.campsite_location;
+if (d.safety)            chips.safety    = d.safety;
+if (d.trail_tip)         chips.tip       = d.trail_tip;
+if (d.bailout)           chips.bailout   = d.bailout;
+if (d.decision_point)    chips.decision  = d.decision_point;
+if (d.morale_marker)     chips.morale    = d.morale_marker;
+
+const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
+const preview    = rawDesc;
+
+return { title: finalTitle, preview, chips };
 
   function findScenario(base, key){
     if (!base) return null;
