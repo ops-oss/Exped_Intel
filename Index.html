@@ -344,8 +344,11 @@ body .ei-toc-list .ico *{ fill:none; }
 #expItin{ padding:24px 16px 18px !important; }   /* more top air */
 #expItin > h3{ margin:0 0 18px !important; }     /* space under title */
 
-/* Extra gap ABOVE the card (outside the card) */
-#expItin.section{ margin-top:32px !important; }
+/* Extra gap when there are NO tabs */
+#expItin.section{ margin-top:32px; }
+
+/* When tabs are present, dock the card to the tabs */
+.ei-tabs + #expItin.section{ margin-top:-1px !important; }
 
 /* ===== Hero image: consistent frame, no overflow ===== */
 :root{
@@ -466,6 +469,401 @@ html,body{ overflow-x:hidden; }
 @supports not (font-size: 1cqw){
   .title{ font-size: clamp(34px, 18svw, 88px); }
 }
+/* === Scenario Tabs (CSS only) =========================================== */
+.ei-tabs{ margin:12px 0 0; }
+.ei-tablist{ display:flex; gap:8px; padding:8px 8px 0; margin:0; list-style:none; align-items:flex-end; }
+.ei-tab{
+  position:relative; display:inline-flex; align-items:center; gap:8px;
+  padding:10px 14px; font:inherit; font-weight:600; font-size:14px;
+  color:color-mix(in srgb, var(--ink, #1e1e1e) 88%, #000);
+  background:color-mix(in srgb, var(--paper, #fff) 86%, transparent);
+  border:1px solid var(--border, rgba(0,0,0,.12)); border-bottom:none;
+  border-top-left-radius:10px; border-top-right-radius:10px;
+  cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,.04);
+}
+.ei-tab svg{ width:18px; height:18px; stroke:currentColor; flex:0 0 auto; }
+.ei-tab[aria-selected="true"]{ background:var(--paper, #fff); color:var(--ink, #1e1e1e); z-index:2; }
+.ei-tab:focus-visible{ outline:2px solid var(--accent, #fe5733); outline-offset:2px; }
+.ei-tabs + #expItin{ margin-top:-1px; }
+@media (max-width:560px){ .ei-tablist{ gap:6px; padding-inline:6px } .ei-tab{ padding:8px 10px; font-size:13px } }
+
+/* === Slideout TOC (hamburger) ========================================== */
+body.ei-open{ overflow:hidden; position:fixed; width:100%; padding-right:calc(100vw - 100%); }
+:root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
+body .ei-toc-toggle{
+  position:fixed; top:14px; right:16px; z-index:9999; width:34px; height:34px; border-radius:8px;
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
+  backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
+  border:1px solid var(--chip2-border); display:grid; place-items:center; cursor:pointer; color:var(--ink);
+}
+body .ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
+body .ei-toc-toggle .lines::before,
+body .ei-toc-toggle .lines::after{
+  content:""; position:absolute; left:0; right:0; height:2px; background:currentColor; border-radius:2px;
+  transition:transform .18s ease, opacity .18s ease;
+}
+body .ei-toc-toggle .lines::before{ top:0; }
+body .ei-toc-toggle .lines::after{ bottom:0; }
+body.ei-open .ei-toc-toggle .lines::before{ transform:translateY(6px) rotate(45deg); }
+body.ei-open .ei-toc-toggle .lines::after{ transform:translateY(-6px) rotate(-45deg); }
+
+body .ei-toc-panel{
+  position:fixed; inset:0 0 0 auto; width:var(--ei-toc-w); transform:translateX(100%);
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  border-left:1px solid var(--chip2-border); box-shadow:-16px 0 32px rgba(0,0,0,.06);
+  z-index:9998; transition:transform .22s ease; display:flex; flex-direction:column; gap:12px; padding:16px 14px;
+  max-height:100vh; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+}
+body.ei-open .ei-toc-panel{ transform:translateX(0); }
+
+body .ei-toc-dim{ position:fixed; inset:0; background:rgba(0,0,0,.12); opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:9997; }
+body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
+
+body .ei-toc-title{ font-weight:700; letter-spacing:-.01em; opacity:.85; margin:2px 6px 4px; }
+body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
+body .ei-toc-list a,
+body .ei-toc-list .ei-chip{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
+  border:1.5px solid var(--chip-border); border-radius:6px; background:var(--chip-fill);
+  color:color-mix(in srgb, var(--ink) 78%, #000); text-decoration:none;
+}
+body .ei-toc-list .ico{ width:16px; height:16px; flex:0 0 auto; stroke:currentColor; }
+body .ei-toc-list .ico *{ fill:none; }
+body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-current="true"]{
+  border-color:color-mix(in srgb, var(--accent) 35%, var(--chip-border));
+  background:color-mix(in srgb, var(--accent) 10%, var(--chip-fill));
+  color:var(--ink);
+}
+
+/* === Section header icon sizing (prevents giant icons) ================== */
+.section > h3{ display:flex; align-items:baseline; gap:10px; }
+.section > h3 .hdr-ico{ width:1em; height:1em; flex:0 0 auto; }
+.section > h3:focus, .section > h3:target{ outline:none !important; box-shadow:none !important; }
+.section > h3:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+
+/* — Tabs: attach to the card and use the paper color — */
+.ei-tabs{ margin-top:12px; position:relative; z-index:1; }
+.ei-tablist{ align-items:flex-end; gap:8px; }
+.ei-tab{
+  background: var(--paper);
+  border: 1px solid var(--div-soft);
+  border-bottom: none;
+  color: var(--ink);
+}
+.ei-tab[aria-selected="true"]{
+  background: var(--paper);
+  color: var(--ink);
+}
+.ei-tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background: var(--paper); /* hides the card’s top border directly under the active tab */
+}
+.ei-tabs + #expItin{ margin-top:-1px !important; }
+#expItin{ border-top-left-radius:0; } /* seam looks flush under first tab */
+
+/* ——— Scenarios: clickable tabs + match the card surface ——— */
+:root{
+  --exp-card-bg: rgba(255,255,255,.38);
+  --exp-card-border: rgba(0,0,0,.11);
+}
+
+/* keep tab strip above the card so all tabs are clickable */
+.ei-tabs{ position: relative; z-index: 5; margin-bottom: 0; }
+
+/* the card sits below the tabs */
+#expItin{
+  position: relative;
+  z-index: 0;
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+}
+
+/* tabs look like the same surface as the card */
+.ei-tab{
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-bottom: none;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+/* hide the card’s top border exactly under the active tab */
+.ei-tab[aria-selected="true"]::after{
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px; height: 1px;
+  background: var(--exp-card-bg);
+}
+
+/* seam: dock the card to the tabs */
+#expItin.section{ margin-top: 0; }
+.ei-tabs + #expItin.section{ margin-top: -1px !important; }
+
+/* (optional) seam on the left looks flush under the first tab */
+#expItin{ border-top-left-radius: 0; }
+
+/* Tabs docked to the card + same surface */
+.ei-tabs{ position:relative; z-index:5; margin:12px 0 -1px; } /* negative bottom tucks under tab line */
+#expItin.section{ margin-top:0; }
+.ei-tabs + #expItin.section{ margin-top:-1px !important; }   /* seam */
+#expItin{ position:relative; z-index:0; border-top-left-radius:0; }
+
+:root{ --exp-card-bg: rgba(255,255,255,.38); --exp-card-border: rgba(0,0,0,.11); }
+.ei-tab{
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-bottom: none;
+  color: var(--ink);
+  box-shadow: none;
+}
+.ei-tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background: var(--exp-card-bg);
+}
+
+/* FINAL: dock tabs to card + same surface */
+:root{
+  --exp-card-bg: rgba(255,255,255,.38);
+  --exp-card-border: rgba(0,0,0,.11);
+}
+
+.ei-tabs{ position:relative; z-index:5; margin:12px 0 -1px; }
+.ei-tablist{
+  background: var(--exp-card-bg);
+  padding: 8px 8px 0;
+  border: 1px solid var(--exp-card-border);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+.ei-tab{
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-bottom: none;
+  color: var(--ink);
+  box-shadow: none;
+}
+.ei-tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background: var(--exp-card-bg);
+}
+#expItin{
+  position:relative; z-index:0;
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-top-left-radius: 0;
+}
+.ei-tabs + #expItin.section{ margin-top:-1px !important; }
+
+/* PATCH 4 — seam overrides (final) */
+/* same surface + border for both */
+:root{
+  --exp-card-bg: rgba(255,255,255,.38);
+  --exp-card-border: rgba(0,0,0,.11);
+}
+
+/* TABS = CARD EDGE (no separate strip) */
+:root{
+  --exp-card-bg: var(--paper);              /* same surface */
+  --exp-card-border: rgba(0,0,0,.11);
+}
+
+/* no extra panel behind the tabs */
+.ei-tablist{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* tabs draw the top border of the card */
+.ei-tabs{
+  position: relative;
+  z-index: 5;
+  margin: 12px 0 0 !important;             /* no negative tuck */
+}
+
+.ei-tab{
+  background: var(--exp-card-bg);
+  color: var(--ink);
+  border: 1px solid var(--exp-card-border);
+  border-bottom: 0;                         /* open bottom so it meets the card */
+  border-radius: 10px 10px 0 0;
+  box-shadow: none;
+}
+
+/* make the active tab visually continuous with the card */
+.ei-tab[aria-selected="true"]{
+  position: relative;
+  z-index: 2;
+}
+
+/* seam: card starts exactly under the tabs */
+#expItin{
+  position: relative;
+  z-index: 0;
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-top: 0;                            /* top edge is provided by tabs */
+  border-top-left-radius: 0;                /* flush under first tab */
+}
+
+#expItin.section{ margin-top: 0 !important; }
+.ei-tabs + #expItin.section{ margin-top: -1px !important; } /* remove any hint of gap */
+
+/* kill any previous decorative “after” line on active tab */
+.ei-tab[aria-selected="true"]::after{ display:none !important; }
+
+/* card picks up right under the strip */
+#expItin.section{ margin-top:0 !important; }
+.ei-tabs + #expItin.section{ margin-top:0 !important; }  /* no gap under the strip */
+#expItin{
+  position:relative; z-index:0;
+  background: var(--exp-card-bg);
+  border: 1px solid var(--exp-card-border);
+  border-top-left-radius: 0;         /* flush under first tab */
+}
+
+/* sub-pixel insurance on HiDPI */
+@media (min-resolution: 2dppx){
+  .ei-tabs{ margin-bottom:-1.01px; }
+}
+
+/* Seam: make the strip and card meet perfectly */
+#expItin{ border-top:0; }  /* card doesn’t draw a top edge */
+
+/* ===== TABS = TOP EDGE OF THE CARD (final override) ===================== */
+/* 1) Make the strip transparent (no faux card behind tabs) */
+.ei-tabs{ position:relative; z-index:5; margin:12px 0 0 !important; }
+.ei-tablist{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* 2) Tabs draw the card’s top border */
+.ei-tab{
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border: 1px solid rgba(0,0,0,.11) !important;
+  border-bottom: 0 !important;                 /* so it meets the card */
+  border-radius: 10px 10px 0 0 !important;
+  box-shadow: none !important;
+}
+
+/* 3) Visual active state (and keep it above the card) */
+.ei-tab[aria-selected="true"]{
+  position: relative;
+  z-index: 2;
+  background: var(--paper) !important;
+  border-bottom-color: transparent !important;
+  filter: none !important;
+}
+.ei-tab[aria-selected="true"]::after{ display:none !important; } /* kill any old seam line */
+
+/* Optional: make inactives look “unselected” */
+.ei-tab[aria-selected="false"]{ opacity:.82; }
+.ei-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* 4) Dock the card to the tabs (no gap, no faux border) */
+#expItin{
+  position: relative;
+  z-index: 0;
+  background: var(--paper) !important;
+  border: 1px solid rgba(0,0,0,.11) !important;
+  border-top: 0 !important;                    /* tabs provide the top edge */
+  border-top-left-radius: 0 !important;        /* flush under first tab */
+}
+#expItin.section{ margin-top:0 !important; }
+.ei-tabs + #expItin.section{ margin-top:-1px !important; }  /* erase any hairline */
+
+/* 5) Neutralize older “strip/card” styles that created the gap */
+.ei-tablist{ border-bottom:0 !important; }
+#expItin{ border-top:0 !important; }           /* if an older block re-added it */
+
+/* === SEAM: no gap between tabs and card (final) ======================= */
+.ei-tabs{ margin-bottom:0 !important; }         /* never add space below the tabs */
+.ei-tablist{ padding:0 !important; margin:0 !important; }  /* belt & suspenders */
+
+/* Make the card overlap the tab line by ~1px on all DPIs */
+#expItin.section{ margin-top:-1px !important; }            /* overlap by 1px */
+@media (min-resolution:2dppx){
+  #expItin.section{ margin-top:-1.01px !important; }       /* HiDPI insurance */
+}
+
+/* Ensure no extra borders sneak back in */
+#expItin{ border-top:0 !important; }                        /* tabs provide top edge */
+.ei-tab[aria-selected="true"]::after{ display:none !important; } /* kill fake seam */
+
+/* Tabs: clearer active vs inactive */
+.ei-tab[aria-selected="true"]{
+  opacity: 1 !important;
+  filter: none !important;
+}
+.ei-tab[aria-selected="false"]{
+  opacity: .55 !important;          /* ghost */
+  filter: saturate(.6) contrast(.95);
+}
+.ei-tab[aria-selected="false"]:hover,
+.ei-tab[aria-selected="false"]:focus-visible{
+  opacity: .9 !important;            /* wake on hover/focus */
+  filter: none;
+}
+
+/* === SEAM: tabs are the card’s top edge (authoritative) =============== */
+.ei-tablist{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.ei-tabs{
+  position: relative;
+  z-index: 5;
+  margin: 12px 0 0 !important;   /* no negative tuck */
+}
+
+/* Tabs draw the border, card starts directly underneath */
+.ei-tab{
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border: 1px solid rgba(0,0,0,.11) !important;
+  border-bottom: 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+  box-shadow: none !important;
+}
+.ei-tab[aria-selected="true"]::after{ display:none !important; }  /* nuke old seam line */
+
+/* Card: no top border; overlap by 1px to erase sub-pixel gaps */
+#expItin{
+  position: relative;
+  z-index: 0;
+  background: var(--paper) !important;
+  border: 1px solid rgba(0,0,0,.11) !important;
+  border-top: 0 !important;
+  border-top-left-radius: 0 !important;
+}
+
+/* Single source of truth for the docking */
+#expItin.section{ margin-top: -1px !important; }   /* overlap the tab line */
+.ei-tabs + #expItin.section{ margin-top: -1px !important; }
+.ei-tabs{ margin-bottom: 0 !important; }
+
+/* HiDPI insurance */
+@media (min-resolution:2dppx){
+  #expItin.section{ margin-top:-1.01px !important; }
+}
+
+/* close the grid gap between tabs and the card */
+.page > .ei-tabs { margin-bottom: -20px !important; } /* negate row-gap */
+.ei-tabs + #expItin.section { margin-top: -1px !important; } /* seam overlap */
+@media (min-resolution:2dppx){
+  .ei-tabs + #expItin.section { margin-top: -1.01px !important; }
+}
+
 </style>
 </head>
 <body>
@@ -816,6 +1214,32 @@ html,body{ overflow-x:hidden; }
   <path d="M15 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
   <path d="M4 20h14" />
 </symbol>
+  <!-- 
+
+=== Scenario tab symbols (append before </svg>) === -->
+  <symbol id="tab-baseline" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <ellipse cx="12" cy="6" rx="8" ry="3" />
+    <path d="M4 6v6a8 3 0 0 0 16 0v-6" />
+    <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
+  </symbol>
+
+  <symbol id="tab-anchor" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M12.857 14.675a5.016 5.016 0 0 1 -.857 -.675a5 5 0 0 0 -7 0v-9a5 5 0 0 1 7 0a5 5 0 0 0 7 0v6" />
+    <path d="M5 21v-7" />
+    <path d="M21.121 20.121a3 3 0 1 0 -4.242 0c.418 .419 1.125 1.045 2.121 1.879c1.051 -.89 1.759 -1.516 2.121 -1.879z" />
+    <path d="M19 18v.01" />
+  </symbol>
+
+  <symbol id="tab-driven" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M5.636 19.364a9 9 0 1 1 12.728 0" />
+    <path d="M16 9l-4 4" />
+  </symbol>
 </svg>
 
 <div class="page">
@@ -842,6 +1266,30 @@ html,body{ overflow-x:hidden; }
     <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer"><img id="hero" alt="Expedition hero"/></a>
     <div id="credit" class="credit"></div>
   </div>
+
+<!-- Scenario Tabs: lives in the BODY, above the Expedition Itinerary card -->
+<nav class="ei-tabs" aria-label="Expedition scenarios">
+  <ul class="ei-tablist" role="tablist">
+    <li>
+      <button class="ei-tab" role="tab" aria-selected="true" id="ei-tab-baseline" data-scenario="baseline">
+        <svg aria-hidden="true"><use href="#tab-baseline"></use></svg>
+        <span>Baseline</span>
+      </button>
+    </li>
+    <li>
+      <button class="ei-tab" role="tab" aria-selected="false" id="ei-tab-anchor" data-scenario="anchor">
+        <svg aria-hidden="true"><use href="#tab-anchor"></use></svg>
+        <span>Anchor</span>
+      </button>
+    </li>
+    <li>
+      <button class="ei-tab" role="tab" aria-selected="false" id="ei-tab-driven" data-scenario="driven">
+        <svg aria-hidden="true"><use href="#tab-driven"></use></svg>
+        <span>Driven</span>
+      </button>
+    </li>
+  </ul>
+</nav>
 
   <!-- Expedition Itinerary (summary chips) -->
   <section id="expItin" class="section" style="display:none">
@@ -1179,21 +1627,32 @@ function computeSrc(){
   const qp=new URLSearchParams(location.search).get('src');
   if(qp) return qp;
   const m = location.pathname.match(/\/trip\/([^\/?#]+)\/?$/);
-  const slug = m?.[1] || 'teton-crest-trail-expedition';
+  const slug = m?.[1] || 'zion-shuttle-trail-beginning';
   return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
 }
 async function loadData(){
+  // 1) Prefer inline JSON if present (great for CodePen / local preview)
+  const inlineEl = document.getElementById('ei-data');
+  if (inlineEl && inlineEl.textContent && inlineEl.textContent.trim().length){
+    const inline = safeParse(inlineEl.textContent);
+    if (inline && Object.keys(inline).length){
+      console.log('EI DATA SOURCE → inline (#ei-data)');
+      return inline;
+    }
+  }
+
+  // 2) Otherwise fetch from the computed URL
   const url = computeSrc();
-  console.log('EI JSON URL →', url);
+  console.log('EI DATA SOURCE → fetch:', url);
   try{
-    const res = await fetch(url,{cache:'no-store',headers:{accept:'application/json'}});
+    const res = await fetch(url, { cache:'no-store', headers:{ accept:'application/json' } });
     if(!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     const text = await res.text();
     const raw = safeParse(text) ?? {};
     return raw;
   }catch(err){
-    console.warn('Falling back to inline JSON:', err);
-    return safeParse(document.getElementById('ei-data')?.textContent)||{};
+    console.warn('Fetch failed; no usable inline JSON found either:', err);
+    return {};
   }
 }
 
@@ -1279,18 +1738,27 @@ if (data.image_link) {
   kvOrParagraph('final_brief', data.final_brief);
   kvOrParagraph('field_disclaimer', data.field_disclaimer);
 
-  function hideTrulyEmptySections(){
-    document.querySelectorAll('.section').forEach(s=>{
-      if (s.querySelector('#gpxEmbedWrap')) return;
-      const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
-        return n.innerText.trim() || n.querySelector('iframe, a, .chip');
-      });
-      if (!hasContent) s.style.display = 'none';
+function hideTrulyEmptySections(){
+  document.querySelectorAll('.section').forEach(s=>{
+    if (s.querySelector('#gpxEmbedWrap')) return; // never auto-hide GPX wrapper
+    const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
+      return (n.innerText && n.innerText.trim().length) || n.querySelector('iframe, a, .chip');
     });
-  }
-  hideTrulyEmptySections();
+    // toggle BOTH ways
+    s.style.display = hasContent ? '' : 'none';
+  });
+}
+window.EI_refreshSections = hideTrulyEmptySections; // expose for tabs
 
-  status.textContent=''; setTimeout(()=>status.remove(),10);
+// …after hideTrulyEmptySections();
+hideTrulyEmptySections();
+
+status.textContent='';
+setTimeout(()=>status.remove(),10);
+
+/* PATCH 3 — expose data for the tabs */
+window.EI_DATA = data;
+window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
 
 /* ===== In-page nav: build from h3s ===== */
@@ -1453,96 +1921,348 @@ window.addEventListener('beforeprint', () => {
   });
 })();
 </script>
-
-<!-- ========= Inline JSON sample so it renders instantly ========= -->
-<script id="ei-data" type="application/json">
-{
-  "title": "Teton Crest Trail Expedition",
-  "category": "Backpacking",
-  "season": "July–September",
-  "location": "Grand Teton National Park, WY",
-  "date": "2025-08-12",
-  "hero_image": "https://images.unsplash.com/photo-1508264165352-258a6b0c4b52?q=80&w=1600&auto=format&fit=crop",
-  "image_credit": "Photo: Grant Ritchie (Unsplash)",
-  "image_link": "https://unsplash.com/photos/green-grass-field-near-mountain-x1w_Q78xOEU",
-  "expedition_itinerary": {
-    "route": "Teton Crest Trail Traverse",
-    "objective": "End-to-End Traverse",
-    "duration": "4 days / 3 nights",
-    "mileage": "40–45 miles",
-    "experience": "Intermediate",
-    "terrain": "Alpine meadows, granite passes",
-    "elevation": "+7,800 ft / -7,600 ft",
-    "trailheads": "Phillips Pass → String Lake",
-    "gps": "43.655, -110.860"
-  },
-  "gpx_download_link": "https://example.com/tct-starter.gpx",
-  "start_trailhead": "Phillips Pass",
-  "end_trailhead": "String Lake",
-  "map_embed_url": "https://www.openstreetmap.org/export/embed.html?bbox=-110.95%2C43.55%2C-110.70%2C43.80&layer=mapnik",
-  "permits_entry": "Type: Wilderness permit\\nBooking: Opens 6 months out\\nPick-up: Moose Visitor Center (ID required)",
-  "shuttle_transportation": "Park at String Lake. Shuttle from String Lake to Phillips Pass trailhead (reserve ahead).",
-  "permit_timeline": "- 6 months out: Submit permit request\\n- 1 week out: Confirm group + pickup window\\n- Day 0: Collect permit; brief on bear activity",
-  "multi_trailhead": "One-way shuttle recommended; alternative: self-shuttle with two vehicles.",
-  "key_considerations": "- Bear canisters required\\n- Afternoon storms common; aim to crest passes by 2pm",
-  "days": [
-    {
-      "title": "DAY 1: Phillips Pass TH to Marion Lake",
-      "preview": "Warm-up traverse with big meadows and first Grand views.",
-      "chips": {
-        "distance": "9.8 mi",
-        "elevation": "+2,100 ft / -620 ft",
-        "campsite": "Marion Lake (permit)",
-        "trail": "Teton Crest Trail",
-        "terrain": "Alpine meadows, granite slabs",
-        "water": "Creeks at mi 4.5 & 8.7",
-        "safety": "Bear canisters; hang time awareness",
-        "decision": "Weather check near patrol hut",
-        "morale": "Sunset above Marion"
-      }
-    },
-    {
-      "title": "DAY 2: Marion Lake to Death Canyon Shelf",
-      "preview": "High-country cruise; wide-open shelf camping.",
-      "chips": {
-        "distance": "10.6 mi",
-        "elevation": "+1,950 ft / -1,100 ft",
-        "campsite": "Death Canyon Shelf (zones)",
-        "trail": "TCT + Alaska Basin Overlook spur (opt.)",
-        "terrain": "Open plateau, talus bands",
-        "water": "Reliable streams on shelf",
-        "safety": "Afternoon lightning risk",
-        "decision": "Bail via tram if storms build",
-        "morale": "Milky Way viewing"
-      }
-    },
-    {
-      "title": "DAY 3: Death Canyon Shelf to North Fork Cascade",
-      "preview": "Cathedral views; optional Hurricane Pass side trip.",
-      "chips": {
-        "distance": "11.2 mi",
-        "elevation": "+2,450 ft / -2,300 ft",
-        "campsite": "North Fork Cascade (zones)",
-        "trail": "TCT mainline",
-        "terrain": "Pass travel, glacial cirques",
-        "water": "Multiple crossings; treat",
-        "safety": "Snow patches linger early season",
-        "decision": "Skip side trips in poor weather",
-        "morale": "Grand Teton reveal"
-      }
+<script>
+  // place this immediately before the PATCH 4 tabs script block
+  (function primeEI(){
+    if (!window.EI_DATA || !Object.keys(window.EI_DATA).length){
+      try {
+        const el = document.getElementById('ei-data');
+        if (el && el.textContent) window.EI_DATA = JSON.parse(el.textContent);
+      } catch {}
     }
-  ],
-  "campsite_intel": "Best wind protection at Marion Lake SE side; Shelf has exposed sites—use rock walls.",
-  "weather_altitude": "Typical: 75°F/40°F; expect rapid shifts. UV high at elevation.",
-  "gear_checklist": "- Bear canister\\n- Rain layers\\n- Warm midlayer\\n- Map + compass + GPX\\n- Sun and storm kit",
-  "optional_mod": "Add Hurricane Pass spur (+3 mi).",
-  "risk_matrix": "Lightning: Medium; Snow travel: Low–Med (early season); Water crossings: Low.",
-  "conditions_watch": "- Snow cornices on Hurricane Pass (early July)\\n- Bridge repairs near Cascade Creek",
-  "bailout_summary": "- Tram bailout on Day 2\\n- Cascade Canyon exit to Jenny Lake shuttle",
-  "emergency": "Teton Dispatch: 307-739-3301\\nPark Info: 307-739-3300",
-  "final_brief": "Early starts, steady pacing, turn-around time 2pm on pass days.",
-  "field_disclaimer": "Backcountry travel is inherently risky. You are responsible for your decisions."
-}
+  })();
 </script>
-</body>
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const tabs = document.querySelectorAll('.ei-tab');
+  if (!tabs.length) return;
+
+  /* ---------- helpers ---------- */
+
+  const getBase = () =>
+    (window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {};
+
+  // allow fenced JSON scenarios in data.scenarios_json
+  function addScenariosFromString(data){
+    if (!data) return {};
+    if (Array.isArray(data.scenarios) || typeof data.scenarios === 'object') return data;
+
+    const raw = String(data.scenarios_json || '').trim();
+    if (!raw) return data;
+
+    let t = raw.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
+    const m = t.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (m) t = m[0];
+    if (/^\s*</.test(t)) return data; // looks like HTML
+
+    try{
+      const parsed = JSON.parse(t);
+      if (Array.isArray(parsed)) data.scenarios = parsed;
+      else if (parsed && Array.isArray(parsed.scenarios)) data.scenarios = parsed.scenarios;
+    }catch{}
+    return data;
+  }
+
+  const headerToItin = (h={}) => ({
+    duration:   h.duration   || '',
+    mileage:    h.mileage    || '',
+    elevation:  h.elevation  || '',
+    trailheads: h.trailheads || '',
+    gps:        h.gps        || '',
+    terrain:    h.terrain    || '',
+    experience: h.experience || ''
+  });
+
+  // parse “…, 14 miles, +2500 ft / -3100 ft” tacked onto a title
+  function parseTitleMetrics(rawTitle=""){
+    const t = String(rawTitle || "").trim();
+    const m = t.match(/,\s*([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*$/i);
+    const routeOnly = m ? t.slice(0, m.index).trim() : t;
+    const chips = {};
+    if (m){
+      chips.distance  = m[1].replace(/\s+/g,' ').trim();
+      chips.elevation = `${m[2].replace(/\s+/g,' ').trim()} / ${m[3].replace(/\s+/g,' ').trim()}`;
+    }
+    return { title: routeOnly, chips };
+  }
+
+// ---- helper: pull "route, 14 miles, +2500 ft / -3100 ft" from any line
+function parseLineForTitleAndChips(text=""){
+  const t = String(text||"").trim();
+  // route , 14 miles , +xxxx ft / -yyyy ft    (commas optional around miles)
+  const m = t.match(/^(.*?)(?:,\s*)?([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*\.?$/i);
+  if (!m) return { title: t, chips:{} };
+  const route = m[1].trim().replace(/\s{2,}/g,' ');
+  const chips = {
+    distance:  m[2].replace(/\s+/g,' ').trim(),
+    elevation: `${m[3].replace(/\s+/g,' ').trim()} / ${m[4].replace(/\s+/g,' ').trim()}`
+  };
+  return { title: route, chips };
+}
+
+// --- ADD: extract days robustly from any JSON shape
+function coerceArray(v){
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === 'object') return Object.values(v);
+  return [];
+}
+
+function parseDaysFromText(text=""){
+  // Splits "Day 1:" / "Days 2–3:" blocks into day objects
+  const chunks = String(text).replace(/\r/g,'')
+    .split(/\n(?=DAYS?\s+\d+(\s*[-–]\s*\d+)?:)/i)
+    .filter(Boolean);
+
+  return chunks.map(block => {
+    const head = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
+    const titleLine = head ? head[2] : block.split('\n')[0];
+    const rest = block.replace(/^[^\n]*\n?/, '').trim();
+    return { title: titleLine?.trim() || 'Itinerary Day', preview: rest };
+  });
+}
+
+function getDays(node){
+  if (!node) return [];
+  // 1) obvious places
+  let out = [
+    ...coerceArray(node.days),
+    ...coerceArray(node.itinerary_days),
+    ...coerceArray(node.overview_days),
+  ];
+  // 2) nested objects
+  if (node.itinerary?.days) out.push(...coerceArray(node.itinerary.days));
+  if (node.itinerary_overview?.days) out.push(...coerceArray(node.itinerary_overview.days));
+  if (Array.isArray(node.itinerary_overview)) out.push(...node.itinerary_overview);
+
+  // 3) string blobs we can parse
+  const ioStr = typeof node.itinerary_overview === 'string' ? node.itinerary_overview : null;
+  const ioStr2 = typeof node['Itinerary Overview'] === 'string' ? node['Itinerary Overview'] : null;
+  if (ioStr)  out.push(...parseDaysFromText(ioStr));
+  if (ioStr2) out.push(...parseDaysFromText(ioStr2));
+
+  return out.filter(Boolean);
+}
+
+function adaptDay(d = {}){
+  // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
+  if (typeof d === 'string'){
+    const p = parseLineForTitleAndChips(d);
+    return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
+  }
+
+function dayNumberFromLabel(lbl=''){ const m=String(lbl).match(/day\s*(\d+)/i); return m?+m[1]:null; }
+function normalizeDayKey(d={}, idx){ const n=dayNumberFromLabel(d.label); return n!=null?`day-${n}`:(d.label?d.label.trim().toLowerCase():`idx-${idx}`); }
+
+function mergeDaysWithBaseline(baseDaysRaw=[], scenDaysRaw=[], strategy='patch'){
+  const base = Array.isArray(baseDaysRaw)?baseDaysRaw:[];
+  const scen = Array.isArray(scenDaysRaw)?scenDaysRaw:[];
+  if(!scen.length) return base;
+  if(strategy==='replace') return scen;
+
+  const baseMap=new Map();
+  base.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), {idx:i, day:d}));
+  const res = base.slice();
+
+  scen.forEach((sd,i)=>{
+    const key=normalizeDayKey(sd,i);
+    if(baseMap.has(key)){ const {idx, day}=baseMap.get(key); res[idx] = {...day, ...sd}; }
+    else{ res.push(sd); }
+  });
+  return res;
+}
+
+function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
+  const baseMap=new Map(); adaptedBaseline.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), d));
+  const chipKeys=['trail','terrain','features','water','safety','tip','decision','bailout','morale','campsite'];
+  return adaptedMerged.map((d,i)=>{
+    const out={...d, chips:{...(d.chips||{})}};
+    const base=baseMap.get(normalizeDayKey(d,i));
+    if(base){
+      if(!out.preview && base.preview) out.preview=base.preview;
+      chipKeys.forEach(k=>{ if(!out.chips[k] && base.chips?.[k]) out.chips[k]=base.chips[k]; });
+    }
+    return out;
+  });
+}
+
+  // 0) Pull day index if label is "Day 2" (optional)
+  const dayIdx = String(d.label||'').match(/day\s*(\d+)/i)?.[1];
+
+  // 1) Source strings
+  const rawTitle = d.title || d.day_title || d.label || '';
+  const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
+
+  // 2) Prefer explicit title; otherwise derive title from description
+  let parsed = parseLineForTitleAndChips(rawTitle || rawDesc);
+
+  // 3) Distance/elevation may also be in distance_and_elevation
+  const chips = { ...parsed.chips };
+  if (typeof d.distance_and_elevation === 'string' && !chips.distance){
+    const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
+    if (mm){ chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
+    else   { chips.distance = d.distance_and_elevation.trim(); }
+  }
+
+  // 4) Map common zap keys → chips
+  if (d.primary_trail)     chips.trail     = d.primary_trail;
+  if (d.terrain)           chips.terrain   = d.terrain;
+  if (d.notable_features)  chips.features  = d.notable_features;
+  if (d.key_features)      chips.features  = chips.features || d.key_features;
+  if (d.key_water_sources) chips.water     = d.key_water_sources;
+  if (d.campsite_location) chips.campsite  = d.campsite_location;
+  if (d.safety)            chips.safety    = d.safety;
+  if (d.trail_tip)         chips.tip       = d.trail_tip;
+  if (d.bailout)           chips.bailout   = d.bailout;
+  if (d.decision_point)    chips.decision  = d.decision_point;
+  if (d.morale_marker)     chips.morale    = d.morale_marker;
+
+  const finalTitle = parsed.title || rawTitle || 'Itinerary Day';
+  const preview    = rawDesc;
+
+  return { title: finalTitle, preview, chips };
+}
+
+  function findScenario(base, key){
+    if (!base) return null;
+    const k = (key||'').toLowerCase();
+    if (Array.isArray(base.scenarios)){
+      return base.scenarios.find(s => (s.key||s.label||'').toLowerCase() === k) || base.scenarios[0] || null;
+    }
+    if (base.scenarios && typeof base.scenarios === 'object'){
+      return base.scenarios[k] || base[k] || null;
+    }
+    return null;
+  }
+
+  function updateGPX(gpxURL, startTH, endTH){
+    const wrap=$('gpxEmbedWrap'), iframe=$('gpxStudio'), link=$('gpxStudioLink'), btn=$('gpxBtn'), bar=$('gpxActions'), th=$('trailheads');
+    if(!wrap) return;
+    let msg = wrap.querySelector('#gpxMissing');
+    if(!msg){
+      msg=document.createElement('div');
+      msg.id='gpxMissing';
+      msg.style.cssText='opacity:.7;font-size:14px';
+      msg.textContent='No GPX URL set.';
+      wrap.appendChild(msg);
+    }
+    if(!gpxURL){
+      if(iframe) iframe.removeAttribute('src');
+      msg.style.display=''; if(bar) bar.style.display='none'; if(th) th.textContent='';
+      return;
+    }
+    msg.style.display='none'; if(bar) bar.style.display='';
+    const studio='https://gpx.studio/embed?options='+encodeURIComponent(JSON.stringify({
+      token:'pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg',
+      files:[gpxURL], distanceUnits:'imperial'
+    }));
+    if(iframe && iframe.src !== studio) iframe.src = studio;
+    if(link) link.href = studio;
+    if(btn){
+      const slug=(window.EI_DATA && window.EI_DATA.slug) || 'route';
+      btn.href=gpxURL; btn.download=slug+'.gpx';
+    }
+    if(th) th.textContent=[startTH,endTH].filter(Boolean).join(' → ');
+  }
+
+  function updateMap(url){
+    const ifr = $('shuttle_map');
+    if (!ifr) return;
+    if (url){ ifr.src=url; ifr.parentElement.style.display=''; }
+    else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
+  }
+
+  /* ---------- render one scenario ---------- */
+  function renderScenario(name){
+    let base = addScenariosFromString(getBase());
+    const raw  = findScenario(base, name) || null;
+
+    // 1) Itinerary header
+    const itin = {
+      ...(base.expedition_itinerary || {}),
+      ...(raw?.header ? headerToItin(raw.header) : {})
+    };
+    if (Object.values(itin).some(Boolean)){
+      renderExpeditionKV(itin);
+      renderExpeditionChips(itin);
+      $('expItin').style.display = '';
+    } else {
+      $('expItin').style.display = 'none';
+    }
+
+// 3) Days — merge scenario with baseline using patch/replace strategy
+const baseDaysRaw = Array.isArray(base.days) ? base.days : [];
+const scenDaysRaw = Array.isArray(raw?.days) ? raw.days : [];
+const daysStrategy = (raw?.days_strategy === 'replace' || raw?.__replaceDays === true)
+  ? 'replace'
+  : 'patch';
+
+// merge raw days
+const mergedRaw     = mergeDaysWithBaseline(baseDaysRaw, scenDaysRaw, daysStrategy);
+
+// adapt both lists
+const adaptedBase   = baseDaysRaw.map(adaptDay);
+const adaptedMerged = mergedRaw.map(adaptDay);
+
+// borrow missing from baseline if patching
+const finalDays = (daysStrategy === 'patch')
+  ? borrowMissingFromBaseline(adaptedMerged, adaptedBase)
+  : adaptedMerged;
+
+// render
+if ($('itineraryDays')){
+  $('itineraryDays').innerHTML = finalDays.map(renderDay).join('');
+  const reinit = () => {
+    if (window.EI_refreshSections) window.EI_refreshSections();
+    if (window.EI_initAccordions) window.EI_initAccordions();
+    document.dispatchEvent(new CustomEvent('ei:days-updated'));
+  };
+  reinit(); setTimeout(reinit, 0);
+  console.log('[EI] days rendered:', finalDays.length);
+}
+    // 3) GPX + Map
+    const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
+    const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
+    const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
+    const map   = (raw?.header?.map_embed_url) || base.map_embed_url || base.map_embed || '';
+    updateGPX(gpx, start, end);
+    updateMap(map);
+
+    // 4) Text sections
+    const sec = [
+      'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
+      'key_considerations','campsite_intel','weather_altitude','gear_checklist',
+      'optional_mod','risk_matrix','conditions_watch','bailout_summary','emergency',
+      'final_brief','field_disclaimer'
+    ];
+    sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
+
+    if (window.EI_refreshSections) window.EI_refreshSections();
+    console.log('[EI] rendered scenario →', name);
+  }
+
+  /* ---------- wire up tabs ---------- */
+  const setActive = (btn) =>
+    tabs.forEach(t => t.setAttribute('aria-selected', t===btn ? 'true':'false'));
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActive(btn);
+      renderScenario(btn.dataset.scenario);
+    });
+  });
+
+  // first paint (use preselected tab if present)
+  const selected = [...tabs].find(b => b.getAttribute('aria-selected')==='true') || tabs[0];
+  if (selected){ setActive(selected); renderScenario(selected.dataset.scenario); }
+
+  // repaint when async data arrives
+  window.addEventListener('ei:data-ready', () => {
+    const active = [...tabs].find(b => b.getAttribute('aria-selected')==='true') || tabs[0];
+    if (active) renderScenario(active.dataset.scenario);
+  });
+})();
+</script></body>
 </html>
