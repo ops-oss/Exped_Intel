@@ -2174,12 +2174,21 @@ function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
     if(th) th.textContent=[startTH,endTH].filter(Boolean).join(' → ');
   }
 
-  function updateMap(url){
-    const ifr = $('shuttle_map');
-    if (!ifr) return;
-    if (url){ ifr.src=url; ifr.parentElement.style.display=''; }
-    else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
-  }
+ function updateMap(url){
+  const ifr = document.getElementById('mapEmbed') ||
+              document.getElementById('map_embed') ||
+              document.getElementById('shuttle_map');
+  if (!ifr) return;
+  if (url){ ifr.src = url; ifr.parentElement.style.display=''; }
+  else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
+}
+
+// Align days by label/number for merging
+function normDayKey(d, i){
+  const lbl = String(d?.label || '').toLowerCase();
+  const m = lbl.match(/day\s*(\d+)/);
+  return m ? `d${m[1]}` : `idx-${i}`;
+}
 
   /* ---------- render one scenario ---------- */
   function renderScenario(name){
@@ -2216,11 +2225,11 @@ if (scenDaysRaw.length === 0) {
   // Full replacement or no baseline: use scenario days as-is
   finalDaysRaw = scenDaysRaw.slice();
 } else {
-  // Patch: start with scenario days, borrow missing preview/chips from baseline by aligned key
+  // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
   const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
   finalDaysRaw = scenDaysRaw.map((d, i) => {
     const b = baseMap.get(normDayKey(d, i)) || {};
-    const out = { ...b, ...d };                 // scenario overrides baseline
+    const out = { ...b, ...d };
     if (!out.preview && b.preview) out.preview = b.preview;
     if (!out.chips) out.chips = {};
     if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
@@ -2229,9 +2238,9 @@ if (scenDaysRaw.length === 0) {
 }
 
 // Adapt for renderer and draw
-const finalDays = (finalDaysRaw || []).map(adaptDay);  // you already have adaptDay
-if ($('#itineraryDays')){
-  $('#itineraryDays').innerHTML = finalDays.map(renderDay).join('');
+const finalDays = (finalDaysRaw || []).map(adaptDay);  // uses your existing adaptDay
+if (document.getElementById('itineraryDays')){
+  document.getElementById('itineraryDays').innerHTML = finalDays.map(renderDay).join('');
   const reinit = () => {
     if (window.EI_refreshSections) window.EI_refreshSections();
     if (window.EI_initAccordions) window.EI_initAccordions();
@@ -2240,7 +2249,8 @@ if ($('#itineraryDays')){
   reinit(); setTimeout(reinit, 0);
   console.log('[EI] days rendered:', finalDays.length);
 }
-    // 3) GPX + Map
+
+ // 3) GPX + Map
     const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
     const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
     const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
@@ -2282,5 +2292,6 @@ if ($('#itineraryDays')){
     if (active) renderScenario(active.dataset.scenario);
   });
 })();
-</script></body>
+</script>
+</body>
 </html>
