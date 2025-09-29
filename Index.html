@@ -2193,13 +2193,6 @@ return { title: finalTitle, preview: finalPreview, chips };
   else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
 }
 
-// Align days by label/number for merging
-function normDayKey(d, i){
-  const lbl = String(d?.label || '').toLowerCase();
-  const m = lbl.match(/day\s*(\d+)/);
-  return m ? `d${m[1]}` : `idx-${i}`;
-}
-
   /* ---------- render one scenario ---------- */
   function renderScenario(name){
     let base = addScenariosFromString(getBase());
