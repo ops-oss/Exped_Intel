@@ -2137,12 +2137,26 @@ if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
   if (d.decision_point)    chips.decision  = d.decision_point;
   if (d.morale_marker)     chips.morale    = d.morale_marker;
 
-// ...
-const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
-const preview    = rawDesc || '';
+// --- compute title & preview safely ---
+const finalTitle =
+  d.route ||
+  d.day_title ||
+  parsed.title ||
+  (typeof d.title === 'string' ? d.title : '') ||
+  'Itinerary Day';
 
-return { title: finalTitle, preview, chips };
+const previewRaw =
+  d.preview || d.day_preview || d.description || d.details || d.summary || '';
+
+// De-duplicate: if preview starts with the title, strip it
+let finalPreview = String(previewRaw || '');
+if (finalPreview && finalTitle) {
+  const esc = finalTitle.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const lead = new RegExp('^\\s*' + esc + '[:\\s,.–—-]*', 'i');
+  finalPreview = finalPreview.replace(lead, '').trim();
 }
+
+return { title: finalTitle, preview: finalPreview, chips };
 
   function findScenario(base, key){
     if (!base) return null;
@@ -2237,17 +2251,23 @@ if (scenDaysRaw.length === 0) {
   // Full replacement or no baseline: use scenario days as-is
   finalDaysRaw = scenDaysRaw.slice();
 } else {
-  // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
-  const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-  finalDaysRaw = scenDaysRaw.map((d, i) => {
-    const b = baseMap.get(normDayKey(d, i)) || {};
-    const out = { ...b, ...d };
-    if (!out.preview && b.preview) out.preview = b.preview;
-    if (!out.chips) out.chips = {};
-    if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-    return out;
-  });
-}
+// Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
+const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
+finalDaysRaw = scenDaysRaw.map((d, i) => {
+  const b = baseMap.get(normDayKey(d, i)) || {};
+  const out = { ...b, ...d };          // scenario overrides baseline
+
+  // FIX: if scenario has its own description but no title, don't keep baseline's title
+  if (d.description && !d.title) {
+    delete out.title;
+    delete out.day_title;
+  }
+
+  if (!out.preview && b.preview) out.preview = b.preview;
+  if (!out.chips) out.chips = {};
+  if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
+  return out;
+});
 
 // Adapt for renderer and draw
 const finalDays = (finalDaysRaw || []).map(adaptDay);  // uses your existing adaptDay
