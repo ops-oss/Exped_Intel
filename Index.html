@@ -2046,34 +2046,6 @@ function getDays(node){
   return out.filter(Boolean);
 }
 
-function adaptDay(d = {}){
-  // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
-  if (typeof d === 'string'){
-    const p = parseLineForTitleAndChips(d);
-    return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
-  }
-
-function dayNumberFromLabel(lbl=''){ const m=String(lbl).match(/day\s*(\d+)/i); return m?+m[1]:null; }
-function normalizeDayKey(d={}, idx){ const n=dayNumberFromLabel(d.label); return n!=null?`day-${n}`:(d.label?d.label.trim().toLowerCase():`idx-${idx}`); }
-
-function mergeDaysWithBaseline(baseDaysRaw=[], scenDaysRaw=[], strategy='patch'){
-  const base = Array.isArray(baseDaysRaw)?baseDaysRaw:[];
-  const scen = Array.isArray(scenDaysRaw)?scenDaysRaw:[];
-  if(!scen.length) return base;
-  if(strategy==='replace') return scen;
-
-  const baseMap=new Map();
-  base.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), {idx:i, day:d}));
-  const res = base.slice();
-
-  scen.forEach((sd,i)=>{
-    const key=normalizeDayKey(sd,i);
-    if(baseMap.has(key)){ const {idx, day}=baseMap.get(key); res[idx] = {...day, ...sd}; }
-    else{ res.push(sd); }
-  });
-  return res;
-}
-
 // --- helper: align days by label/number for merging & borrowing
 function normDayKey(d, i){
   const lbl = String(d?.label || '').toLowerCase();
@@ -2229,13 +2201,6 @@ const daysStrategy =
     ? 'replace'
     : 'patch';
 
-// Align days by label/number for merging
-function normDayKey(d, i){
-  const lbl = String(d?.label || '').toLowerCase();
-  const m = lbl.match(/day\s*(\d+)/);
-  return m ? `d${m[1]}` : `idx-${i}`;
-}
-
 // Build final day list (raw objects)
 let finalDaysRaw;
 if (scenDaysRaw.length === 0) {
@@ -2293,12 +2258,12 @@ if (daysEl){
   }
 
 /* ---------- wire up tabs ---------- */
-const setActive = (btn) => {
-  tabs.forEach(t =>
-    t.setAttribute('aria-selected', t === btn ? 'true' : 'false')
-  );
-};
 
+function setActive(btn){
+  tabs.forEach(t => t.setAttribute('aria-selected', t === btn ? 'true' : 'false'));
+}
+
+// hook tab clicks
 tabs.forEach(btn => {
   btn.addEventListener('click', () => {
     setActive(btn);
@@ -2311,7 +2276,7 @@ const selected =
   Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
   tabs[0];
 
-if (selected) {
+if (selected){
   setActive(selected);
   renderScenario(selected.dataset.scenario);
 }
