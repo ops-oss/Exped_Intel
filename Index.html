@@ -1936,20 +1936,33 @@ window.addEventListener('beforeprint', () => {
 (() => {
   'use strict';
 
+  /* ---------- tiny helpers ---------- */
   const $ = (id) => document.getElementById(id);
-  const tabs = document.querySelectorAll('.ei-tab');
-  if (!tabs.length) return;
-
-  /* ---------- helpers ---------- */
 
   const getBase = () =>
     (window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {};
 
+  // If scenarios come in as a JSON string or fenced block, normalize to array
   function addScenariosFromString(base){
     if (!base) return {};
-    if (typeof base.scenarios === 'string'){
-      try { base.scenarios = JSON.parse(base.scenarios); }
-      catch(e){ console.warn('[EI] could not parse scenarios string', e); base.scenarios = []; }
+    if (Array.isArray(base.scenarios)) return base;
+    if (typeof base.scenarios === 'object' && base.scenarios) return base;
+
+    const raw = String(base.scenarios_json || base.scenarios || '').trim();
+    if (!raw) return base;
+
+    // strip optional ```json fences
+    let t = raw.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
+    const m = t.match(/\{[\s\S]*\}|$begin:math:display$[\\s\\S]*$end:math:display$/);
+    if (m) t = m[0];
+
+    try {
+      const parsed = JSON.parse(t);
+      base.scenarios = Array.isArray(parsed) ? parsed :
+                       (parsed && Array.isArray(parsed.scenarios)) ? parsed.scenarios : [];
+    } catch(e){
+      console.warn('[EI] could not parse scenarios string', e);
+      base.scenarios = [];
     }
     return base;
   }
@@ -1964,21 +1977,20 @@ window.addEventListener('beforeprint', () => {
     experience: h.experience || ''
   });
 
-  // parse “Route, 14 miles, +2500 ft / -3100 ft”
   function parseLineForTitleAndChips(text=""){
     const t = String(text||"").trim();
     const m = t.match(/^(.*?)(?:,\s*)?([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*\.?$/i);
     if (!m) return { title: t, chips:{} };
     return {
-      title: m[1].trim(),
+      title: m[1].trim().replace(/\s{2,}/g,' '),
       chips: {
-        distance: m[2].trim(),
-        elevation: `${m[3].trim()} / ${m[4].trim()}`
+        distance:  m[2].replace(/\s+/g,' ').trim(),
+        elevation: `${m[3].replace(/\s+/g,' ').trim()} / ${m[4].replace(/\s+/g,' ').trim()}`
       }
     };
   }
 
-  // normalize keys for day alignment
+  // Align days by label/number for merging
   function normDayKey(d, i){
     const lbl = String(d?.label || '').toLowerCase();
     const m = lbl.match(/day\s*(\d+)/);
@@ -1994,9 +2006,8 @@ window.addEventListener('beforeprint', () => {
     const rawTitle = d.title || d.day_title || d.label || '';
     const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
 
-    // drop bare “Day N”
-    const isBareDay = /^\s*day\s*\d+\s*$/i.test(String(rawTitle||''));
-    const sourceTitle = (!rawTitle || isBareDay) ? rawDesc : rawTitle;
+    const isBareDay   = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
+    const sourceTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
 
     let parsed = parseLineForTitleAndChips(sourceTitle);
 
@@ -2008,33 +2019,34 @@ window.addEventListener('beforeprint', () => {
     const chips = { ...parsed.chips };
     if (typeof d.distance_and_elevation === 'string' && !chips.distance){
       const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
-      if (mm){ chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
-      else { chips.distance = d.distance_and_elevation.trim(); }
+      chips.distance  = (mm ? mm[1] : d.distance_and_elevation).trim();
+      chips.elevation = (mm ? mm[2] : '').trim() || chips.elevation || '';
     }
 
-    if (d.primary_trail)     chips.trail    = d.primary_trail;
-    if (d.terrain)           chips.terrain  = d.terrain;
-    if (d.notable_features)  chips.features = d.notable_features;
-    if (d.key_features)      chips.features = chips.features || d.key_features;
-    if (d.key_water_sources) chips.water    = d.key_water_sources;
-    if (d.campsite_location) chips.campsite = d.campsite_location;
-    if (d.safety)            chips.safety   = d.safety;
-    if (d.trail_tip)         chips.tip      = d.trail_tip;
-    if (d.bailout)           chips.bailout  = d.bailout;
-    if (d.decision_point)    chips.decision = d.decision_point;
-    if (d.morale_marker)     chips.morale   = d.morale_marker;
+    if (d.primary_trail)     chips.trail     = d.primary_trail;
+    if (d.terrain)           chips.terrain   = d.terrain;
+    if (d.notable_features)  chips.features  = d.notable_features;
+    if (d.key_features)      chips.features  = chips.features || d.key_features;
+    if (d.key_water_sources) chips.water     = d.key_water_sources;
+    if (d.campsite_location) chips.campsite  = d.campsite_location;
+    if (d.safety)            chips.safety    = d.safety;
+    if (d.trail_tip)         chips.tip       = d.trail_tip;
+    if (d.bailout)           chips.bailout   = d.bailout;
+    if (d.decision_point)    chips.decision  = d.decision_point;
+    if (d.morale_marker)     chips.morale    = d.morale_marker;
 
-    const finalTitle =
-      d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
+const finalTitle =
+  d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
 
-    let finalPreview = String(rawDesc || '');
-    if (finalPreview && finalTitle){
-      const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');
-      finalPreview = finalPreview.replace(lead, '').trim();
-    }
+const previewRaw = rawDesc || '';
+let finalPreview = String(previewRaw || '');
+if (finalPreview && finalTitle) {
+  const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');     
+  const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');       
+  finalPreview = finalPreview.replace(lead, '').trim();
+}
 
-    return { title: finalTitle, preview: finalPreview, chips };
+return { title: finalTitle, preview: finalPreview, chips };
   }
 
   function findScenario(base, key){
@@ -2088,12 +2100,12 @@ window.addEventListener('beforeprint', () => {
     else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
   }
 
-  /* ---------- render one scenario ---------- */
+  /* ---------- render one scenario (called on every tab click) ---------- */
   function renderScenario(name){
-    let base = addScenariosFromString(getBase());
+    const base = addScenariosFromString(getBase());
     const raw  = findScenario(base, name) || null;
 
-    // Itinerary header
+    // top itinerary section
     const itin = {
       ...(base.expedition_itinerary || {}),
       ...(raw?.header ? headerToItin(raw.header) : {})
@@ -2106,12 +2118,11 @@ window.addEventListener('beforeprint', () => {
       $('expItin').style.display = 'none';
     }
 
-    // Days: baseline vs scenario
+    // days (replace/patch)
     const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
     const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
     const daysStrategy =
-      (raw?.days_strategy === 'replace' || raw?.replaceDays === true)
-        ? 'replace' : 'patch';
+      (raw?.days_strategy === 'replace' || raw?.replaceDays === true) ? 'replace' : 'patch';
 
     let finalDaysRaw;
     if (scenDaysRaw.length === 0){
@@ -2130,28 +2141,136 @@ window.addEventListener('beforeprint', () => {
       });
     }
 
-    const finalDays = (finalDaysRaw || []).map(adaptDay);
     const daysEl = document.getElementById('itineraryDays');
     if (daysEl){
-      daysEl.innerHTML = finalDays.map(renderDay).join('');
-      const reinit = () => {
-        if (window.EI_refreshSections) window.EI_refreshSections();
-        if (window.EI_initAccordions) window.EI_initAccordions();
-        document.dispatchEvent(new CustomEvent('ei:days-updated'));
-      };
-      reinit(); setTimeout(reinit, 0);
-      console.log('[EI] days rendered:', finalDays.length);
+      // --- DRIVEN polish: synthesize clean title/preview/totals
+if (name === 'driven' && Array.isArray(finalDaysRaw) && finalDaysRaw.length === 1) {
+  const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+
+  // pull start/end trailheads
+  const trailheadsStr = (raw?.header?.trailheads || itin.trailheads || '').trim();
+  const [thA, thB] = trailheadsStr.split('→').map(s => (s || '').trim());
+  const startTH =
+    raw?.waypoint_hints?.start_trailhead ||
+    base.start_trailhead || thA || '';
+  const endTH =
+    raw?.waypoint_hints?.end_trailhead ||
+    base.end_trailhead || thB || '';
+
+  // totals from header (prefer Driven header, else itin header)
+  const totalsMileage = (raw?.header?.mileage || itin.mileage || '').trim();
+  const totalsElev    = (raw?.header?.elevation || itin.elevation || '').trim();
+  const totals = [totalsMileage, totalsElev].filter(Boolean).join(', '); // "~14 miles, +2500 ft / -3000 ft"
+
+  // title: if missing/generic, synthesize "Start → End"
+  const genericTitle = !d0.title || /^day\s*\d+$/i.test(d0.title) || /^single day$/i.test(d0.title);
+  if (genericTitle) d0.title = [startTH, endTH].filter(Boolean).join(' → ') || 'Single-day push';
+
+  // preview: concise push note; keep any existing text after it
+  const pushNote = 'Pre-dawn start; sustained pace; attempt exposed high-point only with safe conditions; same-day exit.';
+  const basePreview = (d0.preview || d0.description || '').trim();
+  d0.preview = basePreview ? `${pushNote} ${basePreview}` : pushNote;
+
+  // ensure distance/elevation present
+  const hasTotalsInText = /miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft/i.test(basePreview);
+  if (!d0.distance_and_elevation && totals) d0.distance_and_elevation = totals;
+  if (!hasTotalsInText && totals && !/miles/i.test(d0.preview)) {
+    d0.preview = `${d0.preview} ${totals}.`;
+  }
+
+  // carry over useful chips if not set
+  d0.primary_trail = d0.primary_trail || (base.days || [])
+    .map(x => x?.primary_trail).filter(Boolean)[0] || '';
+  d0.terrain = d0.terrain || itin.terrain || '';
+}
+     // --- Driven title patch: anchor Day 1 to Start and final day to End (universal) ---
+if (String(name).toLowerCase() === 'driven' && Array.isArray(finalDaysRaw) && finalDaysRaw.length) {
+  const startTH = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead
+    || (raw?.header?.trailheads?.split('→')[0] || '').trim();
+  const endTH   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead
+    || (raw?.header?.trailheads?.split('→')[1] || '').trim();
+
+  const clean = s => String(s || '').trim();
+  const looksGeneric = t => !t || /^day\s*\d+$/i.test(t) || /^single\s*day$/i.test(t);
+  const partsFrom = (t) => {
+    const x = clean(t);
+    if (!x) return [];
+    if (x.includes('→')) return x.split('→').map(p => clean(p));
+    if (/ to /i.test(x)) return x.split(/ to /i).map(p => clean(p));
+    return [x];
+  };
+  const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
+
+  if (finalDaysRaw.length === 1) {
+    // Single-day Driven: force "Start → End"
+    const d0 = finalDaysRaw[0] || {};
+    const desired = titleFromParts([startTH, endTH]) || 'Single-day push';
+    const t = clean(d0.title || d0.day_title || d0.label);
+    if (looksGeneric(t) || !t || /(^|[\s→-])camp($|[\s→-])/i.test(t) || t !== desired) {
+      d0.title = desired;
+    }
+    // Add a concise push note if preview is empty of the finish
+    const hdrMiles = clean(raw?.header?.mileage || base.mileage);
+    const hdrElev  = clean(raw?.header?.elevation || base.elevation);
+    const already  = String(d0.preview || d0.description || '').toLowerCase().includes((endTH || '').toLowerCase());
+    if (!already && (hdrMiles || hdrElev)) {
+      const blurb = `Pre-dawn start; sustained pace to finish at ${endTH || 'the exit'}. ${[hdrMiles, hdrElev].filter(Boolean).join(', ')}`;
+      d0.preview = d0.preview ? `${d0.preview}` : blurb;
+    }
+    finalDaysRaw[0] = d0;
+  } else {
+    // Multi-day Driven: Day 1 must start at Start; final day must end at End
+    const first = finalDaysRaw[0] || {};
+    const last  = finalDaysRaw[finalDaysRaw.length - 1] || {};
+
+    // Fix first-day title
+    {
+      const t = clean(first.title || first.day_title || first.label);
+      let parts = partsFrom(t);
+      if (!parts.length || looksGeneric(t) || /(^|[\s→-])camp($|[\s→-])/i.test(t)) {
+        parts = [startTH, parts[1] || parts[0] || 'Stage 1'];
+      }
+      if (startTH && parts[0] !== startTH) {
+        if (parts.length === 1) parts = [startTH, parts[0]];
+        else parts[0] = startTH;
+      }
+      first.title = titleFromParts(parts);
+      finalDaysRaw[0] = first;
     }
 
-    // GPX + Map (scenario first)
-    const gpx   = raw?.header?.gpx_download_link || base.gpx_download_link || base.gpx_url || '';
-    const start = raw?.waypoint_hints?.start_trailhead || base.start_trailhead || '';
-    const end   = raw?.waypoint_hints?.end_trailhead   || base.end_trailhead   || '';
-    const map   = raw?.header?.map_embed_url || base.map_embed_url || base.map_embed || '';
+    // Fix final-day title
+    {
+      const t = clean(last.title || last.day_title || last.label);
+      let parts = partsFrom(t);
+      if (!parts.length || looksGeneric(t)) {
+        parts = [parts[0] || 'Stage', endTH];
+      }
+      if (endTH && parts[parts.length - 1] !== endTH) {
+        if (parts.length === 1) parts = [parts[0], endTH];
+        else parts[parts.length - 1] = endTH;
+      }
+      last.title = titleFromParts(parts);
+      finalDaysRaw[finalDaysRaw.length - 1] = last;
+    }
+  }
+}
+// --- end Driven title patch --- 
+      const finalDays = (finalDaysRaw || []).map(adaptDay);
+      daysEl.innerHTML = finalDays.map(renderDay).join('');
+      if (window.EI_refreshSections) window.EI_refreshSections();
+      if (window.EI_initAccordions) window.EI_initAccordions();
+      document.dispatchEvent(new CustomEvent('ei:days-updated'));
+    }
+
+    // GPX + map
+    const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
+    const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
+    const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
+    const map   = (raw?.header?.map_embed_url) || base.map_embed_url || base.map_embed || '';
     updateGPX(gpx, start, end);
     updateMap(map);
 
-    // Sections
+    // text sections
     const sec = [
       'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
       'key_considerations','campsite_intel','weather_altitude','gear_checklist',
@@ -2160,11 +2279,13 @@ window.addEventListener('beforeprint', () => {
     ];
     sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
 
-    if (window.EI_refreshSections) window.EI_refreshSections();
     console.log('[EI] rendered scenario →', name);
   }
 
-  /* ---------- wire up tabs ---------- */
+  /* ---------- tabs wiring ---------- */
+  const tabs = document.querySelectorAll('.ei-tab');
+  if (!tabs.length) return;
+
   function setActive(btn){
     tabs.forEach(t => t.setAttribute('aria-selected', t === btn ? 'true' : 'false'));
   }
@@ -2176,15 +2297,21 @@ window.addEventListener('beforeprint', () => {
     });
   });
 
-  const selected = [...tabs].find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
-  if (selected){ setActive(selected); renderScenario(selected.dataset.scenario); }
+  // first paint
+  const selected =
+    Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
+  if (selected){
+    setActive(selected);
+    renderScenario(selected.dataset.scenario);
+  }
 
+  // repaint if data arrives later
   window.addEventListener('ei:data-ready', () => {
-    const active = [...tabs].find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
+    const active =
+      Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
     if (active) renderScenario(active.dataset.scenario);
   });
-
-})();  
+})();
 </script>
 </body>
 </html>
