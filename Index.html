@@ -1940,207 +1940,76 @@ window.addEventListener('beforeprint', () => {
   const tabs = document.querySelectorAll('.ei-tab');
   if (!tabs.length) return;
 
-  /* ---------- helpers ---------- */
+  /* ---------- (your existing helpers above here stay unchanged) ---------- */
+  // getBase, addScenariosFromString, headerToItin, parseLineForTitleAndChips,
+  // parseDaysFromText, getDays, kvOrParagraph, renderExpeditionKV, renderExpeditionChips, renderDay, etc.
 
-  const getBase = () =>
-    (window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {};
-
-  // allow fenced JSON scenarios in data.scenarios_json
-  function addScenariosFromString(data){
-    if (!data) return {};
-    if (Array.isArray(data.scenarios) || typeof data.scenarios === 'object') return data;
-
-    const raw = String(data.scenarios_json || '').trim();
-    if (!raw) return data;
-
-    let t = raw.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
-    const m = t.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (m) t = m[0];
-    if (/^\s*</.test(t)) return data; // looks like HTML
-
-    try{
-      const parsed = JSON.parse(t);
-      if (Array.isArray(parsed)) data.scenarios = parsed;
-      else if (parsed && Array.isArray(parsed.scenarios)) data.scenarios = parsed.scenarios;
-    }catch{}
-    return data;
+  // --- helper: align days by label/number for merging & borrowing
+  function normDayKey(d, i){
+    const lbl = String(d?.label || '').toLowerCase();
+    const m = lbl.match(/day\s*(\d+)/);
+    return m ? `d${m[1]}` : `idx-${i}`;
   }
 
-  const headerToItin = (h={}) => ({
-    duration:   h.duration   || '',
-    mileage:    h.mileage    || '',
-    elevation:  h.elevation  || '',
-    trailheads: h.trailheads || '',
-    gps:        h.gps        || '',
-    terrain:    h.terrain    || '',
-    experience: h.experience || ''
-  });
-
-  // parse “…, 14 miles, +2500 ft / -3100 ft” tacked onto a title
-  function parseTitleMetrics(rawTitle=""){
-    const t = String(rawTitle || "").trim();
-    const m = t.match(/,\s*([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*$/i);
-    const routeOnly = m ? t.slice(0, m.index).trim() : t;
-    const chips = {};
-    if (m){
-      chips.distance  = m[1].replace(/\s+/g,' ').trim();
-      chips.elevation = `${m[2].replace(/\s+/g,' ').trim()} / ${m[3].replace(/\s+/g,' ').trim()}`;
+  function adaptDay(d = {}) {
+    // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
+    if (typeof d === 'string') {
+      const p = parseLineForTitleAndChips(d);
+      return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
     }
-    return { title: routeOnly, chips };
+
+    // 0) Core strings
+    const rawTitle = d.title || d.day_title || d.label || '';
+    const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
+
+    // 1) If the title is just "Day N", prefer the description for route parsing
+    const isBareDay   = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
+    const sourceTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
+
+    // 2) Parse "<Route>, 10 miles, +A ft / -B ft" if present
+    let parsed = parseLineForTitleAndChips(sourceTitle);
+
+    // 3) If still no route-like title, grab the first sentence of the description
+    if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
+      const firstSentence = String(rawDesc).split('.').shift().trim();
+      if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
+    }
+
+    // 4) Distance/elevation may also be in distance_and_elevation
+    const chips = { ...parsed.chips };
+    if (typeof d.distance_and_elevation === 'string' && !chips.distance) {
+      const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
+      if (mm) { chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
+      else    { chips.distance = d.distance_and_elevation.trim(); }
+    }
+
+    // 5) Map common keys → chips
+    if (d.primary_trail)     chips.trail     = d.primary_trail;
+    if (d.terrain)           chips.terrain   = d.terrain;
+    if (d.notable_features)  chips.features  = d.notable_features;
+    if (d.key_features)      chips.features  = chips.features || d.key_features;
+    if (d.key_water_sources) chips.water     = d.key_water_sources;
+    if (d.campsite_location) chips.campsite  = d.campsite_location;
+    if (d.safety)            chips.safety    = d.safety;
+    if (d.trail_tip)         chips.tip       = d.trail_tip;
+    if (d.bailout)           chips.bailout   = d.bailout;
+    if (d.decision_point)    chips.decision  = d.decision_point;
+    if (d.morale_marker)     chips.morale    = d.morale_marker;
+
+    // 6) Final title, prefer GPT's route/day_title over "Day N"
+    const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
+
+    // 7) Final preview and de-dupe when preview starts with title
+    const previewRaw = rawDesc || '';
+    let finalPreview = String(previewRaw || '');
+    if (finalPreview && finalTitle) {
+      const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape for regex
+      const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');   // title + separators
+      finalPreview = finalPreview.replace(lead, '').trim();
+    }
+
+    return { title: finalTitle, preview: finalPreview, chips };
   }
-
-// ---- helper: pull "route, 14 miles, +2500 ft / -3100 ft" from any line
-function parseLineForTitleAndChips(text=""){
-  const t = String(text||"").trim();
-  // route , 14 miles , +xxxx ft / -yyyy ft    (commas optional around miles)
-  const m = t.match(/^(.*?)(?:,\s*)?([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*\.?$/i);
-  if (!m) return { title: t, chips:{} };
-  const route = m[1].trim().replace(/\s{2,}/g,' ');
-  const chips = {
-    distance:  m[2].replace(/\s+/g,' ').trim(),
-    elevation: `${m[3].replace(/\s+/g,' ').trim()} / ${m[4].replace(/\s+/g,' ').trim()}`
-  };
-  return { title: route, chips };
-}
-
-// --- ADD: extract days robustly from any JSON shape
-function coerceArray(v){
-  if (Array.isArray(v)) return v;
-  if (v && typeof v === 'object') return Object.values(v);
-  return [];
-}
-
-function parseDaysFromText(text=""){
-  // Splits "Day 1:" / "Days 2–3:" blocks into day objects
-  const chunks = String(text).replace(/\r/g,'')
-    .split(/\n(?=DAYS?\s+\d+(\s*[-–]\s*\d+)?:)/i)
-    .filter(Boolean);
-
-  return chunks.map(block => {
-    const head = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
-    const titleLine = head ? head[2] : block.split('\n')[0];
-    const rest = block.replace(/^[^\n]*\n?/, '').trim();
-    return { title: titleLine?.trim() || 'Itinerary Day', preview: rest };
-  });
-}
-
-function getDays(node){
-  if (!node) return [];
-  // 1) obvious places
-  let out = [
-    ...coerceArray(node.days),
-    ...coerceArray(node.itinerary_days),
-    ...coerceArray(node.overview_days),
-  ];
-  // 2) nested objects
-  if (node.itinerary?.days) out.push(...coerceArray(node.itinerary.days));
-  if (node.itinerary_overview?.days) out.push(...coerceArray(node.itinerary_overview.days));
-  if (Array.isArray(node.itinerary_overview)) out.push(...node.itinerary_overview);
-
-  // 3) string blobs we can parse
-  const ioStr = typeof node.itinerary_overview === 'string' ? node.itinerary_overview : null;
-  const ioStr2 = typeof node['Itinerary Overview'] === 'string' ? node['Itinerary Overview'] : null;
-  if (ioStr)  out.push(...parseDaysFromText(ioStr));
-  if (ioStr2) out.push(...parseDaysFromText(ioStr2));
-
-  return out.filter(Boolean);
-}
-
-function adaptDay(d = {}){
-  // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
-  if (typeof d === 'string'){
-    const p = parseLineForTitleAndChips(d);
-    return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
-  }
-
-function dayNumberFromLabel(lbl=''){ const m=String(lbl).match(/day\s*(\d+)/i); return m?+m[1]:null; }
-function normalizeDayKey(d={}, idx){ const n=dayNumberFromLabel(d.label); return n!=null?`day-${n}`:(d.label?d.label.trim().toLowerCase():`idx-${idx}`); }
-
-function mergeDaysWithBaseline(baseDaysRaw=[], scenDaysRaw=[], strategy='patch'){
-  const base = Array.isArray(baseDaysRaw)?baseDaysRaw:[];
-  const scen = Array.isArray(scenDaysRaw)?scenDaysRaw:[];
-  if(!scen.length) return base;
-  if(strategy==='replace') return scen;
-
-  const baseMap=new Map();
-  base.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), {idx:i, day:d}));
-  const res = base.slice();
-
-  scen.forEach((sd,i)=>{
-    const key=normalizeDayKey(sd,i);
-    if(baseMap.has(key)){ const {idx, day}=baseMap.get(key); res[idx] = {...day, ...sd}; }
-    else{ res.push(sd); }
-  });
-  return res;
-}
-
-// --- helper: align days by label/number for merging & borrowing
-function normDayKey(d, i){
-  const lbl = String(d?.label || '').toLowerCase();
-  const m = lbl.match(/day\s*(\d+)/);
-  return m ? `d${m[1]}` : `idx-${i}`;
-}
-
-function adaptDay(d = {}) {
-  // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
-  if (typeof d === 'string') {
-    const p = parseLineForTitleAndChips(d);
-    return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
-  }
-
-  // 0) Core strings
-  const rawTitle = d.title || d.day_title || d.label || '';
-  const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
-
-  // 1) If the title is just "Day N", prefer the description for route parsing
-  const isBareDay   = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
-  const sourceTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
-
-  // 2) Parse "<Route>, 10 miles, +A ft / -B ft" if present
-  let parsed = parseLineForTitleAndChips(sourceTitle);
-
-  // 3) If still no route-like title, grab the first sentence of the description
-  if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
-    const firstSentence = String(rawDesc).split('.').shift().trim();
-    if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
-  }
-
-  // 4) Distance/elevation may also be in distance_and_elevation
-  const chips = { ...parsed.chips };
-  if (typeof d.distance_and_elevation === 'string' && !chips.distance) {
-    const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
-    if (mm) { chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
-    else    { chips.distance = d.distance_and_elevation.trim(); }
-  }
-
-// 5) Map common keys → chips
-if (d.primary_trail)     chips.trail     = d.primary_trail;
-if (d.terrain)           chips.terrain   = d.terrain;
-if (d.notable_features)  chips.features  = d.notable_features;
-if (d.key_features)      chips.features  = chips.features || d.key_features;
-if (d.key_water_sources) chips.water     = d.key_water_sources;
-if (d.campsite_location) chips.campsite  = d.campsite_location;
-if (d.safety)            chips.safety    = d.safety;
-if (d.trail_tip)         chips.tip       = d.trail_tip;
-if (d.bailout)           chips.bailout   = d.bailout;
-if (d.decision_point)    chips.decision  = d.decision_point;
-if (d.morale_marker)     chips.morale    = d.morale_marker;
-
-// 6) Final title, prefer GPT's route/day_title over "Day N"
-const finalTitle =
-  d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
-
-// 7) Final preview and de-dupe when preview starts with title
-const previewRaw = rawDesc || '';
-let finalPreview = String(previewRaw || '');
-if (finalPreview && finalTitle) {
-  const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');     // escape for regex
-  const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');       // title + separators
-  finalPreview = finalPreview.replace(lead, '').trim();
-}
-
-return { title: finalTitle, preview: finalPreview, chips };
-}
 
   function findScenario(base, key){
     if (!base) return null;
@@ -2184,18 +2053,18 @@ return { title: finalTitle, preview: finalPreview, chips };
     if(th) th.textContent=[startTH,endTH].filter(Boolean).join(' → ');
   }
 
- function updateMap(url){
-  const ifr = document.getElementById('mapEmbed') ||
-              document.getElementById('map_embed') ||
-              document.getElementById('shuttle_map');
-  if (!ifr) return;
-  if (url){ ifr.src = url; ifr.parentElement.style.display=''; }
-  else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
-}
+  function updateMap(url){
+    const ifr = document.getElementById('mapEmbed') ||
+                document.getElementById('map_embed') ||
+                document.getElementById('shuttle_map');
+    if (!ifr) return;
+    if (url){ ifr.src = url; ifr.parentElement.style.display=''; }
+    else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
+  }
 
   /* ---------- render one scenario ---------- */
   function renderScenario(name){
-    let base = addScenariosFromString(getBase());
+    const base = addScenariosFromString(getBase());
     const raw  = findScenario(base, name) || null;
 
     // 1) Itinerary header
@@ -2211,57 +2080,45 @@ return { title: finalTitle, preview: finalPreview, chips };
       $('expItin').style.display = 'none';
     }
 
-// 3) Days — build scenario days with patch/replace strategy (no external helper)
-const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
-const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
-const daysStrategy =
-  (raw?.days_strategy === 'replace' || raw?.replaceDays === true)
-    ? 'replace'
-    : 'patch';
+    // 2) Days — build with patch/replace (no external helper)
+    const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
+    const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
+    const daysStrategy =
+      (raw?.days_strategy === 'replace' || raw?.replaceDays === true)
+        ? 'replace'
+        : 'patch';
 
-// Align days by label/number for merging
-function normDayKey(d, i){
-  const lbl = String(d?.label || '').toLowerCase();
-  const m = lbl.match(/day\s*(\d+)/);
-  return m ? `d${m[1]}` : `idx-${i}`;
-}
+    let finalDaysRaw;
+    if (scenDaysRaw.length === 0) {
+      finalDaysRaw = baseDaysRaw.slice();
+    } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0) {
+      finalDaysRaw = scenDaysRaw.slice();
+    } else {
+      const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
+      finalDaysRaw = scenDaysRaw.map((d, i) => {
+        const b = baseMap.get(normDayKey(d, i)) || {};
+        const out = { ...b, ...d };                // scenario overrides baseline
+        if (!out.preview && b.preview) out.preview = b.preview;
+        if (!out.chips) out.chips = {};
+        if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
+        return out;
+      });
+    }
 
-// Build final day list (raw objects)
-let finalDaysRaw;
-if (scenDaysRaw.length === 0) {
-  // No scenario days: just use baseline days
-  finalDaysRaw = baseDaysRaw.slice();
-} else if (daysStrategy === 'replace' || baseDaysRaw.length === 0) {
-  // Full replacement or no baseline: use scenario days as-is
-  finalDaysRaw = scenDaysRaw.slice();
-} else {
-  // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
-  const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-  finalDaysRaw = scenDaysRaw.map((d, i) => {
-    const b = baseMap.get(normDayKey(d, i)) || {};
-    const out = { ...b, ...d };
-    if (!out.preview && b.preview) out.preview = b.preview;
-    if (!out.chips) out.chips = {};
-    if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-    return out;
-  });
-}
+    const finalDays = (finalDaysRaw || []).map(adaptDay);
+    const daysEl = document.getElementById('itineraryDays');
+    if (daysEl){
+      daysEl.innerHTML = finalDays.map(renderDay).join('');
+      const reinit = () => {
+        if (window.EI_refreshSections) window.EI_refreshSections();
+        if (window.EI_initAccordions) window.EI_initAccordions();
+        document.dispatchEvent(new CustomEvent('ei:days-updated'));
+      };
+      reinit(); setTimeout(reinit, 0);
+      console.log('[EI] days rendered:', finalDays.length);
+    }
 
-// Adapt for renderer and draw
-const finalDays = (finalDaysRaw || []).map(adaptDay);
-const daysEl = document.getElementById('itineraryDays');
-if (daysEl){
-  daysEl.innerHTML = finalDays.map(renderDay).join('');
-  const reinit = () => {
-    if (window.EI_refreshSections) window.EI_refreshSections();
-    if (window.EI_initAccordions) window.EI_initAccordions();
-    document.dispatchEvent(new CustomEvent('ei:days-updated'));
-  };
-  reinit(); setTimeout(reinit, 0);
-  console.log('[EI] days rendered:', finalDays.length);
-}
-
- // 3) GPX + Map
+    // 3) GPX + Map
     const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
     const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
     const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
@@ -2282,38 +2139,38 @@ if (daysEl){
     console.log('[EI] rendered scenario →', name);
   }
 
-/* ---------- wire up tabs ---------- */
-const setActive = (btn) => {
-  tabs.forEach(t =>
-    t.setAttribute('aria-selected', t === btn ? 'true' : 'false')
-  );
-};
+  /* ---------- wire up tabs ---------- */
+  const setActive = (btn) => {
+    tabs.forEach(t =>
+      t.setAttribute('aria-selected', t === btn ? 'true' : 'false')
+    );
+  };
 
-tabs.forEach(btn => {
-  btn.addEventListener('click', () => {
-    setActive(btn);
-    renderScenario(btn.dataset.scenario);
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActive(btn);
+      renderScenario(btn.dataset.scenario);
+    });
   });
-});
 
-// first paint (use preselected tab if present)
-const selected =
-  Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
-  tabs[0];
-
-if (selected) {
-  setActive(selected);
-  renderScenario(selected.dataset.scenario);
-}
-
-// repaint when async data arrives
-window.addEventListener('ei:data-ready', () => {
-  const active =
+  // first paint (use preselected tab if present)
+  const selected =
     Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
     tabs[0];
-  if (active) renderScenario(active.dataset.scenario);
-});
-})();  <!-- closes the IIFE; nothing after this line inside <script> -->
+
+  if (selected) {
+    setActive(selected);
+    renderScenario(selected.dataset.scenario);
+  }
+
+  // repaint when async data arrives
+  window.addEventListener('ei:data-ready', () => {
+    const active =
+      Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
+      tabs[0];
+    if (active) renderScenario(active.dataset.scenario);
+  });
+})();
 </script>
 </body>
 </html>
