@@ -2074,57 +2074,46 @@ function mergeDaysWithBaseline(baseDaysRaw=[], scenDaysRaw=[], strategy='patch')
   return res;
 }
 
-// --- helper to align days by label/number ---
+// --- helper: align days by label/number for merging & borrowing
 function normDayKey(d, i){
   const lbl = String(d?.label || '').toLowerCase();
   const m = lbl.match(/day\s*(\d+)/);
   return m ? `d${m[1]}` : `idx-${i}`;
 }
 
-function borrowMissingFromBaseline(adaptedMerged=[], adaptedBaseline=[]){
-  const baseMap=new Map(); adaptedBaseline.forEach((d,i)=> baseMap.set(normalizeDayKey(d,i), d));
-  const chipKeys=['trail','terrain','features','water','safety','tip','decision','bailout','morale','campsite'];
-  return adaptedMerged.map((d,i)=>{
-    const out={...d, chips:{...(d.chips||{})}};
-    const base=baseMap.get(normalizeDayKey(d,i));
-    if(base){
-      if(!out.preview && base.preview) out.preview=base.preview;
-      chipKeys.forEach(k=>{ if(!out.chips[k] && base.chips?.[k]) out.chips[k]=base.chips[k]; });
-    }
-    return out;
-  });
-}
+function adaptDay(d = {}) {
+  // Allow a simple string day ("Route, 12 miles, +1000 ft / -900 ft")
+  if (typeof d === 'string') {
+    const p = parseLineForTitleAndChips(d);
+    return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
+  }
 
-  // 0) Pull day index if label is "Day 2" (optional)
-  const dayIdx = String(d.label||'').match(/day\s*(\d+)/i)?.[1];
-
-  // 1) Source strings
+  // 0) Core strings
   const rawTitle = d.title || d.day_title || d.label || '';
   const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
 
-// 2) Build a better source string for parsing the route title.
-// If the title looks like just "Day N", use the description instead.
-const isBareDay = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
-const sourceForTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
+  // 1) If the title is just "Day N", prefer the description for route parsing
+  const isBareDay   = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
+  const sourceTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
 
-// Parse "<Route>, 10 miles, +A / -B" if present; otherwise we’ll fall back.
-let parsed = parseLineForTitleAndChips(sourceForTitle);
+  // 2) Parse "<Route>, 10 miles, +A ft / -B ft" if present
+  let parsed = parseLineForTitleAndChips(sourceTitle);
 
-// If we still didn't get a route-y title, grab the first sentence of the description.
-if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
-  const firstSentence = String(rawDesc).split('.').shift().trim();
-  if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
-}
-
-  // 3) Distance/elevation may also be in distance_and_elevation
-  const chips = { ...parsed.chips };
-  if (typeof d.distance_and_elevation === 'string' && !chips.distance){
-    const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
-    if (mm){ chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
-    else   { chips.distance = d.distance_and_elevation.trim(); }
+  // 3) If still no route-like title, grab the first sentence of the description
+  if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
+    const firstSentence = String(rawDesc).split('.').shift().trim();
+    if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
   }
 
-  // 4) Map common zap keys → chips
+  // 4) Distance/elevation may also be in distance_and_elevation
+  const chips = { ...parsed.chips };
+  if (typeof d.distance_and_elevation === 'string' && !chips.distance) {
+    const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
+    if (mm) { chips.distance = mm[1].trim(); chips.elevation = mm[2].trim(); }
+    else    { chips.distance = d.distance_and_elevation.trim(); }
+  }
+
+  // 5) Map common keys → chips
   if (d.primary_trail)     chips.trail     = d.primary_trail;
   if (d.terrain)           chips.terrain   = d.terrain;
   if (d.notable_features)  chips.features  = d.notable_features;
@@ -2137,26 +2126,20 @@ if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
   if (d.decision_point)    chips.decision  = d.decision_point;
   if (d.morale_marker)     chips.morale    = d.morale_marker;
 
-// --- compute title & preview safely ---
-const finalTitle =
-  d.route ||
-  d.day_title ||
-  parsed.title ||
-  (typeof d.title === 'string' ? d.title : '') ||
-  'Itinerary Day';
+  // 6) Final title, prefer GPT's route/day_title over "Day N"
+  const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
 
-const previewRaw =
-  d.preview || d.day_preview || d.description || d.details || d.summary || '';
+  // 7) Final preview and de-dup with title
+  const previewRaw = rawDesc || '';
+  let finalPreview = String(previewRaw || '');
+  if (finalPreview && finalTitle) {
+    const esc  = finalTitle.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const lead = new RegExp('^\\s*' + esc + '[\\s,:—–-]*', 'i');
+    finalPreview = finalPreview.replace(lead, '').trim();
+  }
 
-// De-duplicate: if preview starts with the title, strip it
-let finalPreview = String(previewRaw || '');
-if (finalPreview && finalTitle) {
-  const esc = finalTitle.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-  const lead = new RegExp('^\\s*' + esc + '[:\\s,.–—-]*', 'i');
-  finalPreview = finalPreview.replace(lead, '').trim();
+  return { title: finalTitle, preview: finalPreview, chips };
 }
-
-return { title: finalTitle, preview: finalPreview, chips };
 
   function findScenario(base, key){
     if (!base) return null;
