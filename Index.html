@@ -2137,9 +2137,11 @@ if ((!parsed.title || parsed.title.length < 4) && rawDesc) {
   if (d.decision_point)    chips.decision  = d.decision_point;
   if (d.morale_marker)     chips.morale    = d.morale_marker;
 
+// ...
 const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
+const preview    = rawDesc || '';
 
-  return { title: finalTitle, preview, chips };
+return { title: finalTitle, preview, chips };
 }
 
   function findScenario(base, key){
