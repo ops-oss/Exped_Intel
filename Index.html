@@ -2113,32 +2113,33 @@ function adaptDay(d = {}) {
     else    { chips.distance = d.distance_and_elevation.trim(); }
   }
 
-  // 5) Map common keys → chips
-  if (d.primary_trail)     chips.trail     = d.primary_trail;
-  if (d.terrain)           chips.terrain   = d.terrain;
-  if (d.notable_features)  chips.features  = d.notable_features;
-  if (d.key_features)      chips.features  = chips.features || d.key_features;
-  if (d.key_water_sources) chips.water     = d.key_water_sources;
-  if (d.campsite_location) chips.campsite  = d.campsite_location;
-  if (d.safety)            chips.safety    = d.safety;
-  if (d.trail_tip)         chips.tip       = d.trail_tip;
-  if (d.bailout)           chips.bailout   = d.bailout;
-  if (d.decision_point)    chips.decision  = d.decision_point;
-  if (d.morale_marker)     chips.morale    = d.morale_marker;
+// 5) Map common keys → chips
+if (d.primary_trail)     chips.trail     = d.primary_trail;
+if (d.terrain)           chips.terrain   = d.terrain;
+if (d.notable_features)  chips.features  = d.notable_features;
+if (d.key_features)      chips.features  = chips.features || d.key_features;
+if (d.key_water_sources) chips.water     = d.key_water_sources;
+if (d.campsite_location) chips.campsite  = d.campsite_location;
+if (d.safety)            chips.safety    = d.safety;
+if (d.trail_tip)         chips.tip       = d.trail_tip;
+if (d.bailout)           chips.bailout   = d.bailout;
+if (d.decision_point)    chips.decision  = d.decision_point;
+if (d.morale_marker)     chips.morale    = d.morale_marker;
 
-  // 6) Final title, prefer GPT's route/day_title over "Day N"
-  const finalTitle = d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
+// 6) Final title, prefer GPT's route/day_title over "Day N"
+const finalTitle =
+  d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
 
-  // 7) Final preview and de-dup with title
-  const previewRaw = rawDesc || '';
-  let finalPreview = String(previewRaw || '');
-  if (finalPreview && finalTitle) {
-    const esc  = finalTitle.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const lead = new RegExp('^\\s*' + esc + '[\\s,:—–-]*', 'i');
-    finalPreview = finalPreview.replace(lead, '').trim();
-  }
+// 7) Final preview and de-dupe when preview starts with title
+const previewRaw = rawDesc || '';
+let finalPreview = String(previewRaw || '');
+if (finalPreview && finalTitle) {
+  const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');     // escape for regex
+  const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');       // title + separators
+  finalPreview = finalPreview.replace(lead, '').trim();
+}
 
-  return { title: finalTitle, preview: finalPreview, chips };
+return { title: finalTitle, preview: finalPreview, chips };
 }
 
   function findScenario(base, key){
@@ -2225,6 +2226,13 @@ const daysStrategy =
     ? 'replace'
     : 'patch';
 
+// Align days by label/number for merging
+function normDayKey(d, i){
+  const lbl = String(d?.label || '').toLowerCase();
+  const m = lbl.match(/day\s*(\d+)/);
+  return m ? `d${m[1]}` : `idx-${i}`;
+}
+
 // Build final day list (raw objects)
 let finalDaysRaw;
 if (scenDaysRaw.length === 0) {
@@ -2234,28 +2242,23 @@ if (scenDaysRaw.length === 0) {
   // Full replacement or no baseline: use scenario days as-is
   finalDaysRaw = scenDaysRaw.slice();
 } else {
-// Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
-const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-finalDaysRaw = scenDaysRaw.map((d, i) => {
-  const b = baseMap.get(normDayKey(d, i)) || {};
-  const out = { ...b, ...d };          // scenario overrides baseline
-
-  // FIX: if scenario has its own description but no title, don't keep baseline's title
-  if (d.description && !d.title) {
-    delete out.title;
-    delete out.day_title;
-  }
-
-  if (!out.preview && b.preview) out.preview = b.preview;
-  if (!out.chips) out.chips = {};
-  if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-  return out;
-});
+  // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
+  const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
+  finalDaysRaw = scenDaysRaw.map((d, i) => {
+    const b = baseMap.get(normDayKey(d, i)) || {};
+    const out = { ...b, ...d };
+    if (!out.preview && b.preview) out.preview = b.preview;
+    if (!out.chips) out.chips = {};
+    if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
+    return out;
+  });
+}
 
 // Adapt for renderer and draw
-const finalDays = (finalDaysRaw || []).map(adaptDay);  // uses your existing adaptDay
-if (document.getElementById('itineraryDays')){
-  document.getElementById('itineraryDays').innerHTML = finalDays.map(renderDay).join('');
+const finalDays = (finalDaysRaw || []).map(adaptDay);
+const daysEl = document.getElementById('itineraryDays');
+if (daysEl){
+  daysEl.innerHTML = finalDays.map(renderDay).join('');
   const reinit = () => {
     if (window.EI_refreshSections) window.EI_refreshSections();
     if (window.EI_initAccordions) window.EI_initAccordions();
