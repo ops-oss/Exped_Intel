@@ -2282,27 +2282,38 @@ if (daysEl){
     console.log('[EI] rendered scenario →', name);
   }
 
-  /* ---------- wire up tabs ---------- */
-  const setActive = (btn) =>
-    tabs.forEach(t => t.setAttribute('aria-selected', t===btn ? 'true':'false'));
+/* ---------- wire up tabs ---------- */
+const setActive = (btn) => {
+  tabs.forEach(t =>
+    t.setAttribute('aria-selected', t === btn ? 'true' : 'false')
+  );
+};
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      setActive(btn);
-      renderScenario(btn.dataset.scenario);
-    });
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    setActive(btn);
+    renderScenario(btn.dataset.scenario);
   });
+});
 
-  // first paint (use preselected tab if present)
-  const selected = [...tabs].find(b => b.getAttribute('aria-selected')==='true') || tabs[0];
-  if (selected){ setActive(selected); renderScenario(selected.dataset.scenario); }
+// first paint (use preselected tab if present)
+const selected =
+  Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
+  tabs[0];
 
-  // repaint when async data arrives
-  window.addEventListener('ei:data-ready', () => {
-    const active = [...tabs].find(b => b.getAttribute('aria-selected')==='true') || tabs[0];
-    if (active) renderScenario(active.dataset.scenario);
-  });
-})();
+if (selected) {
+  setActive(selected);
+  renderScenario(selected.dataset.scenario);
+}
+
+// repaint when async data arrives
+window.addEventListener('ei:data-ready', () => {
+  const active =
+    Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') ||
+    tabs[0];
+  if (active) renderScenario(active.dataset.scenario);
+});
+})();  <!-- closes the IIFE; nothing after this line inside <script> -->
 </script>
 </body>
 </html>
