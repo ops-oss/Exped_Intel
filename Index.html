@@ -864,6 +864,14 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   .ei-tabs + #expItin.section { margin-top: -1.01px !important; }
 }
 
+#scenarioTagline.subhead {
+  font-size: 0.95rem;       /* slightly smaller than h3 */
+  font-weight: 400;         /* lighter than the title */
+  color: #555;              /* softer gray tone */
+  margin: 4px 0 12px 0;     /* a little space above/below */
+  line-height: 1.4;
+}
+
 </style>
 </head>
 <body>
@@ -1291,12 +1299,12 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   </ul>
 </nav>
 
-  <!-- Expedition Itinerary (summary chips) -->
-  <section id="expItin" class="section" style="display:none">
-    <h3>Expedition Itinerary</h3>
-    <div id="expKV" class="kv"></div>
-    <div id="expChips" style="margin-top:8px"></div>
-  </section>
+<section id="expItin" class="section" style="display:none">
+  <h3>Expedition Itinerary</h3>
+  <p id="scenarioTagline" class="subhead"></p>
+  <div id="expKV" class="kv"></div>
+  <div id="expChips" style="margin-top:8px"></div>
+</section>
 
   <!-- ORDERED SECTIONS -->
   <section class="section"><h3>Permits & Entry</h3><div id="permits_entry"></div></section>
@@ -1990,6 +1998,48 @@ window.addEventListener('beforeprint', () => {
     };
   }
 
+// ---- derive totals from a scenario's days
+function sumScenarioTotals(days = []) {
+  let miles = 0, up = 0, down = 0;
+
+  const toInt = (s) => {
+    if (s == null) return 0;
+    const m = String(s).match(/-?\d[\d,]*/);
+    return m ? parseInt(m[0].replace(/,/g,''), 10) : 0;
+  };
+
+  const addPair = (pair) => {
+    // pair: "X miles, +A ft / -B ft"
+    const m = String(pair).match(
+      /([\d.]+)\s*miles?\s*,\s*([+\-]?\d[\d,]*)\s*ft\s*\/\s*([+\-]?\d[\d,]*)\s*ft/i
+    );
+    if (!m) return;
+    miles += parseFloat(m[1]);       // miles can have decimals
+    up    += toInt(m[2]);
+    down  += toInt(m[3]);
+  };
+
+  days.forEach(d => {
+    // 1) exact field wins
+    if (d?.distance_and_elevation) { addPair(d.distance_and_elevation); return; }
+    // 2) chips (if GPT populated only elevation there)
+    if (d?.chips?.elevation && d?.chips?.distance) {
+      addPair(`${d.chips.distance}, ${d.chips.elevation}`);
+      return;
+    }
+    // 3) last resort: parse from description tail
+    if (d?.description) addPair(d.description);
+  });
+
+  const fmtMi = (v) => `${Math.round(v)} miles`;
+  const fmtFt = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ','); // 12000 -> "12,000"
+
+  return {
+    mileage:   fmtMi(miles),
+    elevation: `+${fmtFt(up)} ft / -${fmtFt(down)} ft`,
+    duration:  `${days.length} days`
+  };
+}
   // Align days by label/number for merging
   function normDayKey(d, i){
     const lbl = String(d?.label || '').toLowerCase();
@@ -2052,6 +2102,13 @@ if (finalPreview && finalTitle) {
   finalPreview = finalPreview.replace(lead, '').trim();
 }
 
+// after you compute finalTitle & finalPreview
+// strip any trailing "X miles, +A ft / -B ft" from the preview paragraph
+finalPreview = finalPreview.replace(
+  /(?:^|\s)(~?\d+(?:\.\d+)?)\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,
+  ''
+).trim();
+
 return { title: finalTitle, preview: finalPreview, chips };
   }
 
@@ -2106,187 +2163,173 @@ return { title: finalTitle, preview: finalPreview, chips };
     else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
   }
 
-  /* ---------- render one scenario (called on every tab click) ---------- */
-  function renderScenario(name){
-    const base = addScenariosFromString(getBase());
-    const raw  = findScenario(base, name) || null;
+/* ---------- render one scenario (called on every tab click) ---------- */
+function renderScenario(name){
+  const base = addScenariosFromString(getBase());
+  const raw  = findScenario(base, name) || null;
 
-    // top itinerary section
-    const itin = {
-      ...(base.expedition_itinerary || {}),
-      ...(raw?.header ? headerToItin(raw.header) : {})
-    };
-    if (Object.values(itin).some(Boolean)){
-      renderExpeditionKV(itin);
-      renderExpeditionChips(itin);
-      $('expItin').style.display = '';
-    } else {
-      $('expItin').style.display = 'none';
-    }
-
-    // days (replace/patch)
-    const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
-    const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
-    const daysStrategy =
-      (raw?.days_strategy === 'replace' || raw?.replaceDays === true) ? 'replace' : 'patch';
-
-    let finalDaysRaw;
-    if (scenDaysRaw.length === 0){
-      finalDaysRaw = baseDaysRaw.slice();
-    } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0){
-      finalDaysRaw = scenDaysRaw.slice();
-    } else {
-      const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-      finalDaysRaw = scenDaysRaw.map((d, i) => {
-        const b = baseMap.get(normDayKey(d, i)) || {};
-        const out = { ...b, ...d };
-        if (!out.preview && b.preview) out.preview = b.preview;
-        if (!out.chips) out.chips = {};
-        if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-        return out;
-      });
-    }
-
-    const daysEl = document.getElementById('itineraryDays');
-    if (daysEl){
-      // --- DRIVEN polish: synthesize clean title/preview/totals
-if (name === 'driven' && Array.isArray(finalDaysRaw) && finalDaysRaw.length === 1) {
-  const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
-
-  // pull start/end trailheads
-  const trailheadsStr = (raw?.header?.trailheads || itin.trailheads || '').trim();
-  const [thA, thB] = trailheadsStr.split('→').map(s => (s || '').trim());
-  const startTH =
-    raw?.waypoint_hints?.start_trailhead ||
-    base.start_trailhead || thA || '';
-  const endTH =
-    raw?.waypoint_hints?.end_trailhead ||
-    base.end_trailhead || thB || '';
-
-  // totals from header (prefer Driven header, else itin header)
-  const totalsMileage = (raw?.header?.mileage || itin.mileage || '').trim();
-  const totalsElev    = (raw?.header?.elevation || itin.elevation || '').trim();
-  const totals = [totalsMileage, totalsElev].filter(Boolean).join(', '); // "~14 miles, +2500 ft / -3000 ft"
-
-  // title: if missing/generic, synthesize "Start → End"
-  const genericTitle = !d0.title || /^day\s*\d+$/i.test(d0.title) || /^single day$/i.test(d0.title);
-  if (genericTitle) d0.title = [startTH, endTH].filter(Boolean).join(' → ') || 'Single-day push';
-
-  // preview: concise push note; keep any existing text after it
-  const pushNote = 'Pre-dawn start; sustained pace; attempt exposed high-point only with safe conditions; same-day exit.';
-  const basePreview = (d0.preview || d0.description || '').trim();
-  d0.preview = basePreview ? `${pushNote} ${basePreview}` : pushNote;
-
-  // ensure distance/elevation present
-  const hasTotalsInText = /miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft/i.test(basePreview);
-  if (!d0.distance_and_elevation && totals) d0.distance_and_elevation = totals;
-  if (!hasTotalsInText && totals && !/miles/i.test(d0.preview)) {
-    d0.preview = `${d0.preview} ${totals}.`;
-  }
-
-  // carry over useful chips if not set
-  d0.primary_trail = d0.primary_trail || (base.days || [])
-    .map(x => x?.primary_trail).filter(Boolean)[0] || '';
-  d0.terrain = d0.terrain || itin.terrain || '';
-}
-     // --- Driven title patch: anchor Day 1 to Start and final day to End (universal) ---
-if (String(name).toLowerCase() === 'driven' && Array.isArray(finalDaysRaw) && finalDaysRaw.length) {
-  const startTH = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead
-    || (raw?.header?.trailheads?.split('→')[0] || '').trim();
-  const endTH   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead
-    || (raw?.header?.trailheads?.split('→')[1] || '').trim();
-
+  // --- helpers (local) ---
   const clean = s => String(s || '').trim();
-  const looksGeneric = t => !t || /^day\s*\d+$/i.test(t) || /^single\s*day$/i.test(t);
-  const partsFrom = (t) => {
-    const x = clean(t);
-    if (!x) return [];
-    if (x.includes('→')) return x.split('→').map(p => clean(p));
-    if (/ to /i.test(x)) return x.split(/ to /i).map(p => clean(p));
-    return [x];
-  };
-  const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
+  const stripMilesTail = s =>
+    clean(s).replace(/\s*\b\d+(?:\.\d+)?\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,'').trim();
 
-  if (finalDaysRaw.length === 1) {
-    // Single-day Driven: force "Start → End"
-    const d0 = finalDaysRaw[0] || {};
-    const desired = titleFromParts([startTH, endTH]) || 'Single-day push';
-    const t = clean(d0.title || d0.day_title || d0.label);
-    if (looksGeneric(t) || !t || /(^|[\s→-])camp($|[\s→-])/i.test(t) || t !== desired) {
-      d0.title = desired;
-    }
-    // Add a concise push note if preview is empty of the finish
-    const hdrMiles = clean(raw?.header?.mileage || base.mileage);
-    const hdrElev  = clean(raw?.header?.elevation || base.elevation);
-    const already  = String(d0.preview || d0.description || '').toLowerCase().includes((endTH || '').toLowerCase());
-    if (!already && (hdrMiles || hdrElev)) {
-      const blurb = `Pre-dawn start; sustained pace to finish at ${endTH || 'the exit'}. ${[hdrMiles, hdrElev].filter(Boolean).join(', ')}`;
-      d0.preview = d0.preview ? `${d0.preview}` : blurb;
-    }
-    finalDaysRaw[0] = d0;
+  // ========== DAYS: merge/patch FIRST ==========
+  const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
+  const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
+  const daysStrategy =
+    (raw?.days_strategy === 'replace' || raw?.replaceDays === true) ? 'replace' : 'patch';
+
+  let finalDaysRaw;
+  if (scenDaysRaw.length === 0){
+    // No scenario days: use baseline days
+    finalDaysRaw = baseDaysRaw.slice();
+  } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0){
+    // Scenario provided full replacement (or no baseline)
+    finalDaysRaw = scenDaysRaw.slice();
   } else {
-    // Multi-day Driven: Day 1 must start at Start; final day must end at End
-    const first = finalDaysRaw[0] || {};
-    const last  = finalDaysRaw[finalDaysRaw.length - 1] || {};
-
-    // Fix first-day title
-    {
-      const t = clean(first.title || first.day_title || first.label);
-      let parts = partsFrom(t);
-      if (!parts.length || looksGeneric(t) || /(^|[\s→-])camp($|[\s→-])/i.test(t)) {
-        parts = [startTH, parts[1] || parts[0] || 'Stage 1'];
-      }
-      if (startTH && parts[0] !== startTH) {
-        if (parts.length === 1) parts = [startTH, parts[0]];
-        else parts[0] = startTH;
-      }
-      first.title = titleFromParts(parts);
-      finalDaysRaw[0] = first;
-    }
-
-    // Fix final-day title
-    {
-      const t = clean(last.title || last.day_title || last.label);
-      let parts = partsFrom(t);
-      if (!parts.length || looksGeneric(t)) {
-        parts = [parts[0] || 'Stage', endTH];
-      }
-      if (endTH && parts[parts.length - 1] !== endTH) {
-        if (parts.length === 1) parts = [parts[0], endTH];
-        else parts[parts.length - 1] = endTH;
-      }
-      last.title = titleFromParts(parts);
-      finalDaysRaw[finalDaysRaw.length - 1] = last;
-    }
+    // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
+    const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
+    finalDaysRaw = scenDaysRaw.map((d, i) => {
+      const b = baseMap.get(normDayKey(d, i)) || {};
+      const out = { ...b, ...d };
+      if (!out.preview && b.preview) out.preview = b.preview;
+      if (!out.chips) out.chips = {};
+      if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
+      return out;
+    });
   }
+
+  // --- DRIVEN polish: normalize titles to Start → End and sane preview/totals ---
+  (function normalizeDriven(){
+    if (String(name).toLowerCase() !== 'driven' || !Array.isArray(finalDaysRaw) || !finalDaysRaw.length) return;
+
+    const trailheadsStr = clean(raw?.header?.trailheads || base.trailheads || '');
+    const [thA, thB] = trailheadsStr.split('→').map(s => clean(s));
+    const startTH = raw?.waypoint_hints?.start_trailhead || base.start_trailhead || thA || '';
+    const endTH   = raw?.waypoint_hints?.end_trailhead   || base.end_trailhead   || thB || '';
+
+    const looksGeneric = t => !t || /^day\s*\d+$/i.test(t) || /^single\s*day$/i.test(t);
+    const partsFrom = (t) => {
+      const x = clean(t);
+      if (!x) return [];
+      if (x.includes('→')) return x.split('→').map(p => clean(p));
+      if (/ to /i.test(x)) return x.split(/ to /i).map(p => clean(p));
+      return [x];
+    };
+    const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
+
+    if (finalDaysRaw.length === 1) {
+      const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+
+      // force "Start → End" title if missing/generic/misleading
+      const desired = titleFromParts([startTH, endTH]) || 'Single-day push';
+      const t = clean(d0.title || d0.day_title || d0.label);
+      if (looksGeneric(t) || !t || /(^|[\s→-])camp($|[\s→-])/i.test(t) || t !== desired) {
+        d0.title = desired;
+      }
+
+      // concise push note; don't duplicate totals in preview
+      const hdrMiles = clean(raw?.header?.mileage || base.mileage || '');
+      const hdrElev  = clean(raw?.header?.elevation || base.elevation || '');
+      const totalsStr = [hdrMiles, hdrElev].filter(Boolean).join(', ');
+      const pushNote = 'Pre-dawn start; sustained pace; combine baseline segments; same-day exit.';
+      const prev = clean(d0.preview || d0.description || '');
+      const prevNoTail = stripMilesTail(prev);
+      d0.preview = prevNoTail ? `${pushNote} ${prevNoTail}` : pushNote;
+      if (!d0.distance_and_elevation && totalsStr) d0.distance_and_elevation = totalsStr;
+    } else {
+      // Multi-day Driven: fix first/last titles to start/end
+      const first = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+      const last  = finalDaysRaw[finalDaysRaw.length - 1] = { ...(finalDaysRaw.at(-1) || {}) };
+
+      // first day: ensure starts at Start
+      {
+        const t = clean(first.title || first.day_title || first.label);
+        let parts = partsFrom(t);
+        if (!parts.length || looksGeneric(t) || /(^|[\s→-])camp($|[\s→-])/i.test(t)) {
+          parts = [startTH, parts[1] || parts[0] || 'Stage 1'];
+        }
+        if (startTH && parts[0] !== startTH) {
+          if (parts.length === 1) parts = [startTH, parts[0]];
+          else parts[0] = startTH;
+        }
+        first.title = titleFromParts(parts);
+      }
+
+      // last day: ensure ends at End
+      {
+        const t = clean(last.title || last.day_title || last.label);
+        let parts = partsFrom(t);
+        if (!parts.length || looksGeneric(t)) {
+          parts = [parts[0] || 'Stage', endTH];
+        }
+        if (endTH && parts[parts.length - 1] !== endTH) {
+          if (parts.length === 1) parts = [parts[0], endTH];
+          else parts[parts.length - 1] = endTH;
+        }
+        last.title = titleFromParts(parts);
+      }
+    }
+  })();
+
+  // --- Adapt for renderer, and remove trailing "X miles, +A / -B" duplication from preview ---
+  let finalDays = (finalDaysRaw || []).map(adaptDay)
+    .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
+
+  // Paint days
+  const daysEl = document.getElementById('itineraryDays');
+  if (daysEl){
+    daysEl.innerHTML = finalDays.map(renderDay).join('');
+    if (window.EI_refreshSections) window.EI_refreshSections();
+    if (window.EI_initAccordions) window.EI_initAccordions();
+    document.dispatchEvent(new CustomEvent('ei:days-updated'));
+  }
+
+  // ========== TOP ITINERARY (recompute from days AFTER merge) ==========
+  const totals = sumScenarioTotals(finalDays);
+
+  // Build/merge itinerary header object
+  const itin = {
+    ...(base.expedition_itinerary || {}),
+    ...(raw?.header ? headerToItin(raw.header) : {})
+  };
+
+  // Force totals to reflect actual per-scenario days
+  itin.mileage   = totals.mileage;
+  itin.elevation = totals.elevation;
+  // Duration: scenario header if explicit, else count of days
+  itin.duration  = (raw?.header?.duration || totals.duration);
+
+  // Render header + chips
+  renderExpeditionKV(itin);
+  renderExpeditionChips(itin);
+  $('expItin').style.display = '';
+
+  // Tagline under "Expedition Itinerary"
+  const taglineEl = document.getElementById('scenarioTagline');
+  if (taglineEl){
+    taglineEl.textContent = clean(raw?.tagline?.marketing || raw?.tagline?.functional || '');
+  }
+
+  // ========== GPX + MAP ==========
+  const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
+  const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
+  const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
+  const map   = (raw?.header?.map_embed_url) || base.map_embed_url || base.map_embed || '';
+  updateGPX(gpx, start, end);
+  updateMap(map);
+
+  // ========== TEXT SECTIONS ==========
+  const sec = [
+    'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
+    'key_considerations','campsite_intel','weather_altitude','gear_checklist',
+    'optional_mod','risk_matrix','conditions_watch','bailout_summary','emergency',
+    'final_brief','field_disclaimer'
+  ];
+  sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
+
+  console.log('[EI] rendered scenario →', name, { days: finalDays.length, totals });
 }
-// --- end Driven title patch --- 
-      const finalDays = (finalDaysRaw || []).map(adaptDay);
-      daysEl.innerHTML = finalDays.map(renderDay).join('');
-      if (window.EI_refreshSections) window.EI_refreshSections();
-      if (window.EI_initAccordions) window.EI_initAccordions();
-      document.dispatchEvent(new CustomEvent('ei:days-updated'));
-    }
-
-    // GPX + map
-    const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
-    const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
-    const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
-    const map   = (raw?.header?.map_embed_url) || base.map_embed_url || base.map_embed || '';
-    updateGPX(gpx, start, end);
-    updateMap(map);
-
-    // text sections
-    const sec = [
-      'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
-      'key_considerations','campsite_intel','weather_altitude','gear_checklist',
-      'optional_mod','risk_matrix','conditions_watch','bailout_summary','emergency',
-      'final_brief','field_disclaimer'
-    ];
-    sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
-
-    console.log('[EI] rendered scenario →', name);
-  }
 
   /* ---------- tabs wiring ---------- */
   const tabs = document.querySelectorAll('.ei-tab');
