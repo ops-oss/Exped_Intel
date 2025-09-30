@@ -2207,6 +2207,18 @@ function renderScenario(name){
   const base = addScenariosFromString(getBase());
   const raw  = findScenario(base, name) || null;
 
+  // --- PATCH: force Baseline passthrough ---
+  if (String(name).toLowerCase() === 'baseline') {
+    const daysEl = document.getElementById('itineraryDays');
+    if (daysEl && Array.isArray(base?.days)) {
+      daysEl.innerHTML = base.days.map(renderDay).join('');
+    }
+    if (window.EI_refreshSections) window.EI_refreshSections();
+    if (window.EI_initAccordions) window.EI_initAccordions();
+    document.dispatchEvent(new CustomEvent('ei:days-updated'));
+    return; // exit early
+  }
+
   // --- helpers (local) ---
   const clean = s => String(s || '').trim();
   const stripMilesTail = s =>
