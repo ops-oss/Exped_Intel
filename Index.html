@@ -1563,9 +1563,13 @@ function inflateFromMission(data){
     .trim();
   if (!txt) return out;
 
-  const parts = txt.split(/\n?\s*⸻\s*\n?/g);
+  // accept em dash (—), double dash (⸻), or plain hyphen (---)
+  const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
   const grab = (label) => {
-    const re = new RegExp(`(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*⸻|$)`,'i');
+    const re = new RegExp(
+  `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+  'i'
+);
     const m = txt.match(re);
     return m ? m[2].trim() : "";
   };
@@ -1605,7 +1609,7 @@ function inflateFromMission(data){
 
   if(!Array.isArray(out.days) || out.days.length===0){
    const dayBlocks = txt
-  .split(/\n\s*⸻\s*\n/g)
+  .split(/\n\s*(?:—|⸻|---)\s*\n/g)
   .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
     out.days = dayBlocks.map(block=>{
       const title = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
