@@ -1424,9 +1424,39 @@ function kvOrParagraph(containerId, text){
   }
 }
 
+// Extract "Start → End" from a day's fields (title/desc), with safe fallbacks.
+function _routePartsFrom(day){
+  const clean = s => String(s || '').trim();
+  const firstSentence = s => clean(s).split(/[\n.]/)[0];
+
+  // 1) prefer explicit title line containing a route
+  let m = clean(day.title || day.day_title || '')
+  .match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
+  if (m) return [clean(m[1]), clean(m[2])];
+
+  // 2) try the first sentence of description/preview
+  const probe = firstSentence(day.description || day.preview || '');
+  m = probe.match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
+  if (m) return [clean(m[1]), clean(m[2])];
+
+  // 3) anchor-style loop day: infer camp name, use as start=end
+  const camp = clean(day.campsite_location || '')
+                .split('–')[0]   // "Edna Lake – 9000 ft – water"
+                .split('-')[0];  // tolerate hyphen variant
+  if (camp) return [clean(camp), clean(camp)];
+
+  return null; // unknown; caller will fall back
+}
+
+function _formatDayHeader(day, idx){
+  const num = (String(day.label||'').match(/\d+/) || [idx+1])[0];
+  const parts = _routePartsFrom(day);
+  return parts ? `Day ${num}: ${parts[0]} \u2192 ${parts[1]}` : `Day ${num}`;
+}
+
 /* ---------- day + expedition render ---------- */
-function renderDay(day){
-  const title = (day.title || '').replace(/\s+TO\s+/gi, ' → ');
+function renderDay(day, idx){
+  const title = _formatDayHeader(day, idx);
 
   // normalize & allow aliases + arrays
   const src = { ...(day.chips||{}), ...(day||{}) };
@@ -1443,14 +1473,14 @@ function renderDay(day){
     distance: pickAlias('distance'),
     elevation: pickAlias('elevation','gainloss','gain_loss'),
     campsite: pickAlias('campsite','camp','camp_site','site','overnight'),
-    trail:    pickAlias('trail','trailhead','primary_trail'),
+    trail:    pickAlias('trail','trailhead','primary_trail','primary_trails'),
     terrain:  pickAlias('terrain'),
-    water:    pickAlias('water','water_sources'),
+    water:    pickAlias('water','water_sources','key_water_sources'),
     safety:   pickAlias('safety'),
     decision: pickAlias('decision','decision_point'),
     morale:   pickAlias('morale','morale_marker'),
-    features: pickAlias('features'),
-    tip:      pickAlias('tip'),
+    features: pickAlias('features','notable_features'),
+    tip:      pickAlias('tip','trail_tip'),
     bailout:  pickAlias('bailout')
   };
 
@@ -1462,7 +1492,12 @@ function renderDay(day){
   };
 
   let html = `<article class="day"><h4>${title}</h4>`;
-  if(day.preview) html += `<p class="preview">${day.preview}</p>`;
+
+  // preview fallback to description’s first sentence
+  const preview = (day.preview && day.preview.trim())
+      ? day.preview.trim()
+      : String(day.description||'').split('\n')[0];
+  if (preview) html += `<p class="preview">${preview}</p>`;
 
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{
@@ -1635,7 +1670,7 @@ function computeSrc(){
   const qp=new URLSearchParams(location.search).get('src');
   if(qp) return qp;
   const m = location.pathname.match(/\/trip\/([^\/?#]+)\/?$/);
-  const slug = m?.[1] || 'zion-shuttle-trail-beginning';
+  const slug = m?.[1] || 'alpine-lakes-sawtooth-wilderness-hike';
   return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
 }
 async function loadData(){
@@ -1716,7 +1751,7 @@ if (data.image_link) {
 
   // Days
   const days = Array.isArray(data.days)?data.days:[];
-  $('itineraryDays').innerHTML = days.map(renderDay).join('');
+$('itineraryDays').innerHTML = days.map((d,i) => renderDay(d,i)).join('');
 
   // GPX
   const gpxURL=data.gpx_download_link||'';
@@ -2199,79 +2234,86 @@ function renderScenario(name){
     });
   }
 
-  // --- DRIVEN polish: normalize titles to Start → End and sane preview/totals ---
-  (function normalizeDriven(){
-    if (String(name).toLowerCase() !== 'driven' || !Array.isArray(finalDaysRaw) || !finalDaysRaw.length) return;
+// --- DRIVEN polish: normalize titles to Start → End without "Stage" fallbacks ---
+(function normalizeDriven(){
+  if (String(name).toLowerCase() !== 'driven' || !Array.isArray(finalDaysRaw) || !finalDaysRaw.length) return;
 
-    const trailheadsStr = clean(raw?.header?.trailheads || base.trailheads || '');
-    const [thA, thB] = trailheadsStr.split('→').map(s => clean(s));
-    const startTH = raw?.waypoint_hints?.start_trailhead || base.start_trailhead || thA || '';
-    const endTH   = raw?.waypoint_hints?.end_trailhead   || base.end_trailhead   || thB || '';
+  const clean = s => String(s || '').trim();
+  const partsFrom = (t) => {
+    const x = clean(t);
+    if (!x) return [];
+    if (x.includes('→')) return x.split('→').map(s => clean(s));
+    if (/ to /i.test(x)) return x.split(/ to /i).map(s => clean(s));
+    return [];
+  };
+  const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
 
-    const looksGeneric = t => !t || /^day\s*\d+$/i.test(t) || /^single\s*day$/i.test(t);
-    const partsFrom = (t) => {
-      const x = clean(t);
-      if (!x) return [];
-      if (x.includes('→')) return x.split('→').map(p => clean(p));
-      if (/ to /i.test(x)) return x.split(/ to /i).map(p => clean(p));
-      return [x];
-    };
-    const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
+  // prefer explicit waypoint hints, then header trailheads
+  const thStr = clean(raw?.header?.trailheads || base.trailheads || '');
+  const [thA, thB] = thStr.split('→').map(s => clean(s));
+  const startTH = clean(raw?.waypoint_hints?.start_trailhead || base.start_trailhead || thA || '');
+  const endTH   = clean(raw?.waypoint_hints?.end_trailhead   || base.end_trailhead   || thB || '');
 
-    if (finalDaysRaw.length === 1) {
-      const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+  // helper: get [start,end] from a day using your robust extractor + backups
+  const getParts = (d) => {
+    const p = _routePartsFrom({
+      title: d.title || d.day_title || d.label || '',
+      description: d.preview || d.description || '',
+      campsite_location: d.campsite_location || d?.chips?.campsite || ''
+    });
+    if (p) return p;
 
-      // force "Start → End" title if missing/generic/misleading
-      const desired = titleFromParts([startTH, endTH]) || 'Single-day push';
-      const t = clean(d0.title || d0.day_title || d0.label);
-      if (looksGeneric(t) || !t || /(^|[\s→-])camp($|[\s→-])/i.test(t) || t !== desired) {
-        d0.title = desired;
+    // backup: try raw title parsing
+    const tParts = partsFrom(d.title || d.day_title || d.label || '');
+    if (tParts.length === 2) return tParts;
+
+    // last-ditch end from campsite text
+    const camp = clean((d.campsite_location || d?.chips?.campsite || '').split('–')[0].split('-')[0]);
+    return camp ? ['', camp] : [];
+  };
+
+  if (finalDaysRaw.length === 1) {
+    const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+    let parts = getParts(d0);
+
+    // force to "Start → End" using hinted trailheads if we have them
+    if (!parts.length) parts = [startTH, endTH].filter(Boolean);
+    if (startTH) parts[0] = startTH || parts[0];
+    if (endTH)   parts[1] = endTH   || parts[1];
+
+    // only set a title if we actually have something real
+    d0.title = titleFromParts(parts) || d0.title || 'Single-day push';
+
+  } else {
+    // Multi-day Driven: fix first and last titles only.
+    const first = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
+    const last  = finalDaysRaw[finalDaysRaw.length - 1] = { ...(finalDaysRaw.at(-1) || {}) };
+
+    // FIRST DAY: StartTH → (derived end)
+    {
+      let parts = getParts(first);
+      if (!parts.length) parts = partsFrom(first.title || '') || [];
+      // ensure start side is the trailhead if provided
+      if (startTH) {
+        if (parts.length < 2) parts = [startTH, parts[0] || ''];
+        else parts[0] = startTH;
       }
-
-      // concise push note; don't duplicate totals in preview
-      const hdrMiles = clean(raw?.header?.mileage || base.mileage || '');
-      const hdrElev  = clean(raw?.header?.elevation || base.elevation || '');
-      const totalsStr = [hdrMiles, hdrElev].filter(Boolean).join(', ');
-      const pushNote = 'Pre-dawn start; sustained pace; combine baseline segments; same-day exit.';
-      const prev = clean(d0.preview || d0.description || '');
-      const prevNoTail = stripMilesTail(prev);
-      d0.preview = prevNoTail ? `${pushNote} ${prevNoTail}` : pushNote;
-      if (!d0.distance_and_elevation && totalsStr) d0.distance_and_elevation = totalsStr;
-    } else {
-      // Multi-day Driven: fix first/last titles to start/end
-      const first = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
-      const last  = finalDaysRaw[finalDaysRaw.length - 1] = { ...(finalDaysRaw.at(-1) || {}) };
-
-      // first day: ensure starts at Start
-      {
-        const t = clean(first.title || first.day_title || first.label);
-        let parts = partsFrom(t);
-        if (!parts.length || looksGeneric(t) || /(^|[\s→-])camp($|[\s→-])/i.test(t)) {
-          parts = [startTH, parts[1] || parts[0] || 'Stage 1'];
-        }
-        if (startTH && parts[0] !== startTH) {
-          if (parts.length === 1) parts = [startTH, parts[0]];
-          else parts[0] = startTH;
-        }
-        first.title = titleFromParts(parts);
-      }
-
-      // last day: ensure ends at End
-      {
-        const t = clean(last.title || last.day_title || last.label);
-        let parts = partsFrom(t);
-        if (!parts.length || looksGeneric(t)) {
-          parts = [parts[0] || 'Stage', endTH];
-        }
-        if (endTH && parts[parts.length - 1] !== endTH) {
-          if (parts.length === 1) parts = [parts[0], endTH];
-          else parts[parts.length - 1] = endTH;
-        }
-        last.title = titleFromParts(parts);
-      }
+      first.title = titleFromParts(parts) || (startTH ? `${startTH} → ` : (first.title || ''));
     }
-  })();
 
+    // LAST DAY: (derived start) → EndTH
+    {
+      let parts = getParts(last);
+      if (!parts.length) parts = partsFrom(last.title || '') || [];
+      // ensure end side is the trailhead if provided
+      if (endTH) {
+        if (parts.length < 2) parts = [parts[0] || '', endTH];
+        else parts[parts.length - 1] = endTH;
+      }
+      last.title = titleFromParts(parts) || (endTH ? ` → ${endTH}` : (last.title || ''));
+    }
+  }
+})();
   // --- Adapt for renderer, and remove trailing "X miles, +A / -B" duplication from preview ---
   let finalDays = (finalDaysRaw || []).map(adaptDay)
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
@@ -2279,7 +2321,7 @@ function renderScenario(name){
   // Paint days
   const daysEl = document.getElementById('itineraryDays');
   if (daysEl){
-    daysEl.innerHTML = finalDays.map(renderDay).join('');
+   daysEl.innerHTML = finalDays.map((d,i) => renderDay(d,i)).join('');
     if (window.EI_refreshSections) window.EI_refreshSections();
     if (window.EI_initAccordions) window.EI_initAccordions();
     document.dispatchEvent(new CustomEvent('ei:days-updated'));
