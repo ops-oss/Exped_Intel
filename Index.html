@@ -1596,7 +1596,8 @@ function inflateFromMission(data){
   }
 
   out.permits_entry         ||= grab("PERMITS\\s*&\\s*ENTRY");
-  out.shuttle_transportation||= grab("SHUTTLE\\s*/\\s*TRANSPORTATION");
+  // accept either "SHUTTLE / TRANSPORTATION" or just "TRANSPORTATION"
+  out.shuttle_transportation ||= grab("(?:SHUTTLE\\s*/\\s*TRANSPORTATION|TRANSPORTATION)");
   out.multi_trailhead       ||= grab("MULTI-TRAILHEAD\\s+LOGISTICS");
   out.key_considerations    ||= grab("KEY\\s+CONSIDERATIONS");
   out.permit_timeline       ||= grab("PERMIT\\s*&\\s*SHUTTLE\\s+TIMELINE");
