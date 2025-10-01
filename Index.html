@@ -2365,7 +2365,10 @@ function renderScenario(name){
   const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
   const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
   const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
-  const map   = (raw?.header?.map_embed_url) || base.map_embed_url || base.map_embed || '';
+  
+  // Always use the mission_text map for ALL scenarios (no per-scenario override)
+  const map = base.map_embed_url || base.map_embed || '';
+
   updateGPX(gpx, start, end);
   updateMap(map);
 
@@ -2377,6 +2380,9 @@ function renderScenario(name){
     'final_brief','field_disclaimer'
   ];
   sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
+
+// Force Shuttle / Transportation to always come from mission_text (base), not scenarios
+kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
 
   console.log('[EI] rendered scenario →', name, { days: finalDays.length, totals });
 }
