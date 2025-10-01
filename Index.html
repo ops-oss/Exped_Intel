@@ -1427,11 +1427,15 @@ function kvOrParagraph(containerId, text){
 // Extract "Start → End" from a day's fields (title/desc), with safe fallbacks.
 function _routePartsFrom(day){
   const clean = s => String(s || '').trim();
-  const firstSentence = s => clean(s).split(/[\n.]/)[0];
+
+  // helper: drop any leading "Day N:" prefix
+  const stripDayPrefix = s => clean(s).replace(/^\s*day\s*\d+\s*:\s*/i, '');
+
+  const firstSentence = s => stripDayPrefix(clean(s)).split(/[\n.]/)[0];
 
   // 1) prefer explicit title line containing a route
-  let m = clean(day.title || day.day_title || '')
-  .match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
+  let title = stripDayPrefix(day.title || day.day_title || day.label || '');
+  let m = title.match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
   if (m) return [clean(m[1]), clean(m[2])];
 
   // 2) try the first sentence of description/preview
@@ -1441,8 +1445,8 @@ function _routePartsFrom(day){
 
   // 3) anchor-style loop day: infer camp name, use as start=end
   const camp = clean(day.campsite_location || '')
-                .split('–')[0]   // "Edna Lake – 9000 ft – water"
-                .split('-')[0];  // tolerate hyphen variant
+                .split('–')[0]
+                .split('-')[0];
   if (camp) return [clean(camp), clean(camp)];
 
   return null; // unknown; caller will fall back
@@ -2206,18 +2210,6 @@ return { title: finalTitle, preview: finalPreview, chips };
 function renderScenario(name){
   const base = addScenariosFromString(getBase());
   const raw  = findScenario(base, name) || null;
-
-  // --- PATCH: force Baseline passthrough ---
-  if (String(name).toLowerCase() === 'baseline') {
-    const daysEl = document.getElementById('itineraryDays');
-    if (daysEl && Array.isArray(base?.days)) {
-      daysEl.innerHTML = base.days.map(renderDay).join('');
-    }
-    if (window.EI_refreshSections) window.EI_refreshSections();
-    if (window.EI_initAccordions) window.EI_initAccordions();
-    document.dispatchEvent(new CustomEvent('ei:days-updated'));
-    return; // exit early
-  }
 
   // --- helpers (local) ---
   const clean = s => String(s || '').trim();
