@@ -1,10 +1,10 @@
 # Canonical route
 /trip/*          /index.html   200
 
+/preview/*    /preview/index.html   200
+
 # Optional alias (also works)
 /expedition/*    /index.html   200
 
 # Catch-all (single page app)
 /*               /index.html   200
-
-/preview/*    /preview/index.html   200
