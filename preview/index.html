@@ -1349,8 +1349,69 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
 </div>
 <!-- right before your existing <script> blocks -->
 <script src="/preview/scout-adapter.js"></script>
-<script id="scout-data" type="application/json">[ …your 3 objects… ]</script>
-<script>
+<script id="scout-data" type="application/json">
+{
+  "options": [
+    {
+      "id": "opt-1",
+      "title": "Manistee River Loop",
+      "region": "Manistee National Forest, Michigan",
+      "days": 2,
+      "miles": 23,
+      "gain_ft": 1200,
+      "loss_ft": 1200,
+      "route_type": "Loop",
+      "intel_score": {
+        "solitude": 6,
+        "photo_ops": 9,
+        "scenic_reward": 8
+      },
+      "cta": {
+        "text": "Blueprint This Manistee River Loop →",
+        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=1&route=Manistee%20River%20Loop"
+      }
+    },
+    {
+      "id": "opt-2",
+      "title": "Porcupine Mountains Loop",
+      "region": "Porcupine Mountains, Michigan",
+      "days": 2,
+      "miles": 17,
+      "gain_ft": 1500,
+      "loss_ft": 1500,
+      "route_type": "Loop",
+      "intel_score": {
+        "solitude": 8,
+        "photo_ops": 9,
+        "scenic_reward": 9
+      },
+      "cta": {
+        "text": "Blueprint This Porcupine Mountains Loop →",
+        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=2&route=Porcupine%20Mountains%20Loop"
+      }
+    },
+    {
+      "id": "opt-3",
+      "title": "Jordan River Pathway",
+      "region": "Jordan River Valley, Michigan",
+      "days": 2,
+      "miles": 18,
+      "gain_ft": 1000,
+      "loss_ft": 1000,
+      "route_type": "Loop",
+      "intel_score": {
+        "solitude": 7,
+        "photo_ops": 8,
+        "scenic_reward": 8
+      },
+      "cta": {
+        "text": "Blueprint This Jordan River Pathway →",
+        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=3&route=Jordan%20River%20Pathway"
+      }
+    }
+  ]
+}
+</script>
 /* ---------- utils ---------- */
 const $ = id => document.getElementById(id);
 const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
@@ -1687,7 +1748,7 @@ function computeSrc(){
 }
 async function loadData(){
   // 1) Prefer inline JSON if present (great for CodePen / local preview)
-  const inlineEl = document.getElementById('ei-data');
+  const inlineEl = document.getElementById('ei-data') || document.getElementById('scout-data');
   if (inlineEl && inlineEl.textContent && inlineEl.textContent.trim().length){
     const inline = safeParse(inlineEl.textContent);
     if (inline && Object.keys(inline).length){
@@ -1981,7 +2042,7 @@ window.addEventListener('beforeprint', () => {
   (function primeEI(){
     if (!window.EI_DATA || !Object.keys(window.EI_DATA).length){
       try {
-        const el = document.getElementById('ei-data');
+        const inlineEl = document.getElementById('ei-data') || document.getElementById('scout-data');
         if (el && el.textContent) window.EI_DATA = JSON.parse(el.textContent);
       } catch {}
     }
