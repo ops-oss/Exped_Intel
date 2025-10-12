@@ -1449,6 +1449,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
 </script>
+<script>
 /* ---------- utils ---------- */
 const $ = id => document.getElementById(id);
 const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
@@ -1909,8 +1910,14 @@ hideTrulyEmptySections();
 status.textContent='';
 setTimeout(()=>status.remove(),10);
 
-/* PATCH 3 — expose data for the tabs */
-window.EI_DATA = data;
+/* PATCH 3 — expose data for the tabs WITHOUT nuking adapter scenarios */
+if (window.EI_DATA && (Array.isArray(window.EI_DATA.scenarios))) {
+  // merge mission/meta fields from `data` into existing EI_DATA
+  window.EI_DATA = { ...window.EI_DATA, ...data };
+} else {
+  // no scenarios present (e.g., loading a full EI JSON) — keep as-is
+  window.EI_DATA = data;
+}
 window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
 
@@ -2080,7 +2087,7 @@ window.addEventListener('beforeprint', () => {
     if (!window.EI_DATA || !Object.keys(window.EI_DATA).length){
       try {
         const inlineEl = document.getElementById('ei-data') || document.getElementById('scout-data');
-        if (el && el.textContent) window.EI_DATA = JSON.parse(el.textContent);
+        if (inlineEl && inlineEl.textContent) window.EI_DATA = JSON.parse(inlineEl.textContent);
       } catch {}
     }
   })();
