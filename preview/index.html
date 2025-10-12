@@ -1347,8 +1347,11 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   <section class="section"><h3>Final Brief Summary</h3><div id="final_brief"></div></section>
   <section class="section"><h3>Field Disclaimer</h3><div id="field_disclaimer"></div></section>
 </div>
-<!-- right before your existing <script> blocks -->
+
+<!-- 1) Adapter: leave this ONE include -->
 <script src="/preview/scout-adapter.js"></script>
+
+<!-- 2) Your real Scout payload (keep ONLY this data block) -->
 <script id="scout-data" type="application/json">
 {
   "options": [
@@ -1361,11 +1364,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
       "gain_ft": 1200,
       "loss_ft": 1200,
       "route_type": "Loop",
-      "intel_score": {
-        "solitude": 6,
-        "photo_ops": 9,
-        "scenic_reward": 8
-      },
+      "intel_score": { "solitude": 6, "photo_ops": 9, "scenic_reward": 8 },
       "cta": {
         "text": "Blueprint This Manistee River Loop →",
         "url": "https://www.expeditionintel.com/upgrade?source=scout&option=1&route=Manistee%20River%20Loop"
@@ -1380,11 +1379,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
       "gain_ft": 1500,
       "loss_ft": 1500,
       "route_type": "Loop",
-      "intel_score": {
-        "solitude": 8,
-        "photo_ops": 9,
-        "scenic_reward": 9
-      },
+      "intel_score": { "solitude": 8, "photo_ops": 9, "scenic_reward": 9 },
       "cta": {
         "text": "Blueprint This Porcupine Mountains Loop →",
         "url": "https://www.expeditionintel.com/upgrade?source=scout&option=2&route=Porcupine%20Mountains%20Loop"
@@ -1399,11 +1394,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
       "gain_ft": 1000,
       "loss_ft": 1000,
       "route_type": "Loop",
-      "intel_score": {
-        "solitude": 7,
-        "photo_ops": 8,
-        "scenic_reward": 8
-      },
+      "intel_score": { "solitude": 7, "photo_ops": 8, "scenic_reward": 8 },
       "cta": {
         "text": "Blueprint This Jordan River Pathway →",
         "url": "https://www.expeditionintel.com/upgrade?source=scout&option=3&route=Jordan%20River%20Pathway"
@@ -1411,6 +1402,52 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
     }
   ]
 }
+</script>
+
+<!-- 3) Bootstrap + inline adapter to EI format -->
+<script>
+(function () {
+  // 3a) read inline JSON safely
+  var el = document.getElementById('ei-data') || document.getElementById('scout-data');
+  if (!el) return;
+  var payload;
+  try { payload = JSON.parse(el.textContent); } catch (e) { console.error('[EI] Invalid JSON', e); return; }
+
+  // 3b) convert Scout "options" -> EI scenarios (baseline/anchor/driven)
+  function optionsToScenarios(opts){
+    if (!Array.isArray(opts)) return [];
+    var keyOrder = ['baseline','anchor','driven'];
+    return opts.slice(0,3).map(function(o, i){
+      return {
+        key:   keyOrder[i] || (o.id || ('opt-'+(i+1))),
+        label: (keyOrder[i] || o.id || '').replace(/^\w/, c=>c.toUpperCase()),
+        header: {
+          duration:  (o.days ? o.days + ' days' : ''),
+          mileage:   (o.miles ? o.miles + ' miles' : ''),
+          elevation: (o.gain_ft!=null && o.loss_ft!=null ? ('+'+o.gain_ft+' ft / -'+o.loss_ft+' ft') : ''),
+          terrain:   (o.route_type || ''),
+          experience:'',
+          trailheads:'',
+          gps:''
+        },
+        tagline: { marketing: (o.title || '') + (o.region ? ' — ' + o.region : '') },
+        // Leave days empty for now; preview still renders tabs + header chips
+        days: []
+      };
+    });
+  }
+
+  // 3c) prefer external adapter if present; else use our inline
+  var adapt = (window.scoutToEI || window.scoutAdapter || function(x){
+    if (Array.isArray(x)) return { scenarios: x };                 // already scenarios
+    if (x && Array.isArray(x.scenarios)) return x;                 // already in EI shape
+    if (x && Array.isArray(x.options)) return { scenarios: optionsToScenarios(x.options) }; // Scout options
+    return { scenarios: [] };
+  });
+
+  window.EI_DATA = adapt(payload);
+  window.dispatchEvent(new CustomEvent('ei:data-ready'));
+})();
 </script>
 /* ---------- utils ---------- */
 const $ = id => document.getElementById(id);
