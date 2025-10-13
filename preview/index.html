@@ -218,6 +218,29 @@
   font-size: 13px !important;
   color: rgba(0,0,0,0.5);
 }
+/* ↓ Smaller text inside selects so long placeholder fits */
+#scoutForm select{
+  font-size: 14px !important;          /* was 16 */
+  padding-right: 38px;                  /* keep room for arrow */
+}
+#scoutForm select option{ font-size: 14px !important; }
+
+/* Make it even smaller only while the placeholder is selected */
+#scoutForm select:has(option[value=""]:checked){
+  font-size: 13px !important;
+  letter-spacing: 0;
+}
+
+/* ↓ Date input: shrink visible text & placeholder */
+#scoutForm input[type="date"]{
+  font-size: 14px !important;           /* was 16 */
+}
+#scoutForm input[type="date"]::-webkit-datetime-edit{
+  font-size: 14px !important;
+}
+#scoutForm input[type="date"]::placeholder{
+  font-size: 14px !important;
+}
 </style>
 </head>
 <body>
