@@ -606,21 +606,29 @@ const season  = seasonFromISODate(dateISO);
 // normalize en-dash to hyphen for enums like 1-2, 3-4, 5-6, 7+
 const normalizeDash = s => (s || "").replace(/[–—]/g, "-");
 
-// final payload
+// --- final payload (camelCase to match Edge) ---
 const payload = {
   name: get("name"),
   email: get("email"),
-  based_in: get("based_in"),
-  experience_level: get("experience_level"),
-  primary_objective: get("primary_objective"),
-  ideal_trip_length: normalizeDash(get("ideal_trip_length")), // <-- normalized
-  preferred_terrain: get("preferred_terrain"),
-  destination_idea: destCombined,
+  basedIn: get("based_in"),
+  experienceLevel: get("experience_level"),
+  primaryObjective: get("primary_objective"),
+  idealTripLength: get("ideal_trip_length"),
+  preferredTerrain: get("preferred_terrain"),
+  destinationIdea: destCombined,     // optional; Edge doesn't require it
   additional: get("additional"),
-  trip_window: season                                       // <-- null or Season
+  tripWindow: season                 // <-- was trip_window
 };
 
-  const required=["name","email","based_in","experience_level","primary_objective","ideal_trip_length"];
+  const required = [
+  "name",
+  "email",
+  "basedIn",
+  "experienceLevel",
+  "primaryObjective",
+  "idealTripLength",
+  "preferredTerrain"
+];
   const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
 
   const btn=$id("btnGenerate"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
