@@ -178,6 +178,29 @@
   line-height: 1.4;
   padding: 4px 6px;
 }
+  /* ===== Date Input Placeholder Refinement ===== */
+
+/* Target only the trip date field */
+#tripDate {
+  font-size: 15px !important;
+  letter-spacing: 0.03em;
+  text-align: left;
+  padding-left: 12px;
+}
+
+/* Shrink and lighten placeholder text */
+#tripDate::placeholder {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.45);
+}
+
+/* Ensure calendar icon stays vertically centered */
+#tripDate::-webkit-calendar-picker-indicator {
+  margin-left: -2px;
+  opacity: 0.8;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
