@@ -679,7 +679,51 @@ try {
     if(btn){ btn.disabled=false; btn.textContent="Generate Scout"; }
   }
 });
+/* =========================
+   FIX: Live preview wiring
+   ========================= */
+function seasonFromISODate(iso){
+  if(!iso) return "";
+  const m = Number(iso.slice(5,7));
+  if([12,1,2].includes(m)) return "Winter";
+  if([3,4,5].includes(m))  return "Spring";
+  if([6,7,8].includes(m))  return "Summer";
+  return "Fall";
+}
 
+(function liveMirror(){
+  const form = document.getElementById("scoutForm");
+  if (!form) return;
+
+  const OUT = {
+    title:    document.getElementById("pv_title"),
+    category: document.getElementById("pv_category"),
+    season:   document.getElementById("pv_season"),
+    location: document.getElementById("pv_location"),
+    date:     document.getElementById("pv_date"),
+    hero:     document.getElementById("pv_hero")
+  };
+
+  const getMeta = (k)=>
+    form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
+
+  function paint(){
+    const dateISO = getMeta("date");
+    OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Scout Recon");
+    OUT.category && (OUT.category.textContent = getMeta("category") || "—");
+    OUT.location && (OUT.location.textContent = getMeta("location") || "—");
+    OUT.date     && (OUT.date.textContent     = dateISO ? new Date(dateISO+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—");
+    OUT.season   && (OUT.season.textContent   = dateISO ? seasonFromISODate(dateISO) : "—");
+
+    if (OUT.hero && getMeta("location") && !OUT.hero.src){
+      OUT.hero.src = "https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
+    }
+  }
+
+  form.addEventListener("input", paint, {passive:true});
+  form.addEventListener("change", paint);
+  paint();
+})();
 /* ===== Initial ===== */
 (function initPreview(){
   ensureCTA();
