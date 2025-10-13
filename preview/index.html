@@ -591,24 +591,34 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
   const idea=get("destination_idea");
   const destCombined = pref ? (idea ? `${pref}: ${idea}` : pref) : idea;
 
-  // derive season from date
-  const dateISO = get("tripDate");
-  const seasonFromISODate=(iso)=>{ if(!iso) return ""; const m=Number(iso.slice(5,7));
-    if([12,1,2].includes(m)) return "Winter"; if([3,4,5].includes(m)) return "Spring"; if([6,7,8].includes(m)) return "Summer"; return "Fall"; };
-  const season = seasonFromISODate(dateISO);
+// derive season from date (send null if empty)
+function seasonFromISODate(iso){
+  if (!iso) return null;
+  const m = Number(iso.slice(5,7));
+  return [12,1,2].includes(m) ? "Winter"
+       : [3,4,5].includes(m)  ? "Spring"
+       : [6,7,8].includes(m)  ? "Summer"
+       : "Fall";
+}
+const dateISO = get("tripDate");
+const season  = seasonFromISODate(dateISO);
 
-  const payload={
-    name:get("name"),
-    email:get("email"),
-    based_in:get("based_in"),
-    experience_level:get("experience_level"),
-    primary_objective:get("primary_objective"),
-    ideal_trip_length:get("ideal_trip_length"),
-    preferred_terrain:get("preferred_terrain"),
-    destination_idea:destCombined,
-    additional:get("additional"),
-    trip_window:season
-  };
+// normalize en-dash to hyphen for enums like 1-2, 3-4, 5-6, 7+
+const normalizeDash = s => (s || "").replace(/[–—]/g, "-");
+
+// final payload
+const payload = {
+  name: get("name"),
+  email: get("email"),
+  based_in: get("based_in"),
+  experience_level: get("experience_level"),
+  primary_objective: get("primary_objective"),
+  ideal_trip_length: normalizeDash(get("ideal_trip_length")), // <-- normalized
+  preferred_terrain: get("preferred_terrain"),
+  destination_idea: destCombined,
+  additional: get("additional"),
+  trip_window: season                                       // <-- null or Season
+};
 
   const required=["name","email","based_in","experience_level","primary_objective","ideal_trip_length"];
   const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
@@ -625,19 +635,35 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
       </div>
     </div>`;
 
-  try{
-    const res = await fetch(ENDPOINT, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload), keepalive:true });
-    const text = await res.text();
-    if(!res.ok || !text){ card && (card.innerHTML=`<div class="empty">Something went wrong. Please try again.</div>`); return; }
+try {
+  const res = await fetch(ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true
+  });
 
-    const opts = parseScoutOptions(text);
-    if(!opts.length){
-      console.warn("Could not parse Scout text:", text);
-      card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
-      return;
-    }
-    SCOUT.options = opts.sort((a,b)=>a.index-b.index);
-    ACTIVE=0; renderTabs(); setActive(0);
+  const text = await res.text(); // read body either way
+
+  if (!res.ok) {
+    console.error("Edge error", res.status, text);
+    card && (card.innerHTML = `<div class="empty">Error ${res.status}: ${text || 'Validation failed.'}</div>`);
+    if (btn) { btn.disabled = false; btn.textContent = "Generate Scout"; }
+    return;
+  }
+
+  const opts = parseScoutOptions(text);
+  if (!opts.length) {
+    console.warn("Could not parse Scout text:", text);
+    card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
+    return;
+  }
+
+  SCOUT.options = opts.sort((a,b) => a.index - b.index);
+  ACTIVE = 0;
+  renderTabs();
+  setActive(0);
+}
   }catch(err){
     console.error(err);
     card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
