@@ -5,113 +5,85 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Scout Live Preview</title>
 <style>
-  :root{
-    --bg:#efefec; --ink:#1f1f1f; --paper:#fff; --accent:#fe5733;
-    --div:rgba(0,0,0,.12); --div-soft:rgba(0,0,0,.08);
-    --paper:#fff; --ink:#1c1c1c; --div-strong:rgba(0,0,0,.24); --focus:#111; --hint:rgba(0,0,0,.55);
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
+  :root{ --bg:#efefec; --ink:#1f1f1f; --paper:#fff; --accent:#fe5733; --div:rgba(0,0,0,.12); --div-soft:rgba(0,0,0,.08); }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{ margin:0; background:var(--bg); color:var(--ink);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
-  .shell{display:grid; grid-template-columns: minmax(320px, 460px) 1fr; gap:16px; max-width:1200px; margin:0 auto; padding:16px;}
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  .shell{display:grid; grid-template-columns:minmax(320px,460px) 1fr; gap:16px; max-width:1200px; margin:0 auto; padding:16px;}
   @media (max-width:980px){ .shell{ grid-template-columns:1fr; } }
 
+  /* Left panel */
   .panel{ background:var(--paper); border:1px solid var(--div); border-radius:12px; padding:16px; }
-
-  /* FORM header only */
   .form-panel > h2{
-    font-weight:900; font-size:clamp(48px, 7vw, 72px);
-    line-height:1.02; letter-spacing:-0.025em; margin:0 0 8px;
+    font-weight:900; font-size:clamp(48px,7vw,72px); line-height:1.02; letter-spacing:-0.025em; margin:0 0 8px;
   }
-  .preview h2{ font-size:20px; }
-
   .muted{opacity:.7; font-size:14px; line-height:1.5}
 
+  /* Form grid */
   .grp{margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; align-items:end}
-  .grp label{
-    font-size:11px; letter-spacing:.10em; text-transform:uppercase; opacity:.70;
-    color:var(--hint); margin:2px 0 6px;
-  }
   .row-1{grid-column:1 / -1}
-
-  /* Inputs */
+  .grp label{font-size:12px; letter-spacing:.08em; text-transform:uppercase; opacity:.7}
   .grp input, .grp select, .grp textarea{
-    width:100%; padding:12px 14px; font:inherit; font-size:15px;
-    border:1px solid var(--div); border-radius:12px; background:#fff;
+    width:100%; padding:12px 14px; border:1px solid var(--div); border-radius:12px; background:#fff; font:inherit;
     transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
   }
-  .grp textarea { min-height:120px; resize:vertical; line-height:1.5; }
+  .grp textarea{ min-height:120px; resize:vertical; line-height:1.5; }
   .grp input:focus, .grp select:focus, .grp textarea:focus{
-    outline:0; border-color:var(--div-strong); box-shadow:0 0 0 3px rgba(0,0,0,.06);
+    outline:0; border-color:rgba(0,0,0,.28); box-shadow:0 0 0 3px rgba(0,0,0,.06);
   }
-  .grp select{
-    appearance:none; background-color:#fff;
-    background-image:
-      linear-gradient(to bottom, transparent, transparent),
+  #scoutForm select{
+    background-image:linear-gradient(to bottom,transparent,transparent),
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
     background-repeat:no-repeat; background-position:right 12px center; background-size:18px; padding-right:38px;
   }
-  #scoutForm ::placeholder { color: rgba(0,0,0,.40); }
-  #scoutForm input:-webkit-autofill,
-  #scoutForm textarea:-webkit-autofill,
-  #scoutForm select:-webkit-autofill{
-    -webkit-text-fill-color:var(--ink);
-    box-shadow:0 0 0 1000px var(--paper) inset !important;
-    transition: background-color 9999s ease-out 0s;
-  }
-  label:has(+ [required])::after{ content:" *"; color:#fe5733; font-weight:700; }
-  label:has(+ :not([required]))::after{ content:" (optional)"; opacity:.55; font-weight:500; }
-  label[data-no-auto]::after{ content:none !important; }
 
   /* Buttons */
   .btn{
-    appearance:none; background:#111; color:#fff; border:none; border-radius:8px;
-    font-weight:800; font-size:15px; letter-spacing:.015em;
-    padding:12px 18px; cursor:pointer;
-    transition: background .12s ease, transform .08s ease, box-shadow .14s ease;
+    appearance:none !important; background:#111 !important; color:#fff !important; border:none !important;
+    border-radius:8px !important; font-weight:800 !important; font-size:15px !important; letter-spacing:.015em !important;
+    padding:12px 18px !important; cursor:pointer;
+    transition:background .12s ease, transform .08s ease, box-shadow .14s ease;
     box-shadow:0 2px 0 rgba(0,0,0,.25), 0 4px 6px rgba(0,0,0,.22);
   }
-  .btn:hover{ background:#333; transform:translateY(-1px); box-shadow:0 2px 0 rgba(0,0,0,.25), 0 6px 10px rgba(0,0,0,.25); }
-  .btn:active{ background:#000; transform:translateY(0); box-shadow:0 1px 0 rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.2); }
-  .btn[disabled]{ opacity:.55; cursor:not-allowed; box-shadow:none; }
-  .btn.ghost{ background:#fff; color:#111; border:1px solid rgba(0,0,0,.18); box-shadow:none; }
+  .btn:hover{ background:#333 !important; transform:translateY(-1px);
+    box-shadow:0 2px 0 rgba(0,0,0,.25), 0 6px 10px rgba(0,0,0,.25); }
+  .btn:active{ background:#000 !important; transform:translateY(0);
+    box-shadow:0 1px 0 rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.2); }
+  .btn[disabled]{ opacity:.55; cursor:default }
+  .btn.ghost{ background:#fff !important; color:#111 !important; border:1px solid rgba(0,0,0,.18) !important; box-shadow:none !important; }
 
   /* Right preview */
   .preview{background:transparent; padding:0}
   .page{background:transparent}
-  .title{font-weight:900; letter-spacing:-.02em; line-height:1.02; font-size:clamp(48px, 7vw, 72px); margin:4px 8px 12px}
+  .title{font-weight:900; letter-spacing:-.02em; line-height:1.02; font-size:clamp(48px,7vw,72px); margin:4px 8px 12px}
   .meta{display:grid; grid-template-columns:1fr 1fr; gap:6px 28px; padding:8px; margin:0 8px 12px;}
   .meta .cell{background:transparent !important; border:0 !important; padding:0 !important; box-shadow:none !important;}
-  .meta .label{font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.55; margin-bottom:2px}
-  .meta .value{font-size:clamp(18px, 2.2vw, 24px); line-height:1.28}
-  @media (min-width:820px){ .meta{grid-template-columns:repeat(4, 1fr);} }
+  .meta .label{font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.65; margin-bottom:2px}
+  .meta .value{font-size:clamp(18px,2.2vw,24px); line-height:1.28}
+  @media (min-width:820px){ .meta{grid-template-columns:repeat(4,1fr);} }
 
   .hero{margin:0 8px 16px; border-radius:12px; overflow:hidden; border:1px solid var(--div)}
   .hero img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; background:#ddd}
 
-  /* Tabs */
+  /* Tabs + card */
   .tabs{margin:0 8px}
   .tablist{display:flex; gap:8px; padding:0; margin:0; list-style:none}
-  .tablist button{
-    padding:10px 14px; font-weight:700; font-size:14px; background:var(--paper);
-    border:1px solid var(--div); border-bottom:none; border-radius:10px 10px 0 0; cursor:pointer; transition:background .15s ease, opacity .15s ease;
+  .ei-tab{
+    appearance:none; border:none; display:inline-flex; align-items:center; gap:8px; padding:10px 14px;
+    font-weight:800; font-size:14px; background:#fff; border:1px solid var(--div); border-radius:12px; cursor:pointer;
+    box-shadow:0 1px 0 rgba(0,0,0,.02);
   }
-  .tablist button[aria-selected="true"]{ background:#fff; position:relative; z-index:2 }
+  .ei-tab[aria-selected="false"]{opacity:.78}
+  .ei-tab[aria-selected="true"]{opacity:1; border-color:rgba(0,0,0,.22)}
   .card{
     background:#fff; border:1px solid var(--div); border-radius:12px; border-top-left-radius:0;
-    padding:16px; position:relative; top:-1px; margin-bottom:16px; transition:opacity .18s ease, transform .18s ease;
+    padding:14px; position:relative; top:-1px; margin-bottom:16px; transition:opacity .18s ease, transform .18s ease;
   }
   .card.is-enter{ opacity:0; transform: translateY(4px); }
   .card.is-enter.is-on{ opacity:1; transform: translateY(0); }
-  .subhead{margin:4px 0 10px; opacity:.8}
 
-  .day{background:rgba(0,0,0,.03); border:1px solid var(--div-soft); border-radius:12px; padding:14px; margin:14px 0}
-  .day h4{margin:0 0 6px; font-size:20px}
-  .previewP{margin:6px 0 12px; opacity:.9; line-height:1.6}
+  .subhead{margin:4px 0 10px; opacity:.8}
   .row{display:flex; gap:12px; align-items:flex-start; padding:8px 0; border-top:1px dashed var(--div-soft)}
   .row:first-of-type{border-top:0}
   .row .k{flex:0 0 220px; font-weight:800}
@@ -120,20 +92,17 @@
   .chip{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background:#fff; border:1px solid rgba(0,0,0,.18); border-radius:8px; font-size:14px}
   .chip.secondary{ background:#f5f5f5; border-color:rgba(0,0,0,.12); font-size:13.5px }
   .muter{opacity:.6}
-
   .empty{padding:24px; text-align:center; border:1px dashed var(--div); border-radius:12px; background:#fff; margin:8px}
 
-  /* CTA under option card */
+  /* CTA area */
   #blueprintCta{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
   #blueprintCta small{ font-size:13px; opacity:.65; margin-top:1px; }
-
-  /* Blueprint button (on-brand) */
   #blueprintCta .btn-cta{
     appearance:none !important; border:none !important; padding:12px 18px !important; border-radius:8px !important;
     font-weight:800 !important; font-size:15px !important; line-height:1 !important; letter-spacing:.015em !important;
     background:#fe5733 !important; color:#fff !important;
     box-shadow:0 2px 0 rgba(0,0,0,.25), 0 4px 6px rgba(0,0,0,.22) !important;
-    transition: transform .08s ease, box-shadow .14s ease, filter .14s ease !important; will-change:transform,box-shadow,filter;
+    transition:transform .08s ease, box-shadow .14s ease, filter .14s ease !important; will-change:transform,box-shadow,filter;
   }
   #blueprintCta .btn-cta:hover{
     filter:brightness(1.05); transform:translateY(-1px);
@@ -144,17 +113,9 @@
     box-shadow:0 1px 0 rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.2) !important;
   }
 
-  /* Loader */
-  #scoutLoading{
-    display:flex; align-items:center; gap:14px;
-    padding:16px; border:1px dashed var(--div);
-    border-radius:12px; background:#fff;
-  }
-  #scoutLoading .spin{
-    width:22px; height:22px; border-radius:50%;
-    border:3px solid rgba(0,0,0,.12); border-top-color:#fe5733;
-    animation: ei-spin 0.8s linear infinite;
-  }
+  /* Loader (inside card) */
+  #scoutLoading{ display:flex; align-items:center; gap:14px; padding:16px; border:1px dashed var(--div); border-radius:12px; background:#fff; }
+  #scoutLoading .spin{ width:22px; height:22px; border-radius:50%; border:3px solid rgba(0,0,0,.12); border-top-color:#fe5733; animation: ei-spin .8s linear infinite; }
   #scoutLoading .h{ font-weight:800; margin:0 0 4px; }
   #scoutLoading .p{ opacity:.65; font-size:13px; margin:0 0 10px; }
   #scoutLoading .bar{ position:relative; height:6px; background:rgba(0,0,0,.06); border-radius:999px; overflow:hidden;}
@@ -163,28 +124,24 @@
   @keyframes ei-spin { to { transform: rotate(360deg); } }
   @keyframes ei-sweep { 0%{left:-35%;width:35%} 50%{left:35%;width:40%} 100%{left:100%;width:35%} }
 
-  /* mobile */
-  @media (max-width: 640px){
-    .shell { padding: 10px; gap: 10px; }
-    .form-panel.panel { padding: 12px; }
-    #scoutForm.grp { grid-template-columns: 1fr; gap: 8px; }
-    .title { font-size: clamp(28px, 8vw, 40px); margin: 6px 8px; }
-    .meta { grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-    .hero { margin: 0 8px 10px; }
-    .tablist { gap: 6px; }
-    .tablist button { padding: 8px 10px; font-size: 13px; }
-    .card { padding: 12px; }
-    .btn, .btn-cta { width: 100%; }
-  }
-
-  :root { color-scheme: light; }
-  @media (max-width: 600px){
-    #scoutForm .row-1[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  /* Mobile tweaks */
+  @media (max-width:640px){
+    .shell{padding:10px; gap:10px}
+    .form-panel.panel{padding:12px}
+    #scoutForm.grp{grid-template-columns:1fr; gap:8px}
+    .title{font-size:clamp(28px,8vw,40px); margin:6px 8px}
+    .meta{grid-template-columns:1fr 1fr; gap:6px 10px}
+    .hero{margin:0 8px 10px}
+    .tablist{gap:6px}
+    .ei-tab{padding:8px 10px; font-size:13px}
+    .card{padding:12px}
+    .btn, .btn-cta{width:100%}
   }
 </style>
 </head>
 <body>
   <main class="shell">
+    <!-- LEFT: form -->
     <aside class="panel form-panel">
       <h2>Discover Your Recon</h2>
       <p class="muted">Your objective sets the direction. Our intel builds the route.</p>
@@ -192,7 +149,7 @@
       <form id="scoutForm" class="grp" novalidate>
         <!-- Trip title -->
         <div class="row-1">
-          <label for="tripTitle">Trip title</label>
+          <label for="tripTitle">Trip title (optional)</label>
           <input id="tripTitle" name="title" data-ei-meta="title" placeholder="Zion West Rim Adventure"/>
         </div>
 
@@ -221,37 +178,54 @@
           <label for="fExp">Experience level</label>
           <select id="fExp" name="experience_level" required>
             <option value="">— Select —</option>
-            <option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Elite</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>Elite</option>
           </select>
         </div>
         <div>
           <label for="fObjective">Primary Objective?</label>
           <select id="fObjective" name="primary_objective" data-ei-meta="category" required>
             <option value="">Select From Dropdown</option>
-            <option>Out and Back</option><option>Loop Hike</option><option>End-To-End Traverse</option>
-            <option>Peak Summit / High Alpine Trekking</option><option>Multi Week Section / Through Hike</option>
-            <option>Summit Expedition</option><option>Packrafting / Paddling Expedition</option><option>Hybrid / Multi-Sport Traverse</option>
+            <option>Out and Back</option>
+            <option>Loop Hike</option>
+            <option>End-To-End Traverse</option>
+            <option>Peak Summit / High Alpine Trekking</option>
+            <option>Multi Week Section / Through Hike</option>
+            <option>Summit Expedition</option>
+            <option>Packrafting / Paddling Expedition</option>
+            <option>Hybrid / Multi-Sport Traverse</option>
           </select>
         </div>
 
-        <!-- Ideal length + Preferred terrain -->
+        <!-- Ideal trip length + Preferred terrain -->
         <div>
           <label for="fLength">Ideal Trip Length?</label>
           <select id="fLength" name="ideal_trip_length" required>
             <option value="">Select From Dropdown</option>
-            <option>1–2</option><option>3–4</option><option>5–6</option><option>7+</option>
+            <option>1–2</option>
+            <option>3–4</option>
+            <option>5–6</option>
+            <option>7+</option>
           </select>
         </div>
         <div>
           <label for="fTerrain">Preferred terrain</label>
           <select id="fTerrain" name="preferred_terrain" required>
             <option value="">Select From Dropdown</option>
-            <option>Alpine Lakes</option><option>Large Mountains</option><option>Coastal</option><option>Forest</option>
-            <option>Rivers</option><option>Desert</option><option>Glacial / Snowfield</option><option>Scrambling & Peakbagging</option>
+            <option>Alpine Lakes</option>
+            <option>Large Mountains</option>
+            <option>Coastal</option>
+            <option>Forest</option>
+            <option>Rivers</option>
+            <option>Desert</option>
+            <option>Glacial / Snowfield</option>
+            <option>Scrambling & Peakbagging</option>
           </select>
         </div>
 
-        <!-- Destination dropdown + idea -->
+        <!-- Destination + idea -->
         <div>
           <label for="fDestination">Destination</label>
           <select id="fDestination">
@@ -269,7 +243,8 @@
         <!-- Additional details -->
         <div class="row-1">
           <label for="fAdditional">Additional details</label>
-          <textarea id="fAdditional" name="additional" rows="5" placeholder="Fitness, recent trips, gear constraints, permit constraints, group size, etc."></textarea>
+          <textarea id="fAdditional" name="additional" rows="5"
+            placeholder="Fitness, recent trips, gear constraints, permit constraints, group size, etc."></textarea>
         </div>
 
         <!-- Actions -->
@@ -280,6 +255,7 @@
       </form>
     </aside>
 
+    <!-- RIGHT: live preview -->
     <section class="panel preview">
       <div class="page">
         <h1 class="title" id="pv_title">Scout Recon</h1>
@@ -302,7 +278,7 @@
         <div class="card" id="optCard">
           <p class="subhead muter">Your route options will appear here after you submit the form (or load samples).</p>
           <div class="empty">No options loaded yet.</div>
-          <div class="cta" id="blueprintCta">
+          <div class="cta" id="blueprintCta" style="display:none">
             <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
             <small id="ctaHint">Select an option above</small>
           </div>
@@ -314,84 +290,68 @@
 <script>
 /* ---------- tiny helpers ---------- */
 const $id = (id)=>document.getElementById(id);
-const chip = (t, secondary=false)=>`<span class="chip${secondary?' secondary':''}">${t}</span>`;
+const chip = (t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${t}</span>`;
 const fmtDateView = (s)=> s ? new Date(s+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—";
 
-/* ===== SCOUT text -> structured options ===== */
+/* ===== Parse SCOUT text (options only) ===== */
 function parseScoutOptions(txt){
-  const sections = [];
-  const re = /OPTION\\s+(\\d+)\\s+–\\s+([^\\n]+)\\s*\\n([\\s\\S]*?)(?=\\n---|\\nFINAL RECOMMENDATION|$)/g;
-  let m;
-  while ((m = re.exec(txt)) !== null){
-    const [, idx, title, body] = m;
-    const grab = (label) => {
-      const r = new RegExp(label + ":\\s*([\\s\\S]*?)(?:\\n\\n|\\r\\n\\r\\n|\\n(?=[A-Z][A-Za-z ]+:)|$)");
-      const mm = body.match(r); return mm ? mm[1].trim() : "";
-    };
-    const kv = (label) => grab(label).split("\\n")[0].trim();
-
-    const region = kv("Region");
-    const distElevRaw = kv("Distance and elevation gain/loss");
-    const duration = kv("Suggested Duration");
-    const objective = kv("Primary Objective");
-    const terrain = kv("Terrain");
-    const season = kv("Ideal Season");
-    const hazards = kv("Known Hazards");
-    const culmin = kv("Culminating Objective");
-    const objClass = kv("Objective Class");
-    const advantage = kv("Strategic Advantage");
-    const routeType = kv("Route Type");
-    const overview = grab("Route Overview");
-    const logistics = grab("Logistics Snapshot");
-    const intelBlock = grab("Intel Score \\(1–10\\)");
+  const sections=[]; const re=/OPTION\s+(\d+)\s+–\s+([^\n]+)\s*\n([\s\S]*?)(?=\n---|\nFINAL RECOMMENDATION|$)/g; let m;
+  while((m=re.exec(txt))!==null){
+    const [,idx,title,body]=m;
+    const grab=(label)=>{ const r=new RegExp(label+":\\s*([\\s\\S]*?)(?:\\n\\n|\\r\\n\\r\\n|\\n(?=[A-Z][A-Za-z ]+:)|$)");
+      const mm=body.match(r); return mm?mm[1].trim():""; };
+    const kv=(label)=>grab(label).split("\n")[0].trim();
+    const region=kv("Region");
+    const dist=kv("Distance and elevation gain/loss");
+    const duration=kv("Suggested Duration");
+    const objective=kv("Primary Objective");
+    const terrain=kv("Terrain");
+    const season=kv("Ideal Season");
+    const hazards=kv("Known Hazards");
+    const culmin=kv("Culminating Objective");
+    const objClass=kv("Objective Class");
+    const advantage=kv("Strategic Advantage");
+    const routeType=kv("Route Type");
+    const overview=grab("Route Overview");
+    const logistics=grab("Logistics Snapshot");
+    const intelBlock=grab("Intel Score \\(1–10\\)");
 
     let miles=null, gain_ft=null, loss_ft=null;
-    const mmiles = distElevRaw.match(/([\\d.,]+)\\s*miles?/i); if (mmiles) miles = mmiles[1];
-    const mgain  = distElevRaw.match(/\\+([\\d.,]+)\\s*ft/i);
-    const mloss  = distElevRaw.match(/-([\\d.,]+)\\s*ft/i);
-    if (mgain) gain_ft = mgain[1].replace(/,/g,"");
-    if (mloss) loss_ft = mloss[1].replace(/,/g,"");
+    const mmiles=dist.match(/([\d.,]+)\s*miles?/i); if(mmiles) miles=mmiles[1];
+    const mgain=dist.match(/\+([\d.,]+)\s*ft/i);    const mloss=dist.match(/-([\d.,]+)\s*ft/i);
+    if(mgain) gain_ft=mgain[1].replace(/,/g,""); if(mloss) loss_ft=mloss[1].replace(/,/g,"");
 
-    const intel = {};
-    if (intelBlock){
-      intelBlock.split("\\n").forEach(line=>{
-        const mm = line.match(/•?\\s*([A-Za-z ]+):\\s*(\\d+)/);
-        if (mm) intel[mm[1].trim()] = Number(mm[2]);
+    const intel={}; if(intelBlock){
+      intelBlock.split("\n").forEach(line=>{
+        const t=line.match(/•?\s*([A-Za-z ]+):\s*(\d+)/); if(t) intel[t[1].trim()]=Number(t[2]);
       });
     }
 
-    let blueprint_url = "";
-    const linkMatch = body.match(/\\[Blueprint[^\\]]*\\]\\((https?:\\/\\/[^\\s)]+)\\)/i);
-    if (linkMatch) blueprint_url = linkMatch[1];
+    let blueprint_url=""; const linkMatch=body.match(/\[Blueprint[^\]]*\]\((https?:\/\/[^\s)]+)\)/i);
+    if(linkMatch) blueprint_url=linkMatch[1];
 
-    sections.push({
-      index:Number(idx), title:title.trim(), region, overview, miles, gain_ft, loss_ft, duration,
+    sections.push({ index:Number(idx), title:title.trim(), region, overview, miles, gain_ft, loss_ft, duration,
       objective, terrain, season, hazards, culminating_objective:culmin, objective_class:objClass,
-      strategic_advantage:advantage, route_type:routeType, logistics, intel, blueprint_url
-    });
+      strategic_advantage:advantage, route_type:routeType, logistics, intel, blueprint_url });
   }
   return sections;
 }
 
-/* ===== Render one SCOUT option (no day cards) ===== */
+/* ===== Build one option card body ===== */
 function buildScoutCard(opt, index){
-  const chips = [];
-  if (opt.duration) chips.push(`<span class="chip">${opt.duration}</span>`);
-  if (opt.miles)    chips.push(`<span class="chip">${opt.miles} miles</span>`);
-  if (opt.gain_ft || opt.loss_ft){
+  const chips=[];
+  if(opt.duration) chips.push(chip(opt.duration));
+  if(opt.miles)    chips.push(chip(`${opt.miles} miles`));
+  if(opt.gain_ft || opt.loss_ft){
     const up = opt.gain_ft ? Number(opt.gain_ft).toLocaleString() : "0";
     const dn = opt.loss_ft ? Number(opt.loss_ft).toLocaleString() : "0";
-    chips.push(`<span class="chip">+${up} ft / -${dn} ft</span>`);
+    chips.push(chip(`+${up} ft / -${dn} ft`));
   }
-  if (opt.terrain)  chips.push(`<span class="chip secondary">${opt.terrain}</span>`);
+  if(opt.terrain) chips.push(chip(opt.terrain,true));
 
-  let logisticsHTML = "";
-  if (opt.logistics){
-    const lines = opt.logistics.replace(/\\r/g,"").split("\\n")
-      .map(s=>s.replace(/^[•\\-\\u2022]\\s*/, "").trim()).filter(Boolean);
-    if (lines.length){
-      logisticsHTML = `<ul style="margin:6px 0 0 18px; padding:0; line-height:1.5">${lines.map(li=>`<li>${li}</li>`).join("")}</ul>`;
-    }
+  let logisticsHTML=""; if(opt.logistics){
+    const lines = opt.logistics.replace(/\r/g,"").split("\n").map(s=>s.replace(/^[•\-\u2022]\s*/,"").trim()).filter(Boolean);
+    if(lines.length){ logisticsHTML = `<ul style="margin:6px 0 0 18px; padding:0; line-height:1.5">${lines.map(li=>`<li>${li}</li>`).join("")}</ul>`; }
   }
 
   const intelHTML = Object.keys(opt.intel||{}).length
@@ -417,66 +377,68 @@ function buildScoutCard(opt, index){
   `;
 }
 
-/* CTA wiring */
-function updateCTA_forScout(opt){
-  const wrap = document.getElementById('blueprintCta');
-  const btn  = document.getElementById('btnBlueprint');
-  const hint = document.getElementById('ctaHint');
-  if (!wrap || !btn || !hint) return;
-  if (!opt){ wrap.style.display='none'; return; }
-  btn.disabled = false;
-  btn.textContent = `Blueprint “${opt.title || `Option ${ACTIVE+1}`}” →`;
-  hint.textContent = 'Purchase to unlock full Blueprint';
-  wrap.style.display = 'flex';
-  btn.onclick = ()=>{ opt.blueprint_url ? (window.location.href = opt.blueprint_url) : alert('No purchase link provided for this option yet.'); };
-}
-
-/* state */
-let SCOUT = { options: [] };
-let ACTIVE = 0;
-
-/* CTA ensure */
+/* ===== CTA wiring ===== */
 function ensureCTA(){
-  const card = $id('optCard'); if (!card) return;
-  let wrap = $id('blueprintCta');
-  if (!wrap){
-    wrap = document.createElement('div');
-    wrap.id = 'blueprintCta';
-    wrap.className = 'cta';
-    wrap.innerHTML = `
-      <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
-      <small id="ctaHint">Select an option above</small>
-    `;
+  const card=$id('optCard'); if(!card) return;
+  let wrap=$id('blueprintCta');
+  if(!wrap){
+    wrap=document.createElement('div'); wrap.id='blueprintCta'; wrap.className='cta';
+    wrap.innerHTML=`<button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button><small id="ctaHint">Select an option above</small>`;
     card.appendChild(wrap);
   }
 }
+function updateCTA_forScout(opt){
+  const wrap=$id('blueprintCta'), btn=$id('btnBlueprint'), hint=$id('ctaHint'); if(!wrap||!btn||!hint) return;
+  if(!opt){ wrap.style.display='none'; return; }
+  btn.disabled=false;
+  btn.textContent=`Blueprint “${opt.title || `Option ${ACTIVE+1}`}” →`;
+  hint.textContent='Purchase to unlock full Blueprint';
+  wrap.style.display='flex';
+  btn.onclick=()=>{ if(opt.blueprint_url) window.location.href=opt.blueprint_url; else alert('No purchase link provided for this option yet.'); };
+}
 
-/* Live mirror */
+/* ===== State + tabs ===== */
+let SCOUT={ options:[] }, ACTIVE=0;
+
+function setActive(idx){
+  ACTIVE=idx;
+  const tabs=$id("optTabs"), card=$id("optCard"); if(!tabs||!card) return;
+  tabs.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-selected", i===idx ? "true" : "false"));
+  const opt=SCOUT.options[idx];
+  card.innerHTML=buildScoutCard(opt, idx);
+  ensureCTA(); updateCTA_forScout(opt);
+}
+
+function renderTabs(){
+  const tabs=$id("optTabs"); if(!tabs) return;
+  tabs.innerHTML=(SCOUT.options||[]).map((o,i)=>{
+    const label=o.label||o.title||o.route||o.tagline?.marketing||"";
+    const name=label ? `OPTION ${i+1} — ${label}` : `OPTION ${i+1}`;
+    return `<li><button type="button" class="ei-tab" role="tab" aria-selected="${i===ACTIVE?'true':'false'}" data-idx="${i}">${name}</button></li>`;
+  }).join("");
+  tabs.onclick=(e)=>{ const b=e.target.closest("button[data-idx]"); if(!b) return; const idx=+b.dataset.idx; if(Number.isInteger(idx)) setActive(idx); };
+}
+
+/* ===== Live preview (mirrors left -> right) ===== */
 (function liveMirror(){
-  const form = $id("scoutForm"); if (!form) return;
+  const form=$id("scoutForm"); if(!form) return;
+  const OUT={ title:$id("pv_title"), category:$id("pv_category"), season:$id("pv_season"), location:$id("pv_location"), date:$id("pv_date"), hero:$id("pv_hero") };
+
   function seasonFromISODate(iso){
-    if(!iso) return "";
-    const m = Number(iso.slice(5,7));
-    if([12,1,2].includes(m)) return "Winter";
-    if([3,4,5].includes(m))  return "Spring";
-    if([6,7,8].includes(m))  return "Summer";
-    return "Fall";
+    if(!iso) return ""; const m=Number(iso.slice(5,7));
+    if([12,1,2].includes(m)) return "Winter"; if([3,4,5].includes(m)) return "Spring"; if([6,7,8].includes(m)) return "Summer"; return "Fall";
   }
-  const OUT = {
-    title:$id("pv_title"), category:$id("pv_category"), season:$id("pv_season"),
-    location:$id("pv_location"), date:$id("pv_date"), hero:$id("pv_hero"),
-  };
+
   function paint(){
-    const getMeta = (k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
-    const dateISO = getMeta("date");
-    const season  = seasonFromISODate(dateISO) || "—";
-    OUT.title && (OUT.title.textContent = getMeta("title") || "Scout Recon");
-    OUT.category && (OUT.category.textContent = getMeta("category") || "—");
-    OUT.season && (OUT.season.textContent = season);
-    OUT.location && (OUT.location.textContent = getMeta("location") || "—");
-    OUT.date && (OUT.date.textContent = dateISO ? fmtDateView(dateISO) : "—");
+    const getMeta=(k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
+    const dateISO=getMeta("date"); const season=seasonFromISODate(dateISO) || "—";
+    OUT.title && (OUT.title.textContent=getMeta("title") || "Scout Recon");
+    OUT.category && (OUT.category.textContent=getMeta("category") || "—");
+    OUT.season && (OUT.season.textContent=season);
+    OUT.location && (OUT.location.textContent=getMeta("location") || "—");
+    OUT.date && (OUT.date.textContent=dateISO ? fmtDateView(dateISO) : "—");
     if (getMeta("location") && OUT.hero && !OUT.hero.src){
-      OUT.hero.src = "https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
+      OUT.hero.src="https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
     }
   }
   form.addEventListener("input", paint);
@@ -484,105 +446,54 @@ function ensureCTA(){
   paint();
 })();
 
-/* CTA click stub */
-function startCheckout(opt){ alert(`Checkout would start for:\\n${opt.title || `Option ${ACTIVE+1}`}`); }
-document.addEventListener('click', (e)=>{
-  const b = e.target.closest('#btnBlueprint'); if (!b) return;
-  const opt = (SCOUT.options||[])[ACTIVE]; if (!opt) return;
-  startCheckout(opt);
-});
-
-/* Tabs + card */
-function setActive(idx){
-  ACTIVE = idx;
-  const tabs = document.getElementById("optTabs");
-  const card = document.getElementById("optCard");
-  if (!tabs || !card) return;
-  tabs.querySelectorAll("button").forEach((b,i)=>{ b.setAttribute("aria-selected", i===idx ? "true" : "false"); });
-  const opt = SCOUT.options[idx];
-  card.innerHTML = buildScoutCard(opt, idx);
-  ensureCTA();
-  updateCTA_forScout(opt);
-}
-function renderTabs(){
-  const tabs = $id("optTabs"); if (!tabs) return;
-  tabs.innerHTML = (SCOUT.options||[]).map((o,i)=>{
-    const label = o.label || o.title || o.route || o.tagline?.marketing || "";
-    const name  = label ? `OPTION ${i+1} — ${label}` : `OPTION ${i+1}`;
-    return `<li><button type="button" class="ei-tab" role="tab" aria-selected="${i===ACTIVE?'true':'false'}" data-idx="${i}">${name}</button></li>`;
-  }).join("");
-  tabs.onclick = (e)=>{
-    const b = e.target.closest("button[data-idx]"); if (!b) return;
-    const idx = +b.dataset.idx; if (Number.isInteger(idx)) setActive(idx);
-  };
-}
-
-/* Samples */
+/* ===== Sample data (dev) ===== */
 document.getElementById("loadSample")?.addEventListener("click", ()=>{
   SCOUT.options = [
-    { index:1, title:"Mount Bierstadt Summit", region:"Front Range, Colorado",
-      overview:"Classic CO 14er with a well-defined path to the summit.",
-      miles:"7", gain_ft:"2850", loss_ft:"2850", duration:"1–2 days",
-      objective:"Peak Summit / High Alpine Trekking", terrain:"Alpine meadows and rocky switchbacks",
-      season:"mid-July–Sept", hazards:"Afternoon thunderstorms, altitude sickness",
-      culminating_objective:"Mount Bierstadt, 14,065 ft", objective_class:"Class 1",
-      strategic_advantage:"Straightforward ascent with big alpine views.", route_type:"Out-and-Back",
-      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Requires planning\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
-      intel:{ Solitude:5, "Photo Ops":8, "Physical Challenge":6, "Navigation Difficulty":3, "Scenic Reward":9 },
-      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=1"
-    },
-    { index:2, title:"Mount Elbert Summit", region:"Sawatch Range, Colorado",
-      overview:"Colorado’s highest peak; steep final push; massive vistas.",
-      miles:"9", gain_ft:"4700", loss_ft:"4700", duration:"1–2 days",
-      objective:"Peak Summit / High Alpine Trekking", terrain:"Forested trails and alpine ridges",
-      season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
-      culminating_objective:"Mount Elbert, 14,440 ft", objective_class:"Class 1",
-      strategic_advantage:"Prestige of CO high point with stunning views.", route_type:"Out-and-Back",
-      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Sparse\n- Campsite: Abundant dispersed\n- Exit Strategy: Commit to full route",
-      intel:{ Solitude:4, "Photo Ops":9, "Physical Challenge":8, "Navigation Difficulty":3, "Scenic Reward":10 },
-      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=2"
-    },
-    { index:3, title:"Quandary Peak Summit", region:"Tenmile Range, Colorado",
-      overview:"Popular but rewarding summit with big Breck views.",
-      miles:"6.75", gain_ft:"3450", loss_ft:"3450", duration:"1–2 days",
-      objective:"Peak Summit / High Alpine Trekking", terrain:"Forested slopes and rocky ridges",
-      season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
-      culminating_objective:"Quandary Peak, 14,265 ft", objective_class:"Class 1",
-      strategic_advantage:"Straightforward climb; quick summit adventure.", route_type:"Out-and-Back",
-      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Plan to carry\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
-      intel:{ Solitude:4, "Photo Ops":8, "Physical Challenge":6, "Navigation Difficulty":2, "Scenic Reward":9 },
-      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=3"
-    }
+    { index:1, title:"Mount Bierstadt Summit", region:"Front Range, Colorado", overview:"Classic CO 14er with a well-defined path to the summit.",
+      miles:"7", gain_ft:"2850", loss_ft:"2850", duration:"1–2 days", objective:"Peak Summit / High Alpine Trekking",
+      terrain:"Alpine meadows and rocky switchbacks", season:"mid-July–Sept", hazards:"Afternoon thunderstorms, altitude sickness",
+      culminating_objective:"Mount Bierstadt, 14,065 ft", objective_class:"Class 1", strategic_advantage:"Straightforward ascent with big alpine views.",
+      route_type:"Out-and-Back", logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Requires planning\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
+      intel:{Solitude:5,"Photo Ops":8,"Physical Challenge":6,"Navigation Difficulty":3,"Scenic Reward":9},
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=1" },
+    { index:2, title:"Mount Elbert Summit", region:"Sawatch Range, Colorado", overview:"Colorado’s highest peak; steep final push; massive vistas.",
+      miles:"9", gain_ft:"4700", loss_ft:"4700", duration:"1–2 days", objective:"Peak Summit / High Alpine Trekking",
+      terrain:"Forested trails and alpine ridges", season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
+      culminating_objective:"Mount Elbert, 14,440 ft", objective_class:"Class 1", strategic_advantage:"Prestige of CO high point with stunning views.",
+      route_type:"Out-and-Back", logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Sparse\n- Campsite: Abundant dispersed\n- Exit Strategy: Commit to full route",
+      intel:{Solitude:4,"Photo Ops":9,"Physical Challenge":8,"Navigation Difficulty":3,"Scenic Reward":10},
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=2" },
+    { index:3, title:"Quandary Peak Summit", region:"Tenmile Range, Colorado", overview:"Popular but rewarding summit with big Breck views.",
+      miles:"6.75", gain_ft:"3450", loss_ft:"3450", duration:"1–2 days", objective:"Peak Summit / High Alpine Trekking",
+      terrain:"Forested slopes and rocky ridges", season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
+      culminating_objective:"Quandary Peak, 14,265 ft", objective_class:"Class 1", strategic_advantage:"Straightforward climb; quick summit adventure.",
+      route_type:"Out-and-Back", logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Plan to carry\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
+      intel:{Solitude:4,"Photo Ops":8,"Physical Challenge":6,"Navigation Difficulty":2,"Scenic Reward":9},
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=3" }
   ];
-  ACTIVE = 0; renderTabs(); setActive(0);
+  ACTIVE=0; renderTabs(); setActive(0);
 });
 
-/* ===== EDGE SUBMIT ===== */
+/* ===== Submit to Edge ===== */
 const ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/shadow-scout-recon-send";
 
 $id("scoutForm")?.addEventListener("submit", async (e)=>{
   e.preventDefault();
-  const f = e.currentTarget;
-  const get = (n)=> (f.elements.namedItem(n)?.value || "").trim();
+  const f=e.currentTarget;
+  const get=(n)=> (f.elements.namedItem(n)?.value || "").trim();
 
-  // combine destination dropdown + free text
-  const pref = (f.querySelector("#fDestination")?.value || "").trim();
-  const idea = get("destination_idea");
-  const destination_idea = pref ? (idea ? `${pref}: ${idea}` : pref) : idea;
+  // combine destination
+  const pref=(f.querySelector("#fDestination")?.value || "").trim();
+  const idea=get("destination_idea");
+  const destCombined = pref ? (idea ? `${pref}: ${idea}` : pref) : idea;
 
   // derive season from date
-  function seasonFromISODate(iso){
-    if(!iso) return "";
-    const m = Number(iso.slice(5,7));
-    if([12,1,2].includes(m)) return "Winter";
-    if([3,4,5].includes(m))  return "Spring";
-    if([6,7,8].includes(m))  return "Summer";
-    return "Fall";
-  }
   const dateISO = get("tripDate");
-  const season  = seasonFromISODate(dateISO);
+  const seasonFromISODate=(iso)=>{ if(!iso) return ""; const m=Number(iso.slice(5,7));
+    if([12,1,2].includes(m)) return "Winter"; if([3,4,5].includes(m)) return "Spring"; if([6,7,8].includes(m)) return "Summer"; return "Fall"; };
+  const season = seasonFromISODate(dateISO);
 
-  const payload = {
+  const payload={
     name:get("name"),
     email:get("email"),
     based_in:get("based_in"),
@@ -590,20 +501,17 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
     primary_objective:get("primary_objective"),
     ideal_trip_length:get("ideal_trip_length"),
     preferred_terrain:get("preferred_terrain"),
-    destination_idea,
+    destination_idea:destCombined,
     additional:get("additional"),
-    trip_window: season
+    trip_window:season
   };
 
-  const required = ["name","email","based_in","experience_level","primary_objective","ideal_trip_length"];
-  const miss = required.filter(k=>!payload[k]);
-  if (miss.length){ alert("Please complete:\n• " + miss.join("\n• ")); return; }
+  const required=["name","email","based_in","experience_level","primary_objective","ideal_trip_length"];
+  const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
 
-  const btn = $id("btnGenerate");
-  if (btn){ btn.disabled = true; btn.textContent = "Generating…"; }
-
-  const card = $id("optCard");
-  if (card) card.innerHTML = `
+  const btn=$id("btnGenerate"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
+  const card=$id("optCard");
+  if(card) card.innerHTML=`
     <div id="scoutLoading">
       <div class="spin"></div>
       <div>
@@ -614,32 +522,27 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
     </div>`;
 
   try{
-    const res = await fetch(ENDPOINT, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(payload),
-      keepalive:true
-    });
+    const res = await fetch(ENDPOINT, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload), keepalive:true });
     const text = await res.text();
-    if (!res.ok || !text){ card && (card.innerHTML = `<div class="empty">Something went wrong. Please try again.</div>`); return; }
+    if(!res.ok || !text){ card && (card.innerHTML=`<div class="empty">Something went wrong. Please try again.</div>`); return; }
 
     const opts = parseScoutOptions(text);
-    if (!opts.length){
+    if(!opts.length){
       console.warn("Could not parse Scout text:", text);
       card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
       return;
     }
     SCOUT.options = opts.sort((a,b)=>a.index-b.index);
-    ACTIVE = 0; renderTabs(); setActive(0);
+    ACTIVE=0; renderTabs(); setActive(0);
   }catch(err){
     console.error(err);
     card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
   }finally{
-    if (btn){ btn.disabled = false; btn.textContent = "Generate Scout"; }
+    if(btn){ btn.disabled=false; btn.textContent="Generate Scout"; }
   }
 });
 
-/* init */
+/* ===== Initial ===== */
 (function initPreview(){
   ensureCTA();
 })();
