@@ -201,6 +201,23 @@
   opacity: 0.8;
   cursor: pointer;
 }
+  /* ===== Global placeholder size refinement ===== */
+#scoutForm ::placeholder {
+  font-size: 13px !important;
+  letter-spacing: 0.03em;
+  color: rgba(0,0,0,0.45) !important;
+}
+
+/* Match placeholder feel for selects */
+#scoutForm select {
+  font-size: 15px !important;
+}
+
+/* Compact dropdown labels so “Select From Dropdown” fits cleanly */
+#scoutForm select option:first-child {
+  font-size: 13px !important;
+  color: rgba(0,0,0,0.5);
+}
 </style>
 </head>
 <body>
