@@ -241,6 +241,13 @@
 #scoutForm input[type="date"]::placeholder{
   font-size: 14px !important;
 }
+  .hero figcaption {
+  font-size: 12px;
+  opacity: .7;
+  padding: 6px 8px;
+  background: #fff;
+  border-top: 1px solid var(--div);
+}
 </style>
 </head>
 <body>
@@ -372,8 +379,11 @@
         </div>
 
         <figure class="hero">
-          <img id="pv_hero" alt="Hero image" src="" />
-        </figure>
+  <img id="pv_hero" alt="Hero image" src="" />
+  <figcaption id="pv_credit" style="display:none;padding:6px 8px;font-size:12px;opacity:.7;background:#fff;border-top:1px solid var(--div)">
+    <!-- set via JS if available -->
+  </figcaption>
+</figure>
 
         <nav class="tabs" aria-label="Options">
           <ul class="tablist" role="tablist" id="optTabs"></ul>
@@ -523,33 +533,6 @@ function renderTabs(){
   tabs.onclick=(e)=>{ const b=e.target.closest("button[data-idx]"); if(!b) return; const idx=+b.dataset.idx; if(Number.isInteger(idx)) setActive(idx); };
 }
 
-/* ===== Live preview (mirrors left -> right) ===== */
-(function liveMirror(){
-  const form=$id("scoutForm"); if(!form) return;
-  const OUT={ title:$id("pv_title"), category:$id("pv_category"), season:$id("pv_season"), location:$id("pv_location"), date:$id("pv_date"), hero:$id("pv_hero") };
-
-  function seasonFromISODate(iso){
-    if(!iso) return ""; const m=Number(iso.slice(5,7));
-    if([12,1,2].includes(m)) return "Winter"; if([3,4,5].includes(m)) return "Spring"; if([6,7,8].includes(m)) return "Summer"; return "Fall";
-  }
-
-  function paint(){
-    const getMeta=(k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
-    const dateISO=getMeta("date"); const season=seasonFromISODate(dateISO) || "—";
-    OUT.title && (OUT.title.textContent=getMeta("title") || "Scout Recon");
-    OUT.category && (OUT.category.textContent=getMeta("category") || "—");
-    OUT.season && (OUT.season.textContent=season);
-    OUT.location && (OUT.location.textContent=getMeta("location") || "—");
-    OUT.date && (OUT.date.textContent=dateISO ? fmtDateView(dateISO) : "—");
-    if (getMeta("location") && OUT.hero && !OUT.hero.src){
-      OUT.hero.src="https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
-    }
-  }
-  form.addEventListener("input", paint);
-  form.addEventListener("change", paint);
-  paint();
-})();
-
 /* ===== Sample data (dev) ===== */
 document.getElementById("loadSample")?.addEventListener("click", ()=>{
   SCOUT.options = [
@@ -581,6 +564,29 @@ document.getElementById("loadSample")?.addEventListener("click", ()=>{
 /* ===== Submit to Edge ===== */
 const ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/shadow-scout-recon-send";
 
+// === HERO IMAGE ENDPOINT ===
+const HERO_ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/hero-image";
+// Cancel in-flight lookups when user types fast
+let heroAbort;
+async function fetchHero({ place, region, orientation = "landscape" }) {
+  if (heroAbort) heroAbort.abort();
+  heroAbort = new AbortController();
+
+  const q = [place, region].filter(Boolean).join(" ").trim();
+  if (!q) return null;
+
+  const u = new URL(HERO_ENDPOINT);
+  u.searchParams.set("source", "auto");      // NPS first, then Unsplash
+  u.searchParams.set("q", q);
+  u.searchParams.set("orientation", orientation);
+  u.searchParams.set("max", "1");
+
+  const res = await fetch(u.toString(), { signal: heroAbort.signal });
+  if (!res.ok) return null;
+  const json = await res.json();             // { count, data: [ {src, credit, link, ...} ] }
+  return (json.data && json.data[0]) || null;
+}
+  
 $id("scoutForm")?.addEventListener("submit", async (e)=>{
   e.preventDefault();
   const f=e.currentTarget;
@@ -590,18 +596,8 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
   const pref=(f.querySelector("#fDestination")?.value || "").trim();
   const idea=get("destination_idea");
   const destCombined = pref ? (idea ? `${pref}: ${idea}` : pref) : idea;
-
-// derive season from date (send null if empty)
-function seasonFromISODate(iso){
-  if (!iso) return null;
-  const m = Number(iso.slice(5,7));
-  return [12,1,2].includes(m) ? "Winter"
-       : [3,4,5].includes(m)  ? "Spring"
-       : [6,7,8].includes(m)  ? "Summer"
-       : "Fall";
-}
-const dateISO = get("tripDate");
-const season  = seasonFromISODate(dateISO);
+  const dateISO = get("tripDate");
+  const season  = seasonFromISODate(dateISO);
 
 // normalize en-dash to hyphen for enums like 1-2, 3-4, 5-6, 7+
 const normalizeDash = s => (s || "").replace(/[–—]/g, "-");
@@ -700,20 +696,49 @@ function seasonFromISODate(iso){
     hero:     document.getElementById("pv_hero")
   };
 
+    // Debounced hero updater
+  let heroTimer = null;
+  async function updateHeroIfNeeded(placeText){
+    clearTimeout(heroTimer);
+    heroTimer = setTimeout(async ()=>{
+      const heroImg = OUT.hero;
+      if (!heroImg) return;
+      
+      if (!placeText || placeText.trim().length < 3) { 
+  heroImg.removeAttribute("src"); 
+  return; 
+}
+
+      heroImg.style.opacity = "0.6";
+      const hit = await fetchHero({ place: placeText, region: "", orientation: "landscape" });
+      if (hit && hit.src) {
+        heroImg.src = hit.src;
+        heroImg.alt = hit.alt || placeText;
+        // optional credit support (only if you add #pv_credit in HTML; see Step 2)
+        const credit = document.getElementById("pv_credit");
+        if (credit) {
+          credit.innerHTML = hit.credit ? hit.credit : "";
+          credit.style.display = hit.credit ? "block" : "none";
+        }
+      }
+      heroImg.style.opacity = "1";
+    }, 300);
+  }
+
   const getMeta = (k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
 
   function paint(){
-    const dateISO = getMeta("date");
-    const season  = seasonFromISODate(dateISO) || "—";
-    OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Scout Recon");
-    OUT.category && (OUT.category.textContent = getMeta("category") || "—");
-    OUT.season   && (OUT.season.textContent   = season);
-    OUT.location && (OUT.location.textContent = getMeta("location") || "—");
-    OUT.date     && (OUT.date.textContent     = dateISO ? new Date(dateISO+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—");
-    if (getMeta("location") && OUT.hero && !OUT.hero.src){
-      OUT.hero.src = "https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
-    }
-  }
+  const dateISO = getMeta("date");
+  const season  = seasonFromISODate(dateISO) || "—";
+
+  OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Scout Recon");
+  OUT.category && (OUT.category.textContent = getMeta("category") || "—");
+  OUT.season   && (OUT.season.textContent   = season);
+  OUT.location && (OUT.location.textContent = getMeta("location") || "—");
+  OUT.date     && (OUT.date.textContent     = dateISO ? fmtDateView(dateISO) : "—");
+
+  updateHeroIfNeeded(getMeta("location"));
+}
 
   form.addEventListener("input", paint);
   form.addEventListener("change", paint);
