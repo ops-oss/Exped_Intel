@@ -137,6 +137,19 @@
     .card{padding:12px}
     .btn, .btn-cta{width:100%}
   }
+  /* required / optional markers driven by classes */
+#scoutForm label.is-required::after{
+  content:" *";
+  color:#fe5733;
+  font-weight:700;
+}
+#scoutForm label.is-optional::after{
+  content:" (optional)";
+  opacity:.55;
+  font-weight:500;
+}
+/* opt-out support if you add data-no-auto on a label */
+#scoutForm label[data-no-auto]::after{ content:none !important; }
 </style>
 </head>
 <body>
@@ -545,6 +558,20 @@ $id("scoutForm")?.addEventListener("submit", async (e)=>{
 /* ===== Initial ===== */
 (function initPreview(){
   ensureCTA();
+})();
+  /* =========================================================
+   MARK REQUIRED / OPTIONAL LABELS
+   ========================================================= */
+(function markRequiredOptional(){
+  const form = document.getElementById('scoutForm');
+  if (!form) return;
+  form.querySelectorAll('label').forEach(label=>{
+    if (label.hasAttribute('data-no-auto')) return; // skip if manually controlled
+    const ctrl = label.nextElementSibling;
+    if (!ctrl) return;
+    label.classList.toggle('is-required',  ctrl.matches('[required]'));
+    label.classList.toggle('is-optional', !ctrl.matches('[required]'));
+  });
 })();
 </script>
 </body>
