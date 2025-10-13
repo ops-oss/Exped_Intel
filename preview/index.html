@@ -643,44 +643,40 @@ const payload = {
       </div>
     </div>`;
 
-try {
-  const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    keepalive: true
-  });
+  try {
+    const res  = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    const text = await res.text();
 
-  const text = await res.text(); // read body either way
+    if (!res.ok || !text) {
+      card && (card.innerHTML = `<div class="empty">Something went wrong. Please try again.</div>`);
+      return;
+    }
 
-  if (!res.ok) {
-    console.error("Edge error", res.status, text);
-    card && (card.innerHTML = `<div class="empty">Error ${res.status}: ${text || 'Validation failed.'}</div>`);
-    if (btn) { btn.disabled = false; btn.textContent = "Generate Scout"; }
-    return;
-  }
+    const opts = parseScoutOptions(text);
+    if (!opts.length) {
+      console.warn("Could not parse Scout text:", text);
+      card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
+      return;
+    }
 
-  const opts = parseScoutOptions(text);
-  if (!opts.length) {
-    console.warn("Could not parse Scout text:", text);
-    card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
-    return;
-  }
-
-  SCOUT.options = opts.sort((a,b) => a.index - b.index);
-  ACTIVE = 0;
-  renderTabs();
-  setActive(0);
-}
-  }catch(err){
+    SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+    ACTIVE = 0;
+    renderTabs();
+    setActive(0);
+  } catch (err) {
     console.error(err);
     card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
-  }finally{
-    if(btn){ btn.disabled=false; btn.textContent="Generate Scout"; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Generate Scout"; }
   }
-});
+}); // <-- closes addEventListener
 /* =========================
-   FIX: Live preview wiring
+   Live preview wiring
    ========================= */
 function seasonFromISODate(iso){
   if(!iso) return "";
@@ -704,23 +700,22 @@ function seasonFromISODate(iso){
     hero:     document.getElementById("pv_hero")
   };
 
-  const getMeta = (k)=>
-    form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
+  const getMeta = (k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
 
   function paint(){
     const dateISO = getMeta("date");
+    const season  = seasonFromISODate(dateISO) || "—";
     OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Scout Recon");
     OUT.category && (OUT.category.textContent = getMeta("category") || "—");
+    OUT.season   && (OUT.season.textContent   = season);
     OUT.location && (OUT.location.textContent = getMeta("location") || "—");
     OUT.date     && (OUT.date.textContent     = dateISO ? new Date(dateISO+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—");
-    OUT.season   && (OUT.season.textContent   = dateISO ? seasonFromISODate(dateISO) : "—");
-
-    if (OUT.hero && getMeta("location") && !OUT.hero.src){
+    if (getMeta("location") && OUT.hero && !OUT.hero.src){
       OUT.hero.src = "https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
     }
   }
 
-  form.addEventListener("input", paint, {passive:true});
+  form.addEventListener("input", paint);
   form.addEventListener("change", paint);
   paint();
 })();
