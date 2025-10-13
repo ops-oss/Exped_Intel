@@ -1,2532 +1,648 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Expedition – Preview</title>
-<link rel="stylesheet" href="/fonts.css"/>
+<title>Scout Live Preview</title>
 <style>
   :root{
-    --bg:#e8e5e2; --ink:#1e1e1e; --paper:#fff; --accent:#fe5733;
-    --label:14px; --body:18px; --h1:clamp(40px,18vw,88px);
-    --border:rgba(0,0,0,.12); --tint:rgba(0,0,0,.06);
-    --chip-border:rgba(0,0,0,.22); --chip-fill:rgba(255,255,255,.66);
-    --chip2-border:rgba(0,0,0,.16); --chip2-fill:rgba(0,0,0,.06);
-    --label-w:210px;
+    --bg:#efefec; --ink:#1f1f1f; --paper:#fff; --accent:#fe5733;
+    --div:rgba(0,0,0,.12); --div-soft:rgba(0,0,0,.08);
+    --paper:#fff; --ink:#1c1c1c; --div-strong:rgba(0,0,0,.24); --focus:#111; --hint:rgba(0,0,0,.55);
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{
     margin:0; background:var(--bg); color:var(--ink);
-    font-family:"Poppins",system-ui,-apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
-  img{display:block;width:100%;height:auto}
-  a{color:inherit;text-underline-offset:2px}
-  .page{max-width:1120px;margin:0 auto;padding:24px 16px 40px;display:grid;row-gap:20px}
-  .actions{display:flex;gap:18px;flex-wrap:wrap}
-  .btn-ghost{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:transparent;color:inherit;border:1px solid var(--border);border-radius:8px;font-weight:600;text-decoration:none;cursor:pointer}
-  .btn-ghost .ico{width:20px;height:20px;stroke:currentColor}
-  .btn-ghost[data-active="true"]{background:var(--paper)}
-  .label{font-size:var(--label);letter-spacing:.18em;text-transform:uppercase;opacity:.7}
-  .label.with-icon{display:flex;align-items:center;gap:.45rem}
-  .label .ico{width:clamp(16px,1.6vw,20px);height:clamp(16px,1.6vw,20px);stroke:currentColor;opacity:.9;flex:0 0 auto}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;align-items:start;margin-top:8px}
-  @media (min-width:960px){.grid2{grid-template-columns:repeat(4,1fr)}}
-  .value{font-size:clamp(18px,2.6vw,28px);line-height:1.28}
-  /* === lock layout to the page column === */
-.page{ max-width:1120px; margin-inline:auto; padding-inline:16px; }
+  .shell{display:grid; grid-template-columns: minmax(320px, 460px) 1fr; gap:16px; max-width:1200px; margin:0 auto; padding:16px;}
+  @media (max-width:980px){ .shell{ grid-template-columns:1fr; } }
 
-/* chips/days can’t force horizontal scroll */
-img, iframe, .embed{ max-width:100%; display:block; }
-#expChips .row{ min-width:0; }
-.row .labelB + div{ min-width:0; overflow-wrap:anywhere; }
+  .panel{ background:var(--paper); border:1px solid var(--div); border-radius:12px; padding:16px; }
 
-/* grids: allow content to shrink */
-.grid2{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-@media (min-width:960px){
-  .grid2{ grid-template-columns:repeat(4, minmax(0,1fr)); }
-  #expChips{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 28px; }
-  #expChips .row{ border-top:0; padding:0; }
-}
+  /* FORM header only */
+  .form-panel > h2{
+    font-weight:900; font-size:clamp(48px, 7vw, 72px);
+    line-height:1.02; letter-spacing:-0.025em; margin:0 0 8px;
+  }
+  .preview h2{ font-size:20px; }
 
-/* belt & suspenders */
-html, body{ overflow-x:hidden; }
-  #heroLink{display:block}
-  .section{margin-top:26px}
-  .section h3{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px;font-weight:700;letter-spacing:-0.01em}
-  .kv{display:grid;grid-template-columns:minmax(12ch,1fr) minmax(0,2fr);row-gap:.75rem;column-gap:1rem;align-items:start;grid-auto-rows:minmax(1.6em,auto)}
-  .kv .k{font-weight:700;line-height:1.45}
-  .kv .v{line-height:1.45;overflow-wrap:anywhere;word-break:break-word;hyphens:auto}
-  .kv.single{grid-template-columns:1fr}
-  .kv.single .v{grid-column:1 / -1}
-  .embed{aspect-ratio:16/9}
-  @media (max-width:640px){ .embed{aspect-ratio:3/4} }
-  .embed iframe{width:100%;height:100%;border:0;display:block}
-  .gpx-actions{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;font-weight:700;border-radius:28px;text-decoration:none;border:1px solid var(--border);background:#000;color:#fff}
-  .btn .ico{width:20px;height:20px}
-  .gpx-note{font-size:14px;text-align:center;max-width:720px;margin:6px auto 0;opacity:.95}
-  .row{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px dashed rgba(0,0,0,.08)}
+  .muted{opacity:.7; font-size:14px; line-height:1.5}
+
+  .grp{margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; align-items:end}
+  .grp label{
+    font-size:11px; letter-spacing:.10em; text-transform:uppercase; opacity:.70;
+    color:var(--hint); margin:2px 0 6px;
+  }
+  .row-1{grid-column:1 / -1}
+
+  /* Inputs */
+  .grp input, .grp select, .grp textarea{
+    width:100%; padding:12px 14px; font:inherit; font-size:15px;
+    border:1px solid var(--div); border-radius:12px; background:#fff;
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .grp textarea { min-height:120px; resize:vertical; line-height:1.5; }
+  .grp input:focus, .grp select:focus, .grp textarea:focus{
+    outline:0; border-color:var(--div-strong); box-shadow:0 0 0 3px rgba(0,0,0,.06);
+  }
+  .grp select{
+    appearance:none; background-color:#fff;
+    background-image:
+      linear-gradient(to bottom, transparent, transparent),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:18px; padding-right:38px;
+  }
+  #scoutForm ::placeholder { color: rgba(0,0,0,.40); }
+  #scoutForm input:-webkit-autofill,
+  #scoutForm textarea:-webkit-autofill,
+  #scoutForm select:-webkit-autofill{
+    -webkit-text-fill-color:var(--ink);
+    box-shadow:0 0 0 1000px var(--paper) inset !important;
+    transition: background-color 9999s ease-out 0s;
+  }
+  label:has(+ [required])::after{ content:" *"; color:#fe5733; font-weight:700; }
+  label:has(+ :not([required]))::after{ content:" (optional)"; opacity:.55; font-weight:500; }
+  label[data-no-auto]::after{ content:none !important; }
+
+  /* Buttons */
+  .btn{
+    appearance:none; background:#111; color:#fff; border:none; border-radius:8px;
+    font-weight:800; font-size:15px; letter-spacing:.015em;
+    padding:12px 18px; cursor:pointer;
+    transition: background .12s ease, transform .08s ease, box-shadow .14s ease;
+    box-shadow:0 2px 0 rgba(0,0,0,.25), 0 4px 6px rgba(0,0,0,.22);
+  }
+  .btn:hover{ background:#333; transform:translateY(-1px); box-shadow:0 2px 0 rgba(0,0,0,.25), 0 6px 10px rgba(0,0,0,.25); }
+  .btn:active{ background:#000; transform:translateY(0); box-shadow:0 1px 0 rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.2); }
+  .btn[disabled]{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+  .btn.ghost{ background:#fff; color:#111; border:1px solid rgba(0,0,0,.18); box-shadow:none; }
+
+  /* Right preview */
+  .preview{background:transparent; padding:0}
+  .page{background:transparent}
+  .title{font-weight:900; letter-spacing:-.02em; line-height:1.02; font-size:clamp(48px, 7vw, 72px); margin:4px 8px 12px}
+  .meta{display:grid; grid-template-columns:1fr 1fr; gap:6px 28px; padding:8px; margin:0 8px 12px;}
+  .meta .cell{background:transparent !important; border:0 !important; padding:0 !important; box-shadow:none !important;}
+  .meta .label{font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.55; margin-bottom:2px}
+  .meta .value{font-size:clamp(18px, 2.2vw, 24px); line-height:1.28}
+  @media (min-width:820px){ .meta{grid-template-columns:repeat(4, 1fr);} }
+
+  .hero{margin:0 8px 16px; border-radius:12px; overflow:hidden; border:1px solid var(--div)}
+  .hero img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; background:#ddd}
+
+  /* Tabs */
+  .tabs{margin:0 8px}
+  .tablist{display:flex; gap:8px; padding:0; margin:0; list-style:none}
+  .tablist button{
+    padding:10px 14px; font-weight:700; font-size:14px; background:var(--paper);
+    border:1px solid var(--div); border-bottom:none; border-radius:10px 10px 0 0; cursor:pointer; transition:background .15s ease, opacity .15s ease;
+  }
+  .tablist button[aria-selected="true"]{ background:#fff; position:relative; z-index:2 }
+  .card{
+    background:#fff; border:1px solid var(--div); border-radius:12px; border-top-left-radius:0;
+    padding:16px; position:relative; top:-1px; margin-bottom:16px; transition:opacity .18s ease, transform .18s ease;
+  }
+  .card.is-enter{ opacity:0; transform: translateY(4px); }
+  .card.is-enter.is-on{ opacity:1; transform: translateY(0); }
+  .subhead{margin:4px 0 10px; opacity:.8}
+
+  .day{background:rgba(0,0,0,.03); border:1px solid var(--div-soft); border-radius:12px; padding:14px; margin:14px 0}
+  .day h4{margin:0 0 6px; font-size:20px}
+  .previewP{margin:6px 0 12px; opacity:.9; line-height:1.6}
+  .row{display:flex; gap:12px; align-items:flex-start; padding:8px 0; border-top:1px dashed var(--div-soft)}
   .row:first-of-type{border-top:0}
-  .row .labelB{flex:0 0 var(--label-w);font-weight:700;font-size:14.5px;letter-spacing:.01em;white-space:nowrap}
-  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:14px;line-height:1;border:1.5px solid var(--chip-border);border-radius:6px;background:var(--chip-fill);color:var(--ink);white-space:nowrap}
-  .chip.secondary{border:1px solid var(--chip2-border);background:var(--chip2-fill);font-size:13.5px}
-  .chip svg{width:16px;height:16px;stroke:currentColor;/* NOTE: no fill:none here so filled Tabler icons work */stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-  .day{padding:18px 16px;border:1px solid rgba(0,0,0,.08);border-radius:10px;background:rgba(255,255,255,.35);margin:18px 0}
-  .day h4{font-size:clamp(18px,3.2vw,24px);margin:0 0 8px;letter-spacing:-0.01em}
-  .day .preview{margin:2px 0 14px;color:rgba(30,30,30,.75);font-size:16.5px;line-height:1.6}
-  @media (max-width:720px){ :root{--label-w:150px} }
-  @media (max-width:520px){
-    :root{--label-w:100%}
-    .row{flex-direction:column;align-items:flex-start;gap:6px}
-    .row .labelB{width:100%}
+  .row .k{flex:0 0 220px; font-weight:800}
+  @media (max-width:560px){ .row{flex-direction:column} .row .k{flex:0 0 auto} }
+  .chips{display:flex; flex-wrap:wrap; gap:8px 10px}
+  .chip{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background:#fff; border:1px solid rgba(0,0,0,.18); border-radius:8px; font-size:14px}
+  .chip.secondary{ background:#f5f5f5; border-color:rgba(0,0,0,.12); font-size:13.5px }
+  .muter{opacity:.6}
+
+  .empty{padding:24px; text-align:center; border:1px dashed var(--div); border-radius:12px; background:#fff; margin:8px}
+
+  /* CTA under option card */
+  #blueprintCta{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
+  #blueprintCta small{ font-size:13px; opacity:.65; margin-top:1px; }
+
+  /* Blueprint button (on-brand) */
+  #blueprintCta .btn-cta{
+    appearance:none !important; border:none !important; padding:12px 18px !important; border-radius:8px !important;
+    font-weight:800 !important; font-size:15px !important; line-height:1 !important; letter-spacing:.015em !important;
+    background:#fe5733 !important; color:#fff !important;
+    box-shadow:0 2px 0 rgba(0,0,0,.25), 0 4px 6px rgba(0,0,0,.22) !important;
+    transition: transform .08s ease, box-shadow .14s ease, filter .14s ease !important; will-change:transform,box-shadow,filter;
   }
-  #status{font-size:12px;opacity:.7;max-width:720px;margin:0 auto}
-
-  /* ===== POLISH OVERRIDES ===== */
-  :root{
-    --hdr-size-min: 24px;
-    --hdr-size-max: 32px;
-    --hdr-letter: -0.02em;
-    --hdr-weight: 700;
-    --hdr-var: 720;
-    --hdr-bottom: 22px;
-
-    --div: rgba(0,0,0,.10);
-    --div-soft: rgba(0,0,0,.06);
-
-    --page-pad-sm: 20px;
-
-    --toc-accent: var(--accent, #fe5733);
-    --toc-ink: var(--ink, #1e1e1e);
-    --toc-border: rgba(0,0,0,.12);
-    --toc-bg: color-mix(in srgb, var(--paper, #fff) 86%, transparent);
-    --toc-panel-w: min(420px, 86vw);
-    --toc-top-pad: 14px;
-    --toc-right-pad: 16px;
+  #blueprintCta .btn-cta:hover{
+    filter:brightness(1.05); transform:translateY(-1px);
+    box-shadow:0 2px 0 rgba(0,0,0,.25), 0 6px 10px rgba(0,0,0,.25) !important;
+  }
+  #blueprintCta .btn-cta:active{
+    transform:translateY(0); filter:brightness(.98);
+    box-shadow:0 1px 0 rgba(0,0,0,.3), 0 3px 6px rgba(0,0,0,.2) !important;
   }
 
-  .section{
-    margin-top: 34px;
-    padding-top: 18px;
-    border-top: 1px solid var(--div);
+  /* Loader */
+  #scoutLoading{
+    display:flex; align-items:center; gap:14px;
+    padding:16px; border:1px dashed var(--div);
+    border-radius:12px; background:#fff;
   }
-  .section > h3{
-    font-size: clamp(var(--hdr-size-min), 4.8vw, var(--hdr-size-max));
-    line-height: 1.18;
-    letter-spacing: var(--hdr-letter);
-    margin: 0 0 var(--hdr-bottom);
-    font-weight: var(--hdr-weight);
-    font-variation-settings: "wght" var(--hdr-var);
-    scroll-margin-top: 80px;
-    color: color-mix(in srgb, var(--ink) 92%, #000);
+  #scoutLoading .spin{
+    width:22px; height:22px; border-radius:50%;
+    border:3px solid rgba(0,0,0,.12); border-top-color:#fe5733;
+    animation: ei-spin 0.8s linear infinite;
   }
-  .kv{ column-gap:1rem; row-gap:1rem; }
-  .kv .k{ font-weight:700; opacity:.9; padding-block:6px; }
-  .kv .v{ opacity:.98; padding-block:6px; }
-  .kv > :nth-child(n+3){ border-top:1px dashed var(--div-soft); }
-  .day{ margin:20px 0; border-radius:12px; background:rgba(255,255,255,.38); }
-  .row{ padding:10px 0; }
-  .chip{ line-height:1.1; }
+  #scoutLoading .h{ font-weight:800; margin:0 0 4px; }
+  #scoutLoading .p{ opacity:.65; font-size:13px; margin:0 0 10px; }
+  #scoutLoading .bar{ position:relative; height:6px; background:rgba(0,0,0,.06); border-radius:999px; overflow:hidden;}
+  #scoutLoading .bar span{ position:absolute; inset:0 auto 0 0; width:35%; background:#fe5733; border-radius:999px; animation: ei-sweep 1.1s ease-in-out infinite; }
 
-  @media (max-width:520px){
-    .page{ padding-left: var(--page-pad-sm); padding-right: var(--page-pad-sm); }
-    .section{ margin-top:32px; padding-top:14px; }
-    .section > h3{ margin-bottom:24px; }
-  }
-  @media (min-width:960px){
-    .section{ margin-top:42px; padding-top:20px; border-top:1px solid rgba(0,0,0,.11); }
-  }
-  
-  @media (prefers-reduced-motion:reduce){
-    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
-  }
-  @media print{
-  /* if the TOC was open, un-freeze the page so it can paginate */
-  body,
-  body.ei-open{
-    position: static !important;
-    overflow: visible !important;
-    width: auto !important;
-    top: auto !important;
-    padding-right: 0 !important;
+  @keyframes ei-spin { to { transform: rotate(360deg); } }
+  @keyframes ei-sweep { 0%{left:-35%;width:35%} 50%{left:35%;width:40%} 100%{left:100%;width:35%} }
+
+  /* mobile */
+  @media (max-width: 640px){
+    .shell { padding: 10px; gap: 10px; }
+    .form-panel.panel { padding: 12px; }
+    #scoutForm.grp { grid-template-columns: 1fr; gap: 8px; }
+    .title { font-size: clamp(28px, 8vw, 40px); margin: 6px 8px; }
+    .meta { grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+    .hero { margin: 0 8px 10px; }
+    .tablist { gap: 6px; }
+    .tablist button { padding: 8px 10px; font-size: 13px; }
+    .card { padding: 12px; }
+    .btn, .btn-cta { width: 100%; }
   }
 
-  /* hide the slideout UI in print */
-  .ei-toc-toggle, .ei-toc-panel, .ei-toc-dim{ display:none !important; }
-
-  /* put each section on its own page (like before) */
-  .section{
-    break-before: page;
-    page-break-before: always;      /* older engines */
-    break-inside: avoid;
-    page-break-inside: avoid;
+  :root { color-scheme: light; }
+  @media (max-width: 600px){
+    #scoutForm .row-1[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
   }
-  .section:first-of-type{
-    break-before: auto;
-    page-break-before: auto;
-  }
-
-  /* keep day cards intact and headers with their content */
-  .day{ break-inside: avoid; page-break-inside: avoid; }
-  h3{ break-after: avoid; page-break-after: avoid; }
-}
-
-/* Hide the redundant KV table for Expedition Itinerary */
-#expKV{ display:none; }
-  
-/* Chips block */
-#expChips{ margin-top:12px !important; }        /* stack by default (mobile) */
-#expChips .chip{ margin:0; }
-
-/* Make Expedition Itinerary a card */
-#expItin.section{            /* override the section divider for this one */
-  border-top:0;
-  padding-top:0;
-}
-
-#expItin{
-  background: rgba(255,255,255,.38);
-  border: 1px solid rgba(0,0,0,.11);
-  border-radius: 12px;
-  padding: 16px;
-}
-
-#expItin > h3{
-  margin: 0 0 12px;
-}
-
-/* Keep labeled-row look on mobile */
-#expChips .row{ padding:10px 0; border-top:1px dashed var(--div-soft); }
-#expChips .row:first-child{ border-top:0; }
-
-  /* Day fields: let chip groups wrap cleanly */
-.row .labelB + div{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px 10px;   /* row gap / column gap */
-}
-.row .labelB + div .chip{
-  margin:0;
-  flex:0 0 auto;   /* don't stretch; size to content */
-  max-width:100%;
-}
-/* Lock background scroll when the TOC is open */
-body.ei-open{
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  padding-right: calc(100vw - 100%);  /* ← Patch 2: prevent right-shift */
-}
-
-/* Make the slideout itself scrollable */
-body .ei-toc-panel{
-  max-height: 100vh;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-  /* TOC (chip-styled slideout) */
-  :root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
-  body .ei-toc-toggle{
-    position:fixed; top:14px; right:16px; z-index:9999;
-    width:34px; height:34px; border-radius:8px;
-    background: rgba(255,255,255,.55);
-    -webkit-backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
-    backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
-    border:1px solid var(--chip2-border);
-    display:grid; place-items:center; cursor:pointer; color:var(--ink);
-  }
-  body .ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
-  body .ei-toc-toggle .lines::before,
-  body .ei-toc-toggle .lines::after{
-    content:""; position:absolute; left:0; right:0; height:2px;
-    background: currentColor; border-radius:2px; transition: transform .18s ease, opacity .18s ease;
-  }
-  body .ei-toc-toggle .lines::before{ top:0; }
-  body .ei-toc-toggle .lines::after{ bottom:0; }
-  body.ei-open .ei-toc-toggle .lines::before{ transform: translateY(6px) rotate(45deg); }
-  body.ei-open .ei-toc-toggle .lines::after{ transform: translateY(-6px) rotate(-45deg); }
-
-  body .ei-toc-panel{
-    position:fixed; inset:0 0 0 auto; width:var(--ei-toc-w);
-    transform:translateX(100%);
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
-    border-left:1px solid var(--chip2-border);
-    box-shadow:-16px 0 32px rgba(0,0,0,.06);
-    z-index:9998; transition:transform .22s ease;
-    display:flex; flex-direction:column; gap:12px; padding:16px 14px;
-  }
-  body.ei-open .ei-toc-panel{ transform:translateX(0); }
-
-  body .ei-toc-dim{
-    position:fixed; inset:0; background: rgba(0,0,0,.12);
-    opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:9997;
-  }
-  body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
-
-  body .ei-toc-title{ font-weight:700; letter-spacing:-.01em; opacity:.85; margin:2px 6px 4px; }
-  body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
-  body .ei-toc-list a,
-  body .ei-toc-list .ei-chip{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
-    border:1.5px solid var(--chip-border); border-radius:6px;
-    background: var(--chip-fill);
-    color: color-mix(in srgb, var(--ink) 78%, #000);
-    text-decoration:none;
-  }
-  /* TOC icons */
-body .ei-toc-list .ico{ width:16px; height:16px; flex:0 0 auto; stroke:currentColor; }
-body .ei-toc-list .ico *{ fill:none; }
-  body .ei-toc-list a[aria-current="true"],
-  body .ei-toc-list .ei-chip[aria-current="true"]{
-    border-color: color-mix(in srgb, var(--accent) 35%, var(--chip-border));
-    background: color-mix(in srgb, var(--accent) 10%, var(--chip-fill));
-    color: var(--ink);
-  }
-  body .ei-toc-list a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-
-  /* Header icons: size to cap-height, baseline align, gap */
-  .section > h3{ display:flex; align-items:baseline; gap:10px; }
-  .section > h3 .hdr-ico{ width:1em; height:1em; flex:0 0 auto; } /* don't force fill */
-/* iOS/Safari anchor highlight on section headings */
-.section > h3:focus,
-.section > h3:target {           /* taps & anchor jumps */
-  outline: none !important;
-  box-shadow: none !important;
-}
-.section > h3:focus-visible {    /* keep a11y ring for keyboards */
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* --- Fixes & polish overrides ------------------------------------------- */
-
-/* 1) Chips can wrap on small screens (prevents right-edge cutoffs) */
-@media (max-width: 640px){
-  .chip{
-    white-space: normal;           /* was nowrap */
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.2;
-    max-width: 100%;
-  }
-  .row .labelB + div{ min-width: 0; }
-}
-
-/* 2) Keep Expedition Itinerary as ONE COLUMN on desktop */
-@media (min-width: 960px){
-  #expChips{ display: block; }            /* override earlier 2-col grid */
-  #expChips .row{ padding:10px 0; border-top:1px dashed var(--div-soft); }
-  #expChips .row:first-child{ border-top:0; }
-}
-
-/* (5) More breathing room — match Day cards */
-#expItin{                 /* card padding */
-  padding: 22px 16px 22px;
-}
-#expItin > h3{            /* space under the card title */
-  margin: 0 0 20px;
-}
-
-/* Same vertical rhythm as .day rows */
-#expChips .row{
-  padding: 12px 0;        /* was 10px */
-}
-#expChips .row:first-child{
-  border-top: 0;          /* keep the first row clean */
-}
-
-/* Expedition Itinerary card spacing (inside the card) */
-#expItin{ padding:24px 16px 18px !important; }   /* more top air */
-#expItin > h3{ margin:0 0 18px !important; }     /* space under title */
-
-/* Extra gap when there are NO tabs */
-#expItin.section{ margin-top:32px; }
-
-/* When tabs are present, dock the card to the tabs */
-.ei-tabs + #expItin.section{ margin-top:-1px !important; }
-
-/* ===== Hero image: consistent frame, no overflow ===== */
-:root{
-  /* pick the frame you want: 16/9, 3/2, 21/9, etc. */
-  --hero-aspect: 16/9;
-  --hero-radius: 12px;
-}
-
-/* Prevent any layout from exceeding the viewport */
-html, body { overflow-x: hidden; } /* guardrail, won’t mask real bugs because images won’t overflow anymore */
-
-/* Reset figure defaults so margins don't push width > 100% */
-.hero { margin: 0; }
-.hero .credit { 
-  font-size: 12.5px;
-  opacity: .9;
-  text-align: center;
-  margin: 8px 16px 0; /* small, even padding */
-}
-
-/* The frame that enforces size/crop */
-.hero-media{
-  position: relative;
-  width: 100%;
-  aspect-ratio: var(--hero-aspect);
-  overflow: hidden;
-  border-radius: var(--hero-radius);
-  background: color-mix(in srgb, var(--ink) 5%, transparent); /* subtle fallback bg */
-}
-
-/* Make every image fill the frame and crop politely */
-.hero-media > img{
-  display: block;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;      /* << key: consistent crop */
-  object-position: center;/* tweak per-image if needed */
-  max-width: none;        /* ignore intrinsic width so it never overflows */
-}
-
-/* Keep non-hero content images sane too */
-img{ max-width: 100%; height: auto; }
-
-/* Fallback for older browsers that don’t know svw */
-@supports not (width: 1svw){
-  .title{ font-size: clamp(40px, 18vw, 88px); }
-}
-
-/* 2) Guardrails so nothing can force wider than the screen */
-.page, .grid2, .actions, .fullbleed, .row, .value, .title { min-width: 0; }
-img, iframe { max-width: 100%; display: block; }
-
-/* === FINAL HERO PATCH — single source of truth ========================== */
-:root{
-  --hero-aspect-mobile: 4 / 5;   /* portrait on phones (change to 1/1 if you prefer square) */
-  --hero-aspect-desktop: 16 / 9; /* banner on desktop */
-}
-
-/* Base */
-.fullbleed{ width:100%; margin-left:0; margin-right:0; overflow:hidden; }
-#hero{
-  display:block; width:100%; height:auto;
-  object-fit:cover; object-position:center;
-  padding:0; max-width:none;
-}
-
-/* Phones */
-@media (max-width:640px){
-  #hero{ aspect-ratio: var(--hero-aspect-mobile) !important; }
-}
-
-/* Desktop/tablet: true full-bleed + fixed frame */
-@media (min-width:960px){
-  .fullbleed{
-    width:100vw;
-    margin-left:calc(50% - 50vw);
-    margin-right:calc(50% - 50vw);
-    overflow:hidden;
-  }
-  #hero{ aspect-ratio: var(--hero-aspect-desktop) !important; }
-}
-
-/* Fallback for engines without aspect-ratio */
-@supports not (aspect-ratio: 1 / 1){
-  @media (max-width:640px){ #hero{ height:125vw !important; } }              /* ~4:5 */
-  @media (min-width:960px){ #hero{ height:calc(100vw * 9 / 16) !important; } }/* 16:9 */
-}
-
-/* Keep photo credit inside the page column */
-#credit, .credit{
-  max-width:1120px; margin:8px auto 10px; padding:0 16px;
-  text-align:right; font-size:12.5px; opacity:.9;
-}
-
-/* Guardrail */
-html,body{ overflow-x:hidden; }
-
-/* Column-scoped title, no hyphens, balanced lines */
-.page{ container-type:inline-size; } /* enables cqw for the column */
-
-.title{
-  font-size: clamp(34px, 16cqw, 88px);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-
-  /* stop hyphenation & ugly breaks */
-  overflow-wrap: normal;
-  word-break: keep-all;       /* ← prevents opportunistic breaks in WebKit */
-  hyphens: none;
-  -webkit-hyphens: none;
-  text-wrap: balance;         /* nicer multi-line heads where supported */
-}
-
-/* Fallback when cqw isn’t supported */
-@supports not (font-size: 1cqw){
-  .title{ font-size: clamp(34px, 18svw, 88px); }
-}
-/* === Scenario Tabs (CSS only) =========================================== */
-.ei-tabs{ margin:12px 0 0; }
-.ei-tablist{ display:flex; gap:8px; padding:8px 8px 0; margin:0; list-style:none; align-items:flex-end; }
-.ei-tab{
-  position:relative; display:inline-flex; align-items:center; gap:8px;
-  padding:10px 14px; font:inherit; font-weight:600; font-size:14px;
-  color:color-mix(in srgb, var(--ink, #1e1e1e) 88%, #000);
-  background:color-mix(in srgb, var(--paper, #fff) 86%, transparent);
-  border:1px solid var(--border, rgba(0,0,0,.12)); border-bottom:none;
-  border-top-left-radius:10px; border-top-right-radius:10px;
-  cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,.04);
-}
-.ei-tab svg{ width:18px; height:18px; stroke:currentColor; flex:0 0 auto; }
-.ei-tab[aria-selected="true"]{ background:var(--paper, #fff); color:var(--ink, #1e1e1e); z-index:2; }
-.ei-tab:focus-visible{ outline:2px solid var(--accent, #fe5733); outline-offset:2px; }
-.ei-tabs + #expItin{ margin-top:-1px; }
-@media (max-width:560px){ .ei-tablist{ gap:6px; padding-inline:6px } .ei-tab{ padding:8px 10px; font-size:13px } }
-
-/* === Slideout TOC (hamburger) ========================================== */
-body.ei-open{ overflow:hidden; position:fixed; width:100%; padding-right:calc(100vw - 100%); }
-:root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
-body .ei-toc-toggle{
-  position:fixed; top:14px; right:16px; z-index:9999; width:34px; height:34px; border-radius:8px;
-  background:rgba(255,255,255,.55);
-  -webkit-backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
-  backdrop-filter:saturate(120%) blur(var(--ei-toc-blur));
-  border:1px solid var(--chip2-border); display:grid; place-items:center; cursor:pointer; color:var(--ink);
-}
-body .ei-toc-toggle .lines{ position:relative; width:20px; height:14px; }
-body .ei-toc-toggle .lines::before,
-body .ei-toc-toggle .lines::after{
-  content:""; position:absolute; left:0; right:0; height:2px; background:currentColor; border-radius:2px;
-  transition:transform .18s ease, opacity .18s ease;
-}
-body .ei-toc-toggle .lines::before{ top:0; }
-body .ei-toc-toggle .lines::after{ bottom:0; }
-body.ei-open .ei-toc-toggle .lines::before{ transform:translateY(6px) rotate(45deg); }
-body.ei-open .ei-toc-toggle .lines::after{ transform:translateY(-6px) rotate(-45deg); }
-
-body .ei-toc-panel{
-  position:fixed; inset:0 0 0 auto; width:var(--ei-toc-w); transform:translateX(100%);
-  background:color-mix(in srgb, var(--paper) 88%, transparent);
-  border-left:1px solid var(--chip2-border); box-shadow:-16px 0 32px rgba(0,0,0,.06);
-  z-index:9998; transition:transform .22s ease; display:flex; flex-direction:column; gap:12px; padding:16px 14px;
-  max-height:100vh; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-}
-body.ei-open .ei-toc-panel{ transform:translateX(0); }
-
-body .ei-toc-dim{ position:fixed; inset:0; background:rgba(0,0,0,.12); opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:9997; }
-body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
-
-body .ei-toc-title{ font-weight:700; letter-spacing:-.01em; opacity:.85; margin:2px 6px 4px; }
-body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
-body .ei-toc-list a,
-body .ei-toc-list .ei-chip{
-  display:inline-flex; align-items:center; gap:8px; padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
-  border:1.5px solid var(--chip-border); border-radius:6px; background:var(--chip-fill);
-  color:color-mix(in srgb, var(--ink) 78%, #000); text-decoration:none;
-}
-body .ei-toc-list .ico{ width:16px; height:16px; flex:0 0 auto; stroke:currentColor; }
-body .ei-toc-list .ico *{ fill:none; }
-body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-current="true"]{
-  border-color:color-mix(in srgb, var(--accent) 35%, var(--chip-border));
-  background:color-mix(in srgb, var(--accent) 10%, var(--chip-fill));
-  color:var(--ink);
-}
-
-/* === Section header icon sizing (prevents giant icons) ================== */
-.section > h3{ display:flex; align-items:baseline; gap:10px; }
-.section > h3 .hdr-ico{ width:1em; height:1em; flex:0 0 auto; }
-.section > h3:focus, .section > h3:target{ outline:none !important; box-shadow:none !important; }
-.section > h3:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
-
-/* — Tabs: attach to the card and use the paper color — */
-.ei-tabs{ margin-top:12px; position:relative; z-index:1; }
-.ei-tablist{ align-items:flex-end; gap:8px; }
-.ei-tab{
-  background: var(--paper);
-  border: 1px solid var(--div-soft);
-  border-bottom: none;
-  color: var(--ink);
-}
-.ei-tab[aria-selected="true"]{
-  background: var(--paper);
-  color: var(--ink);
-}
-.ei-tab[aria-selected="true"]::after{
-  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
-  background: var(--paper); /* hides the card’s top border directly under the active tab */
-}
-.ei-tabs + #expItin{ margin-top:-1px !important; }
-#expItin{ border-top-left-radius:0; } /* seam looks flush under first tab */
-
-/* ——— Scenarios: clickable tabs + match the card surface ——— */
-:root{
-  --exp-card-bg: rgba(255,255,255,.38);
-  --exp-card-border: rgba(0,0,0,.11);
-}
-
-/* keep tab strip above the card so all tabs are clickable */
-.ei-tabs{ position: relative; z-index: 5; margin-bottom: 0; }
-
-/* the card sits below the tabs */
-#expItin{
-  position: relative;
-  z-index: 0;
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-}
-
-/* tabs look like the same surface as the card */
-.ei-tab{
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-bottom: none;
-  color: var(--ink);
-  box-shadow: none;
-}
-
-/* hide the card’s top border exactly under the active tab */
-.ei-tab[aria-selected="true"]::after{
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -1px; height: 1px;
-  background: var(--exp-card-bg);
-}
-
-/* seam: dock the card to the tabs */
-#expItin.section{ margin-top: 0; }
-.ei-tabs + #expItin.section{ margin-top: -1px !important; }
-
-/* (optional) seam on the left looks flush under the first tab */
-#expItin{ border-top-left-radius: 0; }
-
-/* Tabs docked to the card + same surface */
-.ei-tabs{ position:relative; z-index:5; margin:12px 0 -1px; } /* negative bottom tucks under tab line */
-#expItin.section{ margin-top:0; }
-.ei-tabs + #expItin.section{ margin-top:-1px !important; }   /* seam */
-#expItin{ position:relative; z-index:0; border-top-left-radius:0; }
-
-:root{ --exp-card-bg: rgba(255,255,255,.38); --exp-card-border: rgba(0,0,0,.11); }
-.ei-tab{
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-bottom: none;
-  color: var(--ink);
-  box-shadow: none;
-}
-.ei-tab[aria-selected="true"]::after{
-  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
-  background: var(--exp-card-bg);
-}
-
-/* FINAL: dock tabs to card + same surface */
-:root{
-  --exp-card-bg: rgba(255,255,255,.38);
-  --exp-card-border: rgba(0,0,0,.11);
-}
-
-.ei-tabs{ position:relative; z-index:5; margin:12px 0 -1px; }
-.ei-tablist{
-  background: var(--exp-card-bg);
-  padding: 8px 8px 0;
-  border: 1px solid var(--exp-card-border);
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
-}
-.ei-tab{
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-bottom: none;
-  color: var(--ink);
-  box-shadow: none;
-}
-.ei-tab[aria-selected="true"]::after{
-  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
-  background: var(--exp-card-bg);
-}
-#expItin{
-  position:relative; z-index:0;
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-top-left-radius: 0;
-}
-.ei-tabs + #expItin.section{ margin-top:-1px !important; }
-
-/* PATCH 4 — seam overrides (final) */
-/* same surface + border for both */
-:root{
-  --exp-card-bg: rgba(255,255,255,.38);
-  --exp-card-border: rgba(0,0,0,.11);
-}
-
-/* TABS = CARD EDGE (no separate strip) */
-:root{
-  --exp-card-bg: var(--paper);              /* same surface */
-  --exp-card-border: rgba(0,0,0,.11);
-}
-
-/* no extra panel behind the tabs */
-.ei-tablist{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-}
-
-/* tabs draw the top border of the card */
-.ei-tabs{
-  position: relative;
-  z-index: 5;
-  margin: 12px 0 0 !important;             /* no negative tuck */
-}
-
-.ei-tab{
-  background: var(--exp-card-bg);
-  color: var(--ink);
-  border: 1px solid var(--exp-card-border);
-  border-bottom: 0;                         /* open bottom so it meets the card */
-  border-radius: 10px 10px 0 0;
-  box-shadow: none;
-}
-
-/* make the active tab visually continuous with the card */
-.ei-tab[aria-selected="true"]{
-  position: relative;
-  z-index: 2;
-}
-
-/* seam: card starts exactly under the tabs */
-#expItin{
-  position: relative;
-  z-index: 0;
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-top: 0;                            /* top edge is provided by tabs */
-  border-top-left-radius: 0;                /* flush under first tab */
-}
-
-#expItin.section{ margin-top: 0 !important; }
-.ei-tabs + #expItin.section{ margin-top: -1px !important; } /* remove any hint of gap */
-
-/* kill any previous decorative “after” line on active tab */
-.ei-tab[aria-selected="true"]::after{ display:none !important; }
-
-/* card picks up right under the strip */
-#expItin.section{ margin-top:0 !important; }
-.ei-tabs + #expItin.section{ margin-top:0 !important; }  /* no gap under the strip */
-#expItin{
-  position:relative; z-index:0;
-  background: var(--exp-card-bg);
-  border: 1px solid var(--exp-card-border);
-  border-top-left-radius: 0;         /* flush under first tab */
-}
-
-/* sub-pixel insurance on HiDPI */
-@media (min-resolution: 2dppx){
-  .ei-tabs{ margin-bottom:-1.01px; }
-}
-
-/* Seam: make the strip and card meet perfectly */
-#expItin{ border-top:0; }  /* card doesn’t draw a top edge */
-
-/* ===== TABS = TOP EDGE OF THE CARD (final override) ===================== */
-/* 1) Make the strip transparent (no faux card behind tabs) */
-.ei-tabs{ position:relative; z-index:5; margin:12px 0 0 !important; }
-.ei-tablist{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-}
-
-/* 2) Tabs draw the card’s top border */
-.ei-tab{
-  background: var(--paper) !important;
-  color: var(--ink) !important;
-  border: 1px solid rgba(0,0,0,.11) !important;
-  border-bottom: 0 !important;                 /* so it meets the card */
-  border-radius: 10px 10px 0 0 !important;
-  box-shadow: none !important;
-}
-
-/* 3) Visual active state (and keep it above the card) */
-.ei-tab[aria-selected="true"]{
-  position: relative;
-  z-index: 2;
-  background: var(--paper) !important;
-  border-bottom-color: transparent !important;
-  filter: none !important;
-}
-.ei-tab[aria-selected="true"]::after{ display:none !important; } /* kill any old seam line */
-
-/* Optional: make inactives look “unselected” */
-.ei-tab[aria-selected="false"]{ opacity:.82; }
-.ei-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-
-/* 4) Dock the card to the tabs (no gap, no faux border) */
-#expItin{
-  position: relative;
-  z-index: 0;
-  background: var(--paper) !important;
-  border: 1px solid rgba(0,0,0,.11) !important;
-  border-top: 0 !important;                    /* tabs provide the top edge */
-  border-top-left-radius: 0 !important;        /* flush under first tab */
-}
-#expItin.section{ margin-top:0 !important; }
-.ei-tabs + #expItin.section{ margin-top:-1px !important; }  /* erase any hairline */
-
-/* 5) Neutralize older “strip/card” styles that created the gap */
-.ei-tablist{ border-bottom:0 !important; }
-#expItin{ border-top:0 !important; }           /* if an older block re-added it */
-
-/* === SEAM: no gap between tabs and card (final) ======================= */
-.ei-tabs{ margin-bottom:0 !important; }         /* never add space below the tabs */
-.ei-tablist{ padding:0 !important; margin:0 !important; }  /* belt & suspenders */
-
-/* Make the card overlap the tab line by ~1px on all DPIs */
-#expItin.section{ margin-top:-1px !important; }            /* overlap by 1px */
-@media (min-resolution:2dppx){
-  #expItin.section{ margin-top:-1.01px !important; }       /* HiDPI insurance */
-}
-
-/* Ensure no extra borders sneak back in */
-#expItin{ border-top:0 !important; }                        /* tabs provide top edge */
-.ei-tab[aria-selected="true"]::after{ display:none !important; } /* kill fake seam */
-
-/* Tabs: clearer active vs inactive */
-.ei-tab[aria-selected="true"]{
-  opacity: 1 !important;
-  filter: none !important;
-}
-.ei-tab[aria-selected="false"]{
-  opacity: .55 !important;          /* ghost */
-  filter: saturate(.6) contrast(.95);
-}
-.ei-tab[aria-selected="false"]:hover,
-.ei-tab[aria-selected="false"]:focus-visible{
-  opacity: .9 !important;            /* wake on hover/focus */
-  filter: none;
-}
-
-/* === SEAM: tabs are the card’s top edge (authoritative) =============== */
-.ei-tablist{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-}
-
-.ei-tabs{
-  position: relative;
-  z-index: 5;
-  margin: 12px 0 0 !important;   /* no negative tuck */
-}
-
-/* Tabs draw the border, card starts directly underneath */
-.ei-tab{
-  background: var(--paper) !important;
-  color: var(--ink) !important;
-  border: 1px solid rgba(0,0,0,.11) !important;
-  border-bottom: 0 !important;
-  border-radius: 10px 10px 0 0 !important;
-  box-shadow: none !important;
-}
-.ei-tab[aria-selected="true"]::after{ display:none !important; }  /* nuke old seam line */
-
-/* Card: no top border; overlap by 1px to erase sub-pixel gaps */
-#expItin{
-  position: relative;
-  z-index: 0;
-  background: var(--paper) !important;
-  border: 1px solid rgba(0,0,0,.11) !important;
-  border-top: 0 !important;
-  border-top-left-radius: 0 !important;
-}
-
-/* Single source of truth for the docking */
-#expItin.section{ margin-top: -1px !important; }   /* overlap the tab line */
-.ei-tabs + #expItin.section{ margin-top: -1px !important; }
-.ei-tabs{ margin-bottom: 0 !important; }
-
-/* HiDPI insurance */
-@media (min-resolution:2dppx){
-  #expItin.section{ margin-top:-1.01px !important; }
-}
-
-/* close the grid gap between tabs and the card */
-.page > .ei-tabs { margin-bottom: -20px !important; } /* negate row-gap */
-.ei-tabs + #expItin.section { margin-top: -1px !important; } /* seam overlap */
-@media (min-resolution:2dppx){
-  .ei-tabs + #expItin.section { margin-top: -1.01px !important; }
-}
-
-#scenarioTagline.subhead {
-  font-size: 0.95rem;       /* slightly smaller than h3 */
-  font-weight: 400;         /* lighter than the title */
-  color: #555;              /* softer gray tone */
-  margin: 4px 0 12px 0;     /* a little space above/below */
-  line-height: 1.4;
-}
-
 </style>
 </head>
 <body>
+  <main class="shell">
+    <aside class="panel form-panel">
+      <h2>Discover Your Recon</h2>
+      <p class="muted">Your objective sets the direction. Our intel builds the route.</p>
 
-<!-- === INLINE SVG SPRITE — EXACT TABLER ICONS YOU PROVIDED === -->
-<svg aria-hidden="true"
-     style="position:absolute;width:0;height:0;overflow:hidden"
-     xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink">
+      <form id="scoutForm" class="grp" novalidate>
+        <!-- Trip title -->
+        <div class="row-1">
+          <label for="tripTitle">Trip title</label>
+          <input id="tripTitle" name="title" data-ei-meta="title" placeholder="Zion West Rim Adventure"/>
+        </div>
 
-  <!-- UI icons -->
-  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M18 7v14l-6 -4l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4z"/>
-  </symbol>
+        <!-- Date + Based in -->
+        <div>
+          <label for="tripDate">Trip date</label>
+          <input id="tripDate" type="date" name="tripDate" data-ei-meta="date"/>
+        </div>
+        <div>
+          <label for="fBasedIn">(City/State/Country)</label>
+          <input id="fBasedIn" name="based_in" type="text" placeholder="Boulder, CO" required/>
+        </div>
 
-  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
-    <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
-    <path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
-    <path d="M8.7 10.7l6.6 -3.4"/>
-    <path d="M8.7 13.3l6.6 3.4"/>
-  </symbol>
+        <!-- Name + Email -->
+        <div>
+          <label for="fName">Name</label>
+          <input id="fName" name="name" type="text" placeholder="Jane Rider" required/>
+        </div>
+        <div>
+          <label for="fEmail">Email</label>
+          <input id="fEmail" name="email" type="email" placeholder="jane@domain.com" required/>
+        </div>
 
-  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
-    <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4"/>
-    <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6"/>
-    <path d="M17 18h2"/>
-    <path d="M20 15h-3v6"/>
-    <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1z"/>
-  </symbol>
+        <!-- Experience + Primary Objective -->
+        <div>
+          <label for="fExp">Experience level</label>
+          <select id="fExp" name="experience_level" required>
+            <option value="">— Select —</option>
+            <option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Elite</option>
+          </select>
+        </div>
+        <div>
+          <label for="fObjective">Primary Objective?</label>
+          <select id="fObjective" name="primary_objective" data-ei-meta="category" required>
+            <option value="">Select From Dropdown</option>
+            <option>Out and Back</option><option>Loop Hike</option><option>End-To-End Traverse</option>
+            <option>Peak Summit / High Alpine Trekking</option><option>Multi Week Section / Through Hike</option>
+            <option>Summit Expedition</option><option>Packrafting / Paddling Expedition</option><option>Hybrid / Multi-Sport Traverse</option>
+          </select>
+        </div>
 
-  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M8 16l2 -6l6 -2l-2 6l-6 2"/>
-    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
-  </symbol>
+        <!-- Ideal length + Preferred terrain -->
+        <div>
+          <label for="fLength">Ideal Trip Length?</label>
+          <select id="fLength" name="ideal_trip_length" required>
+            <option value="">Select From Dropdown</option>
+            <option>1–2</option><option>3–4</option><option>5–6</option><option>7+</option>
+          </select>
+        </div>
+        <div>
+          <label for="fTerrain">Preferred terrain</label>
+          <select id="fTerrain" name="preferred_terrain" required>
+            <option value="">Select From Dropdown</option>
+            <option>Alpine Lakes</option><option>Large Mountains</option><option>Coastal</option><option>Forest</option>
+            <option>Rivers</option><option>Desert</option><option>Glacial / Snowfield</option><option>Scrambling & Peakbagging</option>
+          </select>
+        </div>
 
-  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
-    <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/>
-  </symbol>
+        <!-- Destination dropdown + idea -->
+        <div>
+          <label for="fDestination">Destination</label>
+          <select id="fDestination">
+            <option value="">Select From Dropdown</option>
+            <option>I know exactly where</option>
+            <option>I have a few ideas</option>
+            <option>I want you to choose for me</option>
+          </select>
+        </div>
+        <div>
+          <label for="fIdea">Destination idea</label>
+          <input id="fIdea" name="destination_idea" data-ei-meta="location" type="text" placeholder="e.g., Wheeler Peak, Lost Coast…"/>
+        </div>
 
-  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
-    <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>
-  </symbol>
+        <!-- Additional details -->
+        <div class="row-1">
+          <label for="fAdditional">Additional details</label>
+          <textarea id="fAdditional" name="additional" rows="5" placeholder="Fitness, recent trips, gear constraints, permit constraints, group size, etc."></textarea>
+        </div>
 
-<symbol id="i-calendar" viewBox="0 0 24 24"
-        fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/>
-  <path d="M16 3v4"/>
-  <path d="M8 3v4"/>
-  <path d="M4 11h16"/>
-  <path d="M8 15h.01"/>
-  <path d="M12 15h.01"/>
-  <path d="M16 15h.01"/>
-</symbol>
+        <!-- Actions -->
+        <div class="row-1" style="display:flex; gap:10px; align-items:center; margin-top:6px">
+          <button class="btn" id="btnGenerate" type="submit">Generate Scout</button>
+          <button class="btn ghost" id="loadSample" data-dev type="button">Load sample 3 options</button>
+        </div>
+      </form>
+    </aside>
 
-  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/>
-    <path d="M7 11l5 5l5 -5"/>
-    <path d="M12 4l0 12"/>
-  </symbol>
+    <section class="panel preview">
+      <div class="page">
+        <h1 class="title" id="pv_title">Scout Recon</h1>
 
-  <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/>
-    <path d="M11 13l9 -9"/>
-    <path d="M15 4h5v5"/>
-  </symbol>
+        <div class="meta">
+          <div class="cell"><div class="label">Category</div><div class="value" id="pv_category">—</div></div>
+          <div class="cell"><div class="label">Season</div><div class="value" id="pv_season">—</div></div>
+          <div class="cell"><div class="label">Location</div><div class="value" id="pv_location">—</div></div>
+          <div class="cell"><div class="label">Date</div><div class="value" id="pv_date">—</div></div>
+        </div>
 
-  <!-- Section-header icons (h-*) -->
-  <symbol id="h-permits" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M15 21h-9a3 3 0 0 1 -3 -3v-1h10v2a2 2 0 0 0 4 0v-14a2 2 0 1 1 2 2h-2m2 -4h-11a3 3 0 0 0 -3 3v11"/>
-    <path d="M9 7l4 0"/>
-    <path d="M9 11l4 0"/>
-  </symbol>
+        <figure class="hero">
+          <img id="pv_hero" alt="Hero image" src="" />
+        </figure>
 
-  <symbol id="h-shuttle" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-    <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-    <path d="M9 17h6"/>
-    <path d="M19 17h1a1 1 0 0 0 1 -1v-4.528a2 2 0 0 0 -.211 -.894l-.96 -1.92a3 3 0 0 0 -2.683 -1.658h-11.146a3 3 0 0 0 -3 3v6a1 1 0 0 0 1 1h1"/>
-    <path d="M3 12h18"/>
-    <path d="M15 12v-5"/>
-    <path d="M6 4m0 1.5a1.5 1.5 0 0 1 1.5 -1.5h7a1.5 1.5 0 0 1 1.5 1.5v0a1.5 1.5 0 0 1 -1.5 1.5h-7a1.5 1.5 0 0 1 -1.5 -1.5z"/>
-  </symbol>
+        <nav class="tabs" aria-label="Options">
+          <ul class="tablist" role="tablist" id="optTabs"></ul>
+        </nav>
 
-  <symbol id="h-timeline" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 20m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-    <path d="M10 20h-6"/>
-    <path d="M14 20h6"/>
-    <path d="M12 15l-2 -2h-3a1 1 0 0 1 -1 -1v-8a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-3l-2 2z"/>
-    <path d="M13.5 9.5l-3 -3"/>
-    <path d="M10.5 9.5l3 -3"/>
-  </symbol>
+        <div class="card" id="optCard">
+          <p class="subhead muter">Your route options will appear here after you submit the form (or load samples).</p>
+          <div class="empty">No options loaded yet.</div>
+          <div class="cta" id="blueprintCta">
+            <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
+            <small id="ctaHint">Select an option above</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <symbol id="h-multitrail" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M14 5a2 2 0 0 0 -2 2v10a2 2 0 0 1 -2 2"/>
-    <path d="M3 17h4v4h-4z"/>
-    <path d="M17 3h4v4h-4z"/>
-  </symbol>
+<script>
+/* ---------- tiny helpers ---------- */
+const $id = (id)=>document.getElementById(id);
+const chip = (t, secondary=false)=>`<span class="chip${secondary?' secondary':''}">${t}</span>`;
+const fmtDateView = (s)=> s ? new Date(s+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—";
 
-  <symbol id="h-considerations" viewBox="0 0 24 24" fill="currentColor">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M8 4a2.599 2.599 0 0 0 -2 .957l-4.355 5.24a2.847 2.847 0 0 0 -.007 3.598l4.368 5.256c.499 .6 1.224 .949 1.994 .949a2.599 2.599 0 0 0 2 -.957l4.355 -5.24a2.847 2.847 0 0 0 .007 -3.598l-4.368 -5.256a2.593 2.593 0 0 0 -1.994 -.949z"/>
-    <path d="M16.382 4.214a1 1 0 0 1 1.32 .074l.084 .094l4.576 5.823c.808 .993 .848 2.396 .13 3.419l-.12 .158l-4.586 5.836a1 1 0 0 1 -1.644 -1.132l.072 -.104l4.596 -5.85a.845 .845 0 0 0 .06 -.978l-.07 -.1l-4.586 -5.836a1 1 0 0 1 .168 -1.404z"/>
-    <path d="M12.382 4.214a1 1 0 0 1 1.32 .074l.084 .094l4.576 5.823c.808 .993 .848 2.396 .13 3.419l-.12 .158l-4.586 5.836a1 1 0 0 1 -1.644 -1.132l.072 -.104l4.596 -5.85a.845 .845 0 0 0 .06 -.978l-.07 -.1l-4.586 -5.836a1 1 0 0 1 .168 -1.404z"/>
-  </symbol>
+/* ===== SCOUT text -> structured options ===== */
+function parseScoutOptions(txt){
+  const sections = [];
+  const re = /OPTION\\s+(\\d+)\\s+–\\s+([^\\n]+)\\s*\\n([\\s\\S]*?)(?=\\n---|\\nFINAL RECOMMENDATION|$)/g;
+  let m;
+  while ((m = re.exec(txt)) !== null){
+    const [, idx, title, body] = m;
+    const grab = (label) => {
+      const r = new RegExp(label + ":\\s*([\\s\\S]*?)(?:\\n\\n|\\r\\n\\r\\n|\\n(?=[A-Z][A-Za-z ]+:)|$)");
+      const mm = body.match(r); return mm ? mm[1].trim() : "";
+    };
+    const kv = (label) => grab(label).split("\\n")[0].trim();
 
-  <symbol id="h-itinerary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 18.5l-3 -1.5l-6 3v-13l6 -3l6 3l6 -3v8"/>
-    <path d="M9 4v13"/>
-    <path d="M15 7v6.5"/>
-    <path d="M19.001 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
-    <path d="M19.001 15.5v1.5"/>
-    <path d="M19.001 21v1.5"/>
-    <path d="M22.032 17.25l-1.299 .75"/>
-    <path d="M17.27 20l-1.3 .75"/>
-    <path d="M15.97 17.25l1.3 .75"/>
-    <path d="M20.733 20l1.3 .75"/>
-  </symbol>
+    const region = kv("Region");
+    const distElevRaw = kv("Distance and elevation gain/loss");
+    const duration = kv("Suggested Duration");
+    const objective = kv("Primary Objective");
+    const terrain = kv("Terrain");
+    const season = kv("Ideal Season");
+    const hazards = kv("Known Hazards");
+    const culmin = kv("Culminating Objective");
+    const objClass = kv("Objective Class");
+    const advantage = kv("Strategic Advantage");
+    const routeType = kv("Route Type");
+    const overview = grab("Route Overview");
+    const logistics = grab("Logistics Snapshot");
+    const intelBlock = grab("Intel Score \\(1–10\\)");
 
-  <symbol id="h-gpx" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M3 7l6 -3l6 3l6 -3v13l-6 3l-6 -3l-6 3v-13"/>
-    <path d="M9 12v.01"/>
-    <path d="M6 13v.01"/>
-    <path d="M17 15l-4 -4"/>
-    <path d="M13 15l4 -4"/>
-  </symbol>
+    let miles=null, gain_ft=null, loss_ft=null;
+    const mmiles = distElevRaw.match(/([\\d.,]+)\\s*miles?/i); if (mmiles) miles = mmiles[1];
+    const mgain  = distElevRaw.match(/\\+([\\d.,]+)\\s*ft/i);
+    const mloss  = distElevRaw.match(/-([\\d.,]+)\\s*ft/i);
+    if (mgain) gain_ft = mgain[1].replace(/,/g,"");
+    if (mloss) loss_ft = mloss[1].replace(/,/g,"");
 
-  <symbol id="h-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M11 14l4 6h6l-9 -16l-9 16h6l4 -6"/>
-  </symbol>
+    const intel = {};
+    if (intelBlock){
+      intelBlock.split("\\n").forEach(line=>{
+        const mm = line.match(/•?\\s*([A-Za-z ]+):\\s*(\\d+)/);
+        if (mm) intel[mm[1].trim()] = Number(mm[2]);
+      });
+    }
 
-  <symbol id="h-weather" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1"/>
-    <path d="M13 14l-2 4l3 0l-2 4"/>
-  </symbol>
+    let blueprint_url = "";
+    const linkMatch = body.match(/\\[Blueprint[^\\]]*\\]\\((https?:\\/\\/[^\\s)]+)\\)/i);
+    if (linkMatch) blueprint_url = linkMatch[1];
 
-  <symbol id="h-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M3.5 5.5l1.5 1.5l2.5 -2.5"/>
-    <path d="M3.5 11.5l1.5 1.5l2.5 -2.5"/>
-    <path d="M3.5 17.5l1.5 1.5l2.5 -2.5"/>
-    <path d="M11 6l9 0"/>
-    <path d="M11 12l9 0"/>
-    <path d="M11 18l9 0"/>
-  </symbol>
+    sections.push({
+      index:Number(idx), title:title.trim(), region, overview, miles, gain_ft, loss_ft, duration,
+      objective, terrain, season, hazards, culminating_objective:culmin, objective_class:objClass,
+      strategic_advantage:advantage, route_type:routeType, logistics, intel, blueprint_url
+    });
+  }
+  return sections;
+}
 
-  <symbol id="h-optional" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M4 8h4v4h-4z"/>
-    <path d="M6 4l0 4"/>
-    <path d="M6 12l0 8"/>
-    <path d="M10 14h4v4h-4z"/>
-    <path d="M12 4l0 10"/>
-    <path d="M12 18l0 2"/>
-    <path d="M16 5h4v4h-4z"/>
-    <path d="M18 4l0 1"/>
-    <path d="M18 9l0 11"/>
-  </symbol>
+/* ===== Render one SCOUT option (no day cards) ===== */
+function buildScoutCard(opt, index){
+  const chips = [];
+  if (opt.duration) chips.push(`<span class="chip">${opt.duration}</span>`);
+  if (opt.miles)    chips.push(`<span class="chip">${opt.miles} miles</span>`);
+  if (opt.gain_ft || opt.loss_ft){
+    const up = opt.gain_ft ? Number(opt.gain_ft).toLocaleString() : "0";
+    const dn = opt.loss_ft ? Number(opt.loss_ft).toLocaleString() : "0";
+    chips.push(`<span class="chip">+${up} ft / -${dn} ft</span>`);
+  }
+  if (opt.terrain)  chips.push(`<span class="chip secondary">${opt.terrain}</span>`);
 
-  <symbol id="h-risk" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M15.04 19.745c-.942 .551 -1.964 .976 -3.04 1.255a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 .195 6.015"/>
-    <path d="M19 16v3"/>
-    <path d="M19 22v.01"/>
-  </symbol>
+  let logisticsHTML = "";
+  if (opt.logistics){
+    const lines = opt.logistics.replace(/\\r/g,"").split("\\n")
+      .map(s=>s.replace(/^[•\\-\\u2022]\\s*/, "").trim()).filter(Boolean);
+    if (lines.length){
+      logisticsHTML = `<ul style="margin:6px 0 0 18px; padding:0; line-height:1.5">${lines.map(li=>`<li>${li}</li>`).join("")}</ul>`;
+    }
+  }
 
-  <symbol id="h-conditions" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M15.51 15.56a5 5 0 1 0 -3.51 1.44"/>
-    <path d="M18.832 17.86a9 9 0 1 0 -6.832 3.14"/>
-    <path d="M12 12v9"/>
-  </symbol>
+  const intelHTML = Object.keys(opt.intel||{}).length
+    ? `<div class="chips" style="margin-top:8px">${Object.entries(opt.intel).map(([k,v])=>`<span class="chip secondary">${k}: ${v}</span>`).join(" ")}</div>`
+    : "";
 
-  <symbol id="h-bailout" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M13 12v.01"/>
-    <path d="M3 21h18"/>
-    <path d="M5 21v-16a2 2 0 0 1 2 -2h7.5m2.5 10.5v7.5"/>
-    <path d="M14 7h7m-3 -3l3 3l-3 3"/>
-  </symbol>
-
-  <symbol id="h-emergency" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 8a2 2 0 0 1 2 2v4a2 2 0 1 1 -4 0v-4a2 2 0 0 1 2 -2"/>
-    <path d="M17 15c.345 .6 1.258 1 2 1a2 2 0 1 0 0 -4a2 2 0 1 1 0 -4c.746 0 1.656 .394 2 1"/>
-    <path d="M3 15c.345 .6 1.258 1 2 1a2 2 0 1 0 0 -4a2 2 0 1 1 0 -4c.746 0 1.656 .394 2 1"/>
-  </symbol>
-
-  <symbol id="h-final" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697"/>
-    <path d="M18 14v4h4"/>
-    <path d="M18 11v-4a2 2 0 0 0 -2 -2h-2"/>
-    <path d="M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/>
-    <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
-    <path d="M8 11h4"/>
-    <path d="M8 15h3"/>
-  </symbol>
-
-  <symbol id="h-disclaimer" viewBox="0 0 24 24" fill="currentColor">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 1.67c.955 0 1.845 .467 2.39 1.247l.105 .16l8.114 13.548a2.914 2.914 0 0 1 -2.307 4.363l-.195 .008h-16.225a2.914 2.914 0 0 1 -2.582 -4.2l.099 -.185l8.11 -13.538a2.914 2.914 0 0 1 2.491 -1.403zm.01 13.33l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -7a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z"/>
-  </symbol>
-
-  <!-- Chips (c-*) -->
-  <symbol id="c-distance" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M19.875 8c.621 0 1.125 .512 1.125 1.143v5.714c0 .631 -.504 1.143 -1.125 1.143h-15.875a1 1 0 0 1 -1 -1v-5.857c0 -.631 .504 -1.143 1.125 -1.143h15.75z"/>
-    <path d="M9 8v2"/>
-    <path d="M6 8v3"/>
-    <path d="M12 8v3"/>
-    <path d="M18 8v3"/>
-    <path d="M15 8v2"/>
-  </symbol>
-
-  <symbol id="c-elevation" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M3 20h18l-6.921 -14.612a2.3 2.3 0 0 0 -4.158 0l-6.921 14.612z"/>
-    <path d="M7.5 11l2 2.5l2.5 -2.5l2 3l2.5 -2"/>
-  </symbol>
-
-  <symbol id="c-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 21v-4"/>
-    <path d="M12 13v-4"/>
-    <path d="M12 5v-2"/>
-    <path d="M10 21h4"/>
-    <path d="M8 5v4h11l2 -2l-2 -2z"/>
-    <path d="M14 13v4h-8l-2 -2l2 -2z"/>
-  </symbol>
-
-  <symbol id="c-terrain" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M4.5 9.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M9.5 4.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M9.5 14.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M4.5 19.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M14.5 9.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M19.5 4.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M14.5 19.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-    <path d="M19.5 14.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-  </symbol>
-
-  <symbol id="c-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M16 3h5v5"/>
-    <path d="M8 3h-5v5"/>
-    <path d="M21 3l-7.536 7.536a5 5 0 0 0 -1.464 3.534v6.93"/>
-    <path d="M6 6.01v-.01"/>
-    <path d="M8 8.02v-.01"/>
-    <path d="M10 10v.01"/>
-  </symbol>
-
-  <symbol id="c-morale" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/>
-    <path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
-  </symbol>
-
-<symbol id="c-safety" viewBox="0 0 24 24"
-        fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M12 4l8 4v6a8 8 0 1 1 -16 0v-6z"/>
-  <path d="M9 12l2 2l4 -4"/>
-</symbol>
-
-  <symbol id="c-water" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M7.502 19.423c2.602 2.105 6.395 2.105 8.996 0c2.602 -2.105 3.262 -5.708 1.566 -8.546l-4.89 -7.26c-.42 -.625 -1.287 -.803 -1.936 -.397a1.376 1.376 0 0 0 -.41 .397l-4.893 7.26c-1.695 2.838 -1.035 6.441 1.567 8.546z"/>
-  </symbol>
-
-  <symbol id="c-campsite" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M11 14l4 6h6l-9 -16l-9 16h6l4 -6"/>
-  </symbol>
-
-  <symbol id="c-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
-    <path d="M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0 -16 0"/>
-    <path d="M12 2l0 2"/>
-    <path d="M12 20l0 2"/>
-    <path d="M20 12l2 0"/>
-    <path d="M2 12l2 0"/>
-  </symbol>
-  
-  <symbol id="c-duration" viewBox="0 0 24 24"
-        fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-  <path d="M9 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-  <path d="M15 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-  <path d="M4 20h14" />
-</symbol>
-  <!-- 
-
-=== Scenario tab symbols (append before </svg>) === -->
-  <symbol id="tab-baseline" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <ellipse cx="12" cy="6" rx="8" ry="3" />
-    <path d="M4 6v6a8 3 0 0 0 16 0v-6" />
-    <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
-  </symbol>
-
-  <symbol id="tab-anchor" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12.857 14.675a5.016 5.016 0 0 1 -.857 -.675a5 5 0 0 0 -7 0v-9a5 5 0 0 1 7 0a5 5 0 0 0 7 0v6" />
-    <path d="M5 21v-7" />
-    <path d="M21.121 20.121a3 3 0 1 0 -4.242 0c.418 .419 1.125 1.045 2.121 1.879c1.051 -.89 1.759 -1.516 2.121 -1.879z" />
-    <path d="M19 18v.01" />
-  </symbol>
-
-  <symbol id="tab-driven" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M5.636 19.364a9 9 0 1 1 12.728 0" />
-    <path d="M16 9l-4 4" />
-  </symbol>
-</svg>
-
-<div class="page">
-  <div id="status">Loading…</div>
-  <h1 id="title" class="title"></h1>
-
-  <!-- Top actions -->
-  <div class="actions">
-    <button id="btnBookmark" class="btn-ghost"><svg class="ico"><use href="#i-bookmark"/></svg><span>Bookmark</span></button>
-    <button id="btnShare" class="btn-ghost"><svg class="ico"><use href="#i-share"/></svg><span>Share</span></button>
-    <button id="btnPrint" class="btn-ghost"><svg class="ico"><use href="#i-print"/></svg><span>Print</span></button>
-  </div>
-
-  <!-- Header grid -->
-  <div class="grid2">
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-compass"/></svg><span>Category</span></div><div id="category" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-sun"/></svg><span>Season</span></div><div id="season" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-pin"/></svg><span>Location</span></div><div id="location" class="value"></div></div>
-    <div><div class="label with-icon"><svg class="ico"><use href="#i-calendar"/></svg><span>Date</span></div><div id="date" class="value"></div></div>
-  </div>
-
-  <!-- Hero -->
-  <div class="fullbleed">
-    <a id="heroLink" href="#" target="_blank" rel="noopener noreferrer"><img id="hero" alt="Expedition hero"/></a>
-    <div id="credit" class="credit"></div>
-  </div>
-
-<!-- Scenario Tabs: lives in the BODY, above the Expedition Itinerary card -->
-<nav class="ei-tabs" aria-label="Expedition scenarios">
-  <ul class="ei-tablist" role="tablist">
-    <li>
-      <button class="ei-tab" role="tab" aria-selected="true" id="ei-tab-baseline" data-scenario="baseline">
-        <svg aria-hidden="true"><use href="#tab-baseline"></use></svg>
-        <span>Baseline</span>
-      </button>
-    </li>
-    <li>
-      <button class="ei-tab" role="tab" aria-selected="false" id="ei-tab-anchor" data-scenario="anchor">
-        <svg aria-hidden="true"><use href="#tab-anchor"></use></svg>
-        <span>Anchor</span>
-      </button>
-    </li>
-    <li>
-      <button class="ei-tab" role="tab" aria-selected="false" id="ei-tab-driven" data-scenario="driven">
-        <svg aria-hidden="true"><use href="#tab-driven"></use></svg>
-        <span>Driven</span>
-      </button>
-    </li>
-  </ul>
-</nav>
-
-<section id="expItin" class="section" style="display:none">
-  <h3>Expedition Itinerary</h3>
-  <p id="scenarioTagline" class="subhead"></p>
-  <div id="expKV" class="kv"></div>
-  <div id="expChips" style="margin-top:8px"></div>
-</section>
-
-  <!-- ORDERED SECTIONS -->
-  <section class="section"><h3>Permits & Entry</h3><div id="permits_entry"></div></section>
-
-  <section class="section">
-    <h3>Shuttle / Transportation</h3>
-    <div id="shuttle_transportation"></div>
-    <div class="embed" style="margin-top:10px"><iframe id="shuttle_map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-  </section>
-
-  <section class="section"><h3>Permit & Shuttle Timeline</h3><div id="permit_timeline"></div></section>
-  <section class="section"><h3>Multi-Trailhead Logistics</h3><div id="multi_trailhead"></div></section>
-  <section class="section"><h3>Key Considerations</h3><div id="key_considerations"></div></section>
-
-  <!-- DAYS -->
-  <section class="section"><h3>Itinerary Overview</h3><div id="itineraryDays"></div></section>
-
-  <!-- GPX -->
-  <div class="section">
-    <h3>GPX Route & Elevation</h3>
-    <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-    <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.8"></span>
+  return `
+    <div>
+      <h3 style="margin:0 0 4px">${opt.title || `Option ${index+1}`}</h3>
+      ${opt.region ? `<p class="subhead">${opt.region}</p>` : ""}
+      ${chips.length ? `<div class="chips" style="margin:6px 0 10px">${chips.join(" ")}</div>` : ""}
+      ${opt.overview ? `<p class="previewP" style="margin-top:8px">${opt.overview}</p>` : ""}
+      <div class="row"><div class="k">Primary Objective:</div><div>${opt.objective || "—"}</div></div>
+      <div class="row"><div class="k">Ideal Season:</div><div>${opt.season || "—"}</div></div>
+      <div class="row"><div class="k">Known Hazards:</div><div>${opt.hazards || "—"}</div></div>
+      <div class="row"><div class="k">Culminating Objective:</div><div>${opt.culminating_objective || "—"}</div></div>
+      <div class="row"><div class="k">Objective Class:</div><div>${opt.objective_class || "—"}</div></div>
+      <div class="row"><div class="k">Strategic Advantage:</div><div>${opt.strategic_advantage || "—"}</div></div>
+      <div class="row"><div class="k">Route Type:</div><div>${opt.route_type || "—"}</div></div>
+      ${logisticsHTML ? `<div class="row" style="border-top:1px dashed var(--div-soft); padding-top:10px"><div class="k">Logistics Snapshot:</div><div>${logisticsHTML}</div></div>` : ""}
+      ${intelHTML}
     </div>
-    <div class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><strong>Do not rely on it as your only navigation source.</strong></div>
-  </div>
-
-  <!-- Text sections -->
-  <section class="section"><h3>Campsite Intel</h3><div id="campsite_intel"></div></section>
-  <section class="section"><h3>Weather & Altitude Notes</h3><div id="weather_altitude"></div></section>
-  <section class="section"><h3>Gear Checklist</h3><div id="gear_checklist"></div></section>
-  <section class="section"><h3>Optional Modification</h3><div id="optional_mod"></div></section>
-  <section class="section"><h3>Risk Matrix & Hazard Timeline</h3><div id="risk_matrix"></div></section>
-  <section class="section"><h3>Conditions Watch</h3><div id="conditions_watch"></div></section>
-  <section class="section"><h3>Bailout Summary</h3><div id="bailout_summary"></div></section>
-  <section class="section"><h3>Emergency Contacts & Numbers</h3><div id="emergency"></div></section>
-  <section class="section"><h3>Final Brief Summary</h3><div id="final_brief"></div></section>
-  <section class="section"><h3>Field Disclaimer</h3><div id="field_disclaimer"></div></section>
-</div>
-
-<!-- 1) Adapter: leave this ONE include -->
-<script src="/preview/scout-adapter.js"></script>
-
-<!-- 2) Your real Scout payload (keep ONLY this data block) -->
-<script id="scout-data" type="application/json">
-{
-  "options": [
-    {
-      "id": "opt-1",
-      "title": "Manistee River Loop",
-      "region": "Manistee National Forest, Michigan",
-      "days": 2,
-      "miles": 23,
-      "gain_ft": 1200,
-      "loss_ft": 1200,
-      "route_type": "Loop",
-      "intel_score": { "solitude": 6, "photo_ops": 9, "scenic_reward": 8 },
-      "cta": {
-        "text": "Blueprint This Manistee River Loop →",
-        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=1&route=Manistee%20River%20Loop"
-      }
-    },
-    {
-      "id": "opt-2",
-      "title": "Porcupine Mountains Loop",
-      "region": "Porcupine Mountains, Michigan",
-      "days": 2,
-      "miles": 17,
-      "gain_ft": 1500,
-      "loss_ft": 1500,
-      "route_type": "Loop",
-      "intel_score": { "solitude": 8, "photo_ops": 9, "scenic_reward": 9 },
-      "cta": {
-        "text": "Blueprint This Porcupine Mountains Loop →",
-        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=2&route=Porcupine%20Mountains%20Loop"
-      }
-    },
-    {
-      "id": "opt-3",
-      "title": "Jordan River Pathway",
-      "region": "Jordan River Valley, Michigan",
-      "days": 2,
-      "miles": 18,
-      "gain_ft": 1000,
-      "loss_ft": 1000,
-      "route_type": "Loop",
-      "intel_score": { "solitude": 7, "photo_ops": 8, "scenic_reward": 8 },
-      "cta": {
-        "text": "Blueprint This Jordan River Pathway →",
-        "url": "https://www.expeditionintel.com/upgrade?source=scout&option=3&route=Jordan%20River%20Pathway"
-      }
-    }
-  ]
+  `;
 }
-</script>
 
-<!-- 3) Bootstrap + inline adapter to EI format -->
-<script>
-(function () {
-  // 3a) read inline JSON safely
-  var el = document.getElementById('ei-data') || document.getElementById('scout-data');
-  if (!el) return;
-  var payload;
-  try { payload = JSON.parse(el.textContent); } catch (e) { console.error('[EI] Invalid JSON', e); return; }
+/* CTA wiring */
+function updateCTA_forScout(opt){
+  const wrap = document.getElementById('blueprintCta');
+  const btn  = document.getElementById('btnBlueprint');
+  const hint = document.getElementById('ctaHint');
+  if (!wrap || !btn || !hint) return;
+  if (!opt){ wrap.style.display='none'; return; }
+  btn.disabled = false;
+  btn.textContent = `Blueprint “${opt.title || `Option ${ACTIVE+1}`}” →`;
+  hint.textContent = 'Purchase to unlock full Blueprint';
+  wrap.style.display = 'flex';
+  btn.onclick = ()=>{ opt.blueprint_url ? (window.location.href = opt.blueprint_url) : alert('No purchase link provided for this option yet.'); };
+}
 
-  // 3b) convert Scout "options" -> EI scenarios (baseline/anchor/driven)
-  function optionsToScenarios(opts){
-    if (!Array.isArray(opts)) return [];
-    var keyOrder = ['baseline','anchor','driven'];
-    return opts.slice(0,3).map(function(o, i){
-      return {
-        key:   keyOrder[i] || (o.id || ('opt-'+(i+1))),
-        label: (keyOrder[i] || o.id || '').replace(/^\w/, c=>c.toUpperCase()),
-        header: {
-          duration:  (o.days ? o.days + ' days' : ''),
-          mileage:   (o.miles ? o.miles + ' miles' : ''),
-          elevation: (o.gain_ft!=null && o.loss_ft!=null ? ('+'+o.gain_ft+' ft / -'+o.loss_ft+' ft') : ''),
-          terrain:   (o.route_type || ''),
-          experience:'',
-          trailheads:'',
-          gps:''
-        },
-        tagline: { marketing: (o.title || '') + (o.region ? ' — ' + o.region : '') },
-        // Leave days empty for now; preview still renders tabs + header chips
-        days: []
-      };
-    });
+/* state */
+let SCOUT = { options: [] };
+let ACTIVE = 0;
+
+/* CTA ensure */
+function ensureCTA(){
+  const card = $id('optCard'); if (!card) return;
+  let wrap = $id('blueprintCta');
+  if (!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'blueprintCta';
+    wrap.className = 'cta';
+    wrap.innerHTML = `
+      <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
+      <small id="ctaHint">Select an option above</small>
+    `;
+    card.appendChild(wrap);
   }
+}
 
-  // 3c) prefer external adapter if present; else use our inline
-  var adapt = (window.scoutToEI || window.scoutAdapter || function(x){
-    if (Array.isArray(x)) return { scenarios: x };                 // already scenarios
-    if (x && Array.isArray(x.scenarios)) return x;                 // already in EI shape
-    if (x && Array.isArray(x.options)) return { scenarios: optionsToScenarios(x.options) }; // Scout options
-    return { scenarios: [] };
-  });
-
-  window.EI_DATA = adapt(payload);
-  window.dispatchEvent(new CustomEvent('ei:data-ready'));
-})();
-</script>
-<script>
-/* ---------- utils ---------- */
-const $ = id => document.getElementById(id);
-const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
-const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduce((a,c)=>a?.[c],obj); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
-
-/* ---------- Bookmark / Share / Print ---------- */
-(() => {
-  const btnBm = $('btnBookmark'), btnShare = $('btnShare'), btnPrint = $('btnPrint');
-  if (!btnBm || !btnShare || !btnPrint) return;
-
-  const KEY='ei_bookmarks';
-  const url=location.href.split('#')[0];
-
-  const canWrite = (s)=>{ try{ s.setItem('__t','1'); s.removeItem('__t'); return true; }catch{ return false; } };
-  const store = canWrite(localStorage) ? localStorage : (canWrite(sessionStorage) ? sessionStorage : null);
-  let mem = new Set();
-  const read = ()=> store ? new Set(JSON.parse(store.getItem(KEY)||'[]')) : mem;
-  const write = (set)=> { if(store){ try{ store.setItem(KEY, JSON.stringify([...set])); return; }catch{} } mem = new Set(set); };
-
-  const setUI = (on)=>{ btnBm.dataset.active = on ? 'true' : 'false'; btnBm.setAttribute('aria-pressed', on?'true':'false'); btnBm.querySelector('span').textContent = on ? 'Bookmarked' : 'Bookmark'; };
-  setUI(read().has(url));
-
-  btnBm.addEventListener('click', ()=>{
-    const s = read();
-    s.has(url) ? s.delete(url) : s.add(url);
-    write(s); setUI(s.has(url));
-  });
-
-  btnShare.addEventListener('click', async ()=>{
-    const title=document.title||'Expedition';
-    try{
-      if(navigator.share){ await navigator.share({title,url}); return; }
-      await navigator.clipboard.writeText(url);
-      btnShare.querySelector('span').textContent='Link copied';
-      setTimeout(()=>btnShare.querySelector('span').textContent='Share',1400);
-    }catch{
-      window.prompt('Copy this link:', url);
+/* Live mirror */
+(function liveMirror(){
+  const form = $id("scoutForm"); if (!form) return;
+  function seasonFromISODate(iso){
+    if(!iso) return "";
+    const m = Number(iso.slice(5,7));
+    if([12,1,2].includes(m)) return "Winter";
+    if([3,4,5].includes(m))  return "Spring";
+    if([6,7,8].includes(m))  return "Summer";
+    return "Fall";
+  }
+  const OUT = {
+    title:$id("pv_title"), category:$id("pv_category"), season:$id("pv_season"),
+    location:$id("pv_location"), date:$id("pv_date"), hero:$id("pv_hero"),
+  };
+  function paint(){
+    const getMeta = (k)=> form.querySelector(`[data-ei-meta="${k}"]`)?.value?.trim() || "";
+    const dateISO = getMeta("date");
+    const season  = seasonFromISODate(dateISO) || "—";
+    OUT.title && (OUT.title.textContent = getMeta("title") || "Scout Recon");
+    OUT.category && (OUT.category.textContent = getMeta("category") || "—");
+    OUT.season && (OUT.season.textContent = season);
+    OUT.location && (OUT.location.textContent = getMeta("location") || "—");
+    OUT.date && (OUT.date.textContent = dateISO ? fmtDateView(dateISO) : "—");
+    if (getMeta("location") && OUT.hero && !OUT.hero.src){
+      OUT.hero.src = "https://images.unsplash.it/photo-1501785888041-af3ef285b470?w=1200";
     }
-  });
-
-  btnPrint.addEventListener('click',()=>window.print());
+  }
+  form.addEventListener("input", paint);
+  form.addEventListener("change", paint);
+  paint();
 })();
 
-/* ---------- chips ---------- */
-const CHIP_SVG = {
-  distance:'<svg><use href="#c-distance"/></svg>',
-  elevation:'<svg><use href="#c-elevation"/></svg>',
-  campsite:'<svg><use href="#c-campsite"/></svg>',
-  trail:'<svg><use href="#c-trail"/></svg>',
-  terrain:'<svg><use href="#c-terrain"/></svg>',
-  water:'<svg><use href="#c-water"/></svg>',
-  safety:'<svg><use href="#c-safety"/></svg>',
-  decision:'<svg><use href="#c-decision"/></svg>',
-  morale:'<svg><use href="#c-morale"/></svg>',
-  gps:'<svg><use href="#c-gps"/></svg>',   // ✅ comma added
-  duration:'<svg><use href="#i-calendar"/></svg>',     // calendar for “4 days”
-  experience:'<svg><use href="#c-duration"/></svg>'     // 3-bar icon = level
-};
-const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
-
-/* ---------- KV or paragraph-only renderer ---------- */
-function kvOrParagraph(containerId, text){
-  const el = $(containerId); 
-  if(!el){ return; }
-  if(!text){ el.innerHTML=''; return; }
-  const lines = String(text).split(/\r?\n/).map(s => s.trim().replace(/^-\s*/, "")).filter(Boolean);
-  const hasKV = lines.some(l => /^[^:]+:\s*\S/.test(l));
-  if(hasKV){
-    const rows=[];
-    for(const l of lines){ const m=l.match(/^([^:]+):\s*(.*)$/); if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); } }
-    el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
-  }else{
-    el.innerHTML = `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
-  }
-}
-
-// Extract "Start → End" from a day's fields (title/desc), with safe fallbacks.
-function _routePartsFrom(day){
-  const clean = s => String(s || '').trim();
-
-  // helper: drop any leading "Day N:" prefix
-  const stripDayPrefix = s => clean(s).replace(/^\s*day\s*\d+\s*:\s*/i, '');
-
-  const firstSentence = s => stripDayPrefix(clean(s)).split(/[\n.]/)[0];
-
-  // 1) prefer explicit title line containing a route
-  let title = stripDayPrefix(day.title || day.day_title || day.label || '');
-  let m = title.match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
-  if (m) return [clean(m[1]), clean(m[2])];
-
-  // 2) try the first sentence of description/preview
-  const probe = firstSentence(day.description || day.preview || '');
-  m = probe.match(/^\s*(.+?)\s*(?:→|->| to )\s*(.+?)\s*$/i);
-  if (m) return [clean(m[1]), clean(m[2])];
-
-  // 3) anchor-style loop day: infer camp name, use as start=end
-  const camp = clean(day.campsite_location || '')
-                .split('–')[0]
-                .split('-')[0];
-  if (camp) return [clean(camp), clean(camp)];
-
-  return null; // unknown; caller will fall back
-}
-
-function _formatDayHeader(day, idx){
-  const num = (String(day.label||'').match(/\d+/) || [idx+1])[0];
-  const parts = _routePartsFrom(day);
-  return parts ? `Day ${num}: ${parts[0]} \u2192 ${parts[1]}` : `Day ${num}`;
-}
-
-/* ---------- day + expedition render ---------- */
-function renderDay(day, idx){
-  const title = _formatDayHeader(day, idx);
-
-  // normalize & allow aliases + arrays
-  const src = { ...(day.chips||{}), ...(day||{}) };
-  const pickAlias = (...keys) => {
-    for (const k of keys){
-      const v = src[k];
-      if (Array.isArray(v) && v.length) return v;
-      if (typeof v === 'string' && v.trim()) return v.trim();
-    }
-    return "";
-  };
-
-  const chips = {
-    distance: pickAlias('distance'),
-    elevation: pickAlias('elevation','gainloss','gain_loss'),
-    campsite: pickAlias('campsite','camp','camp_site','site','overnight'),
-    trail:    pickAlias('trail','trailhead','primary_trail','primary_trails'),
-    terrain:  pickAlias('terrain'),
-    water:    pickAlias('water','water_sources','key_water_sources'),
-    safety:   pickAlias('safety'),
-    decision: pickAlias('decision','decision_point'),
-    morale:   pickAlias('morale','morale_marker'),
-    features: pickAlias('features','notable_features'),
-    tip:      pickAlias('tip','trail_tip'),
-    bailout:  pickAlias('bailout')
-  };
-
-  // render one field that may be a string OR an array of strings
-  const renderChipField = (k, val, secondary=false) => {
-    if (Array.isArray(val)) return val.map(v => chipHTML(k, v, secondary)).join(' ');
-    if (typeof val === 'string' && val.trim()) return chipHTML(k, val.trim(), secondary);
-    return '';
-  };
-
-  let html = `<article class="day"><h4>${title}</h4>`;
-
-  // preview fallback to description’s first sentence
-  const preview = (day.preview && day.preview.trim())
-      ? day.preview.trim()
-      : String(day.description||'').split('\n')[0];
-  if (preview) html += `<p class="preview">${preview}</p>`;
-
-  const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
-  prim.forEach(([k,l])=>{
-    const content = renderChipField(k, chips[k], false);
-    if (content) html+=`<div class="row"><div class="labelB">${l}:</div><div>${content}</div></div>`;
-  });
-
-  const secOrder=["trail","terrain","features","water","safety","tip","decision","bailout","morale"];
-  const labels={trail:"Primary trail(s)",terrain:"Terrain",features:"Notable features",water:"Key water sources",safety:"Safety",tip:"Trail tip",decision:"Decision point",bailout:"Bailout",morale:"Morale marker"};
-  secOrder.forEach(k=>{
-    const content = renderChipField(k, chips[k], true);
-    if (content) html+=`<div class="row"><div class="labelB">${labels[k]}:</div><div>${content}</div></div>`;
-  });
-
-  return html+`</article>`;
-}
-function renderExpeditionKV(info){
-  const kv=$('expKV'); if(!kv) return; kv.innerHTML='';
-  const add=(k,v)=>{ if(v) kv.insertAdjacentHTML('beforeend', `<div class="k">${k}</div><div class="v">${v}</div>`); };
-  add("EXPEDITION ITINERARY", info.route||"Teton Crest Trail Traverse");
-  add("PRIMARY OBJECTIVE", info.objective||"End-to-End Traverse");
-  add("TRIP DURATION", info.duration||"");
-  add("TOTAL ESTIMATED MILEAGE", info.mileage||"");
-  add("EXPERIENCE LEVEL", info.experience||"");
-  add("TERRAIN TYPE", info.terrain||"");
-}
-function renderExpeditionChips(info){
-  const host = $('expChips');
-  if (!host) return;
-  host.innerHTML = '';
-
-  // Add one labeled row (same structure as Days)
-  const addRow = (label, chipKey, text, secondary=false, rowClass='') => {
-    if (!text) return;
-    host.insertAdjacentHTML(
-      'beforeend',
-      `<div class="row ${rowClass}">
-         <div class="labelB">${label}:</div>
-         <div>${chipHTML(chipKey, text, secondary)}</div>
-       </div>`
-    );
-  };
-
-  // Top 3 (read together)
-  addRow('Duration',                'duration',  info.duration,  false, 'top');
-  addRow('Total estimated mileage', 'distance',  info.mileage,   false, 'top');
-  addRow('Elevation Gain/Loss',     'elevation', info.elevation, false, 'top');
-
-  // Bottom 4
-  addRow('Start and end trailhead', 'trail',     info.trailheads, true,  'bottom');
-  addRow('GPS',                     'gps',       info.gps,        true,  'bottom');
-  addRow('Terrain type',            'terrain',   info.terrain,    true,  'bottom');
-  addRow('Experience level',        'experience',info.experience, true,  'bottom');
-}
-
-/* ---------- mission_text → structured fields ---------- */
-function inflateFromMission(data){
-  const out = { ...data };
-  const txt = (data.mission_text || "")
-    .replace(/\r/g, '')
-    .replace(/\u2013/g, '-')  // en dash → hyphen
-    .replace(/\u2014/g, '-')  // em dash → hyphen
-    .trim();
-  if (!txt) return out;
-
-  // accept em dash (—), double dash (⸻), or plain hyphen (---)
-  const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
-  const grab = (label) => {
-    const re = new RegExp(
-  `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
-  'i'
-);
-    const m = txt.match(re);
-    return m ? m[2].trim() : "";
-  };
-
-  {
-    const head = parts[0]||"";
-    const getLine = (aliasRE) => head.match(new RegExp(`${aliasRE}:\\s*(.+)`,'i'))?.[1]?.trim() || "";
-    const kv = {
-      route:      getLine("EXPEDITION\\s+ITINERARY"),
-      objective:  getLine("PRIMARY\\s+OBJECTIVE"),
-      duration:   getLine("TRIP\\s+DURATION"),
-      mileage:    getLine("TOTAL\\s+ESTIMATED\\s+MILEAGE"),
-      experience: getLine("EXPERIENCE\\s+LEVEL"),
-      terrain:    getLine("TERRAIN\\s+TYPE")
-    };
-    const elev = head.match(/Cumulative elevation[^:]*:\s*([^\n]+)/i)?.[1];
-    const th   = head.match(/Start and end trailhead[^:]*:\s*([^\n]+)/i)?.[1];
-    const gps  = head.match(/GPS coordinates[^:]*:\s*([^\n]+)/i)?.[1];
-    out.expedition_itinerary = { ...kv, elevation:elev||"", trailheads:th||"", gps:gps||"" };
-  }
-
-  out.permits_entry         ||= grab("PERMITS\\s*&\\s*ENTRY");
-  // accept either "SHUTTLE / TRANSPORTATION" or just "TRANSPORTATION"
-  out.shuttle_transportation ||= grab("(?:SHUTTLE\\s*/\\s*TRANSPORTATION|TRANSPORTATION)");
-  out.multi_trailhead       ||= grab("MULTI-TRAILHEAD\\s+LOGISTICS");
-  out.key_considerations    ||= grab("KEY\\s+CONSIDERATIONS");
-  out.permit_timeline       ||= grab("PERMIT\\s*&\\s*SHUTTLE\\s+TIMELINE");
-  out.campsite_intel        ||= grab("CAMPSITE\\s+INTEL");
-  out.weather_altitude      ||= grab("WEATHER\\s*&\\s*ALTITUDE\\s+NOTES");
-  out.gear_checklist        ||= grab("GEAR\\s+CHECKLIST");
-  out.optional_mod          ||= grab("OPTIONAL\\s+MODIFICATION");
-  out.risk_matrix           ||= grab("RISK\\s+MATRIX\\s*&\\s*HAZARD\\s+TIMELINE");
-  out.conditions_watch      ||= grab("CONDITIONS\\s+WATCH");
-  out.bailout_summary       ||= grab("BAILOUT\\s+SUMMARY");
-  out.emergency             ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
-  out.final_brief           ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
-  out.field_disclaimer      ||= grab("FIELD\\s+DISCLAIMER");
-
-  if(!Array.isArray(out.days) || out.days.length===0){
-   const dayBlocks = txt
-  .split(/\n\s*(?:—|⸻|---)\s*\n/g)
-  .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
-    out.days = dayBlocks.map(block=>{
-      const title = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
-      const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
-      const preview = afterTitle.split(/\n-\s/)[0].split(/\n{2,}/)[0].trim();
-      const pick = (re) => (afterTitle.match(re)?.[1]||"").trim();
-      const chips = {
-        distance: pick(/Distance[^:]*:\s*([^\n]+)/i) || pick(/Distance and elevation[^:]*:\s*([^,]+,[^\n]+)/i),
-        elevation: (()=>{ const s=pick(/Distance and elevation[^:]*:\s*([^\n]+)/i); const m=s.match(/([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i); return m?m[1]:""; })(),
-        campsite: pick(/Campsite location:\s*([^\n]+)/i),
-        trail:    pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
-        terrain:  pick(/Terrain:\s*([^\n]+)/i),
-        water:    pick(/Key water sources:\s*([^\n]+)/i),
-        safety:   pick(/Safety:\s*([^\n]+)/i),
-        decision: pick(/Decision point:\s*([^\n]+)/i),
-        morale:   pick(/Morale marker:\s*([^\n]+)/i)
-      };
-      // --- Multi-campsite support for "- Campsites:" bullet list on range days ---
-(function(){
-  // Scan the bullet block:
-  // - Campsites:
-  //   - Night 1: Creekside Camp – …
-  //   - Night 2: Riverside Camp – …
-  const lines = String(afterTitle||'').split(/\r?\n/);
-  let inBlock = false;
-  const labels = [];
-
-  for (const raw of lines){
-    const line = raw.replace(/\u00A0/g,' ').trim(); // normalize nbsp
-    if (!inBlock && /^-\s*campsites?\s*:/i.test(line)) { inBlock = true; continue; }
-    if (!inBlock) continue;
-    if (!/^\s*[-•]\s+/.test(line)) break;           // stop at first non-bullet
-
-    // "- Night 2: Riverside Camp – …"
-    const m = line.replace(/^\s*[-•]\s+/, '')
-                  .match(/night\s*(\d+)\s*:\s*([^–—-]+)(?:[–—-].*)?$/i);
-    if (m){
-      const n = +m[1];
-      const name = m[2].trim();
-      labels[n-1] = `Night ${n}: ${name}`;
-    }
-  }
-
-  const camps = labels.filter(Boolean);                 // ["Night 1: …", "Night 2: …"]
-  const isRange = /DAYS?\s+\d+\s*[-–]\s*\d+:/i.test(block);
-
-  if (camps.length){
-    // Range day → show multiple chips; single day → use first (only if empty)
-    chips.campsite = isRange ? camps : (chips.campsite || camps[0]);
-  }
-})();
-      if(!chips.distance){ const dm=afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i); if(dm) chips.distance=dm[1]; }
-      return { title, preview, chips };
-    });
-  }
-  return out;
-}
-
-/* ---------- data loader ---------- */
-const SUPABASE_BASE = 'https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
-function computeSrc(){
-  const qp=new URLSearchParams(location.search).get('src');
-  if(qp) return qp;
-  const m = location.pathname.match(/\/trip\/([^\/?#]+)\/?$/);
-  const slug = m?.[1] || 'alpine-lakes-sawtooth-wilderness-hike';
-  return SUPABASE_BASE + encodeURIComponent(slug) + '.json';
-}
-async function loadData(){
-  // 1) Prefer inline JSON if present (great for CodePen / local preview)
-  const inlineEl = document.getElementById('ei-data') || document.getElementById('scout-data');
-  if (inlineEl && inlineEl.textContent && inlineEl.textContent.trim().length){
-    const inline = safeParse(inlineEl.textContent);
-    if (inline && Object.keys(inline).length){
-      console.log('EI DATA SOURCE → inline (#ei-data)');
-      return inline;
-    }
-  }
-
-  // 2) Otherwise fetch from the computed URL
-  const url = computeSrc();
-  console.log('EI DATA SOURCE → fetch:', url);
-  try{
-    const res = await fetch(url, { cache:'no-store', headers:{ accept:'application/json' } });
-    if(!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-    const text = await res.text();
-    const raw = safeParse(text) ?? {};
-    return raw;
-  }catch(err){
-    console.warn('Fetch failed; no usable inline JSON found either:', err);
-    return {};
-  }
-}
-
-/* ---------- Main ---------- */
-(async ()=>{
-  const status=$('status');
-  let data={};
-  try{ data = await loadData(); } catch(e){ console.error(e); status.textContent='Could not load expedition data.'; }
-
-  data = inflateFromMission(data);
-
-  // Title/meta
-  $('title').textContent = data.title||'';
-  document.title = data.title ? `Expedition – ${data.title}` : 'Expedition – Preview';
-  $('category').textContent = data.category||'';
-  $('season').textContent = data.season||'';
-  $('location').textContent = data.location||'';
-  const d=data.date||'';
-  $('date').textContent = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : d;
-
-// Hero + credit
-if (data.hero_image) $('hero').src = data.hero_image;
-
-// Drop the prebuilt HTML from Zapier directly
-$('credit').innerHTML = data.image_credit || '';
-
-// Remove the old single-link wrapper logic (no need for image_link here)
-if (data.image_link) {
-  const a = $('heroLink');
-  a.href = data.image_link;
-  a.style.pointerEvents = 'auto';
-} else {
-  const a = $('heroLink');
-  a.removeAttribute('href');
-  a.style.pointerEvents = 'none';
-}
-  // Expedition itinerary
-  const ei = data.expedition_itinerary||{};
-  if(ei.route||ei.objective||ei.duration||ei.mileage||ei.experience||ei.terrain||ei.elevation||ei.trailheads||ei.gps){
-    $('expItin').style.display='block';
-    renderExpeditionKV(ei);
-    renderExpeditionChips(ei);
-  }
-
-  // Ordered sections
-  kvOrParagraph('permits_entry', data.permits_entry);
-  kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
-  const mapURL = data.map_embed_url || data.shuttle_map_url || "";
-  if (mapURL && $('shuttle_map')) $('shuttle_map').src = mapURL;
-  kvOrParagraph('permit_timeline', data.permit_timeline);
-  kvOrParagraph('multi_trailhead', data.multi_trailhead);
-  kvOrParagraph('key_considerations', data.key_considerations);
-
-  // Days
-  const days = Array.isArray(data.days)?data.days:[];
-$('itineraryDays').innerHTML = days.map((d,i) => renderDay(d,i)).join('');
-
-  // GPX
-  const gpxURL=data.gpx_download_link||'';
-  if(gpxURL){
-    const studio="https://gpx.studio/embed?options="+encodeURIComponent(JSON.stringify({
-      token:"pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg",
-      files:[gpxURL],
-      distanceUnits:"imperial"
-    }));
-    $('gpxStudio').src=studio; $('gpxStudioLink').href=studio; $('gpxBtn').href=gpxURL; $('gpxBtn').download=(data.slug||'route')+'.gpx';
-    const th=[data.start_trailhead,data.end_trailhead].filter(Boolean).join(' → ');
-    if(th) $('trailheads').textContent=th;
-  }else{
-    $('gpxEmbedWrap').innerHTML=`<div style="opacity:.7;font-size:14px">No GPX URL set.</div>`;
-    $('gpxActions').style.display='none';
-  }
-
-  // Remaining text sections
-  kvOrParagraph('campsite_intel', data.campsite_intel);
-  kvOrParagraph('weather_altitude', data.weather_altitude);
-  kvOrParagraph('gear_checklist', data.gear_checklist);
-  kvOrParagraph('optional_mod', data.optional_mod);
-  kvOrParagraph('risk_matrix', data.risk_matrix);
-  kvOrParagraph('conditions_watch', data.conditions_watch);
-  kvOrParagraph('bailout_summary', data.bailout_summary);
-  kvOrParagraph('emergency', data.emergency);
-  kvOrParagraph('final_brief', data.final_brief);
-  kvOrParagraph('field_disclaimer', data.field_disclaimer);
-
-function hideTrulyEmptySections(){
-  document.querySelectorAll('.section').forEach(s=>{
-    if (s.querySelector('#gpxEmbedWrap')) return; // never auto-hide GPX wrapper
-    const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
-      return (n.innerText && n.innerText.trim().length) || n.querySelector('iframe, a, .chip');
-    });
-    // toggle BOTH ways
-    s.style.display = hasContent ? '' : 'none';
-  });
-}
-window.EI_refreshSections = hideTrulyEmptySections; // expose for tabs
-
-// …after hideTrulyEmptySections();
-hideTrulyEmptySections();
-
-status.textContent='';
-setTimeout(()=>status.remove(),10);
-
-/* PATCH 3 — expose data for the tabs WITHOUT nuking adapter scenarios */
-if (window.EI_DATA && (Array.isArray(window.EI_DATA.scenarios))) {
-  // merge mission/meta fields from `data` into existing EI_DATA
-  window.EI_DATA = { ...window.EI_DATA, ...data };
-} else {
-  // no scenarios present (e.g., loading a full EI JSON) — keep as-is
-  window.EI_DATA = data;
-}
-window.dispatchEvent(new CustomEvent('ei:data-ready'));
-})();
-
-/* ===== In-page nav: build from h3s ===== */
-(() => {
-  const heads = [...document.querySelectorAll('.section > h3')];
-  if (!heads.length) return;
-
-  const sections = heads.map(h3 => {
-    let id = h3.id || h3.textContent.trim().toLowerCase()
-      .replace(/[^a-z0-9\s\-&]+/g,'')
-      .replace(/\s*&\s*/g,'-and-')
-      .replace(/\s+/g,'-');
-    if (!id) id = 'sec-' + Math.random().toString(36).slice(2,7);
-    if (document.getElementById(id) && h3.id !== id) { id += '-' + Math.random().toString(36).slice(2,4); }
-    h3.id = id;
-    if (!h3.hasAttribute('tabindex')) h3.setAttribute('tabindex','-1');
-    return { id, title: h3.textContent.trim() };
-  });
-
-  const btn = document.createElement('button');
-  btn.className = 'ei-toc-toggle';
-  btn.type = 'button';
-  btn.setAttribute('aria-label','Open section menu');
-  btn.innerHTML = '<span class="lines" aria-hidden="true"></span>';
-
-  const panel = document.createElement('aside');
-  panel.className = 'ei-toc-panel';
-  panel.setAttribute('aria-label','Sections');
-  panel.innerHTML = '<div class="ei-toc-title">Sections</div><ul class="ei-toc-list" role="list"></ul>';
-
-  const dim = document.createElement('div'); dim.className = 'ei-toc-dim';
-  const ul = panel.querySelector('.ei-toc-list');
-  // icon ids for slider chips
-const tocIconMap = new Map([
-  ['expedition itinerary','h-itinerary'],
-  ['permits & entry','h-permits'],
-  ['shuttle / transportation','h-shuttle'],
-  ['permit & shuttle timeline','h-timeline'],
-  ['multi-trailhead logistics','h-multitrail'],
-  ['key considerations','h-considerations'],
-  ['itinerary overview','h-itinerary'],
-  ['campsite intel','h-campsite'],
-  ['weather & altitude notes','h-weather'],
-  ['gear checklist','h-gear'],
-  ['optional modification','h-optional'],
-  ['risk matrix & hazard timeline','h-risk'],
-  ['conditions watch','h-conditions'],
-  ['bailout summary','h-bailout'],
-  ['emergency contacts & numbers','h-emergency'],
-  ['final brief summary','h-final'],
-  ['field disclaimer','h-disclaimer'],
-  ['gpx route & elevation','h-gpx']
-]);
-  sections.forEach(({id, title}) => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.href = '#'+id;
-    const key = title.trim().toLowerCase();
-const sym = tocIconMap.get(key);
-
-if (sym) {
-  a.innerHTML = `<svg class="ico" aria-hidden="true">
-                   <use href="#${sym}" xlink:href="#${sym}"></use>
-                 </svg><span>${title}</span>`;
-} else {
-  a.textContent = title;
-}
-
-a.addEventListener('click', () => close(true));
-li.appendChild(a);
-ul.appendChild(li);
+/* CTA click stub */
+function startCheckout(opt){ alert(`Checkout would start for:\\n${opt.title || `Option ${ACTIVE+1}`}`); }
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('#btnBlueprint'); if (!b) return;
+  const opt = (SCOUT.options||[])[ACTIVE]; if (!opt) return;
+  startCheckout(opt);
 });
 
-  document.body.append(btn, panel, dim);
-
-const open = () => {
-  const y = window.scrollY || document.documentElement.scrollTop || 0;
-  document.body.dataset.eiScrollY = String(y);
-  document.body.style.top = `-${y}px`;
-  document.body.classList.add('ei-open');
-  btn.setAttribute('aria-label','Close section menu');
-  (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
-};
-
-const close = (focusHeading) => {
-  const y = +(document.body.dataset.eiScrollY || 0);
-  document.body.classList.remove('ei-open');
-  document.body.style.top = '';
-  delete document.body.dataset.eiScrollY; // tidy up
-  window.scrollTo(0, y);
-  btn.setAttribute('aria-label','Open section menu');
-  if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
-};
-  btn.addEventListener('click', () =>
-  document.body.classList.contains('ei-open') ? close() : open()
-);
-  dim.addEventListener('click', () => close());
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-
-  const links = [...panel.querySelectorAll('a')];
-  const byId = Object.fromEntries(sections.map(s => [s.id, links.find(a => a.hash === '#'+s.id)]));
-
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const link = byId[entry.target.id];
-      if (!link) return;
-      if (entry.isIntersecting) {
-        links.forEach(a => a.removeAttribute('aria-current'));
-        link.setAttribute('aria-current','true');
-      }
-    });
-  }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.001] });
-  heads.forEach(h => io.observe(h));
-})();
-
-// Ensure printing never happens while the body is "frozen" for the TOC
-window.addEventListener('beforeprint', () => {
-  document.body.classList.remove('ei-open');
-  document.body.style.top = '';
-  delete document.body.dataset.eiScrollY;
-});
-
-/* ===== Section header icons (Tabler ids) ===== */
-(() => {
-  const map = new Map([
-    ['expedition itinerary','h-itinerary'],
-    ['permits & entry','h-permits'],
-    ['shuttle / transportation','h-shuttle'],
-    ['permit & shuttle timeline','h-timeline'],
-    ['multi-trailhead logistics','h-multitrail'],
-    ['key considerations','h-considerations'],
-    ['itinerary overview','h-itinerary'],
-    ['campsite intel','h-campsite'],
-    ['weather & altitude notes','h-weather'],
-    ['gear checklist','h-gear'],
-    ['optional modification','h-optional'],
-    ['risk matrix & hazard timeline','h-risk'],
-    ['conditions watch','h-conditions'],
-    ['bailout summary','h-bailout'],
-    ['emergency contacts & numbers','h-emergency'],
-    ['final brief summary','h-final'],
-    ['field disclaimer','h-disclaimer'],
-    ['gpx route & elevation','h-gpx']
-  ]);
-
-  document.querySelectorAll('.section > h3').forEach(h3 => {
-    if (h3.querySelector('.hdr-ico')) return;
-    const key = (h3.textContent||'').trim().toLowerCase();
-    const id = map.get(key);
-    if (!id) return;
-    const svgNS='http://www.w3.org/2000/svg';
-    const xlinkNS='http://www.w3.org/1999/xlink';
-    const svg = document.createElementNS(svgNS,'svg');
-    svg.setAttribute('class','hdr-ico');
-    const use = document.createElementNS(svgNS,'use');
-    use.setAttribute('href', `#${id}`);
-    use.setAttributeNS(xlinkNS, 'xlink:href', `#${id}`); // Safari
-    svg.appendChild(use);
-    h3.prepend(svg);
-  });
-})();
-</script>
-<script>
-  // place this immediately before the PATCH 4 tabs script block
-  (function primeEI(){
-    if (!window.EI_DATA || !Object.keys(window.EI_DATA).length){
-      try {
-        const inlineEl = document.getElementById('ei-data') || document.getElementById('scout-data');
-        if (inlineEl && inlineEl.textContent) window.EI_DATA = JSON.parse(inlineEl.textContent);
-      } catch {}
-    }
-  })();
-</script>
-<script>
-(() => {
-  'use strict';
-
-  /* ---------- tiny helpers ---------- */
-  const $ = (id) => document.getElementById(id);
-
-  const getBase = () =>
-    (window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {};
-
-  // If scenarios come in as a JSON string or fenced block, normalize to array
-  function addScenariosFromString(base){
-    if (!base) return {};
-    if (Array.isArray(base.scenarios)) return base;
-    if (typeof base.scenarios === 'object' && base.scenarios) return base;
-
-    const raw = String(base.scenarios_json || base.scenarios || '').trim();
-    if (!raw) return base;
-
-    // strip optional ```json fences
-    let t = raw.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
-    const m = t.match(/\{[\s\S]*\}|$begin:math:display$[\\s\\S]*$end:math:display$/);
-    if (m) t = m[0];
-
-    try {
-      const parsed = JSON.parse(t);
-      base.scenarios = Array.isArray(parsed) ? parsed :
-                       (parsed && Array.isArray(parsed.scenarios)) ? parsed.scenarios : [];
-    } catch(e){
-      console.warn('[EI] could not parse scenarios string', e);
-      base.scenarios = [];
-    }
-    return base;
-  }
-
-  const headerToItin = (h={}) => ({
-    duration:   h.duration   || '',
-    mileage:    h.mileage    || '',
-    elevation:  h.elevation  || '',
-    trailheads: h.trailheads || '',
-    gps:        h.gps        || '',
-    terrain:    h.terrain    || '',
-    experience: h.experience || ''
-  });
-
-  function parseLineForTitleAndChips(text=""){
-    const t = String(text||"").trim();
-    const m = t.match(/^(.*?)(?:,\s*)?([\d.]+\s*miles?)\s*,\s*([+\-–]?\d[\d,]*\s*ft)\s*\/\s*([+\-–]?\d[\d,]*\s*ft)\s*\.?$/i);
-    if (!m) return { title: t, chips:{} };
-    return {
-      title: m[1].trim().replace(/\s{2,}/g,' '),
-      chips: {
-        distance:  m[2].replace(/\s+/g,' ').trim(),
-        elevation: `${m[3].replace(/\s+/g,' ').trim()} / ${m[4].replace(/\s+/g,' ').trim()}`
-      }
-    };
-  }
-
-// ---- derive totals from a scenario's days
-function sumScenarioTotals(days = []) {
-  let miles = 0, up = 0, down = 0;
-
-  const toInt = (s) => {
-    if (s == null) return 0;
-    const m = String(s).match(/-?\d[\d,]*/);
-    return m ? parseInt(m[0].replace(/,/g,''), 10) : 0;
-  };
-
-  const addPair = (pair) => {
-    // pair: "X miles, +A ft / -B ft"
-    const m = String(pair).match(
-      /([\d.]+)\s*miles?\s*,\s*([+\-]?\d[\d,]*)\s*ft\s*\/\s*([+\-]?\d[\d,]*)\s*ft/i
-    );
-    if (!m) return;
-    miles += parseFloat(m[1]);       // miles can have decimals
-    up    += toInt(m[2]);
-    down  += toInt(m[3]);
-  };
-
-  days.forEach(d => {
-    // 1) exact field wins
-    if (d?.distance_and_elevation) { addPair(d.distance_and_elevation); return; }
-    // 2) chips (if GPT populated only elevation there)
-    if (d?.chips?.elevation && d?.chips?.distance) {
-      addPair(`${d.chips.distance}, ${d.chips.elevation}`);
-      return;
-    }
-    // 3) last resort: parse from description tail
-    if (d?.description) addPair(d.description);
-  });
-
-  const fmtMi = (v) => `${Math.round(v)} miles`;
-  const fmtFt = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ','); // 12000 -> "12,000"
-
-  return {
-    mileage:   fmtMi(miles),
-    elevation: `+${fmtFt(up)} ft / -${fmtFt(down)} ft`,
-    duration:  `${days.length} days`
+/* Tabs + card */
+function setActive(idx){
+  ACTIVE = idx;
+  const tabs = document.getElementById("optTabs");
+  const card = document.getElementById("optCard");
+  if (!tabs || !card) return;
+  tabs.querySelectorAll("button").forEach((b,i)=>{ b.setAttribute("aria-selected", i===idx ? "true" : "false"); });
+  const opt = SCOUT.options[idx];
+  card.innerHTML = buildScoutCard(opt, idx);
+  ensureCTA();
+  updateCTA_forScout(opt);
+}
+function renderTabs(){
+  const tabs = $id("optTabs"); if (!tabs) return;
+  tabs.innerHTML = (SCOUT.options||[]).map((o,i)=>{
+    const label = o.label || o.title || o.route || o.tagline?.marketing || "";
+    const name  = label ? `OPTION ${i+1} — ${label}` : `OPTION ${i+1}`;
+    return `<li><button type="button" class="ei-tab" role="tab" aria-selected="${i===ACTIVE?'true':'false'}" data-idx="${i}">${name}</button></li>`;
+  }).join("");
+  tabs.onclick = (e)=>{
+    const b = e.target.closest("button[data-idx]"); if (!b) return;
+    const idx = +b.dataset.idx; if (Number.isInteger(idx)) setActive(idx);
   };
 }
-  // Align days by label/number for merging
-  function normDayKey(d, i){
-    const lbl = String(d?.label || '').toLowerCase();
-    const m = lbl.match(/day\s*(\d+)/);
-    return m ? `d${m[1]}` : `idx-${i}`;
-  }
 
-  function adaptDay(d = {}){
-    if (typeof d === 'string'){
-      const p = parseLineForTitleAndChips(d);
-      return { title: p.title || 'Itinerary Day', preview: '', chips: p.chips || {} };
+/* Samples */
+document.getElementById("loadSample")?.addEventListener("click", ()=>{
+  SCOUT.options = [
+    { index:1, title:"Mount Bierstadt Summit", region:"Front Range, Colorado",
+      overview:"Classic CO 14er with a well-defined path to the summit.",
+      miles:"7", gain_ft:"2850", loss_ft:"2850", duration:"1–2 days",
+      objective:"Peak Summit / High Alpine Trekking", terrain:"Alpine meadows and rocky switchbacks",
+      season:"mid-July–Sept", hazards:"Afternoon thunderstorms, altitude sickness",
+      culminating_objective:"Mount Bierstadt, 14,065 ft", objective_class:"Class 1",
+      strategic_advantage:"Straightforward ascent with big alpine views.", route_type:"Out-and-Back",
+      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Requires planning\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
+      intel:{ Solitude:5, "Photo Ops":8, "Physical Challenge":6, "Navigation Difficulty":3, "Scenic Reward":9 },
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=1"
+    },
+    { index:2, title:"Mount Elbert Summit", region:"Sawatch Range, Colorado",
+      overview:"Colorado’s highest peak; steep final push; massive vistas.",
+      miles:"9", gain_ft:"4700", loss_ft:"4700", duration:"1–2 days",
+      objective:"Peak Summit / High Alpine Trekking", terrain:"Forested trails and alpine ridges",
+      season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
+      culminating_objective:"Mount Elbert, 14,440 ft", objective_class:"Class 1",
+      strategic_advantage:"Prestige of CO high point with stunning views.", route_type:"Out-and-Back",
+      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Sparse\n- Campsite: Abundant dispersed\n- Exit Strategy: Commit to full route",
+      intel:{ Solitude:4, "Photo Ops":9, "Physical Challenge":8, "Navigation Difficulty":3, "Scenic Reward":10 },
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=2"
+    },
+    { index:3, title:"Quandary Peak Summit", region:"Tenmile Range, Colorado",
+      overview:"Popular but rewarding summit with big Breck views.",
+      miles:"6.75", gain_ft:"3450", loss_ft:"3450", duration:"1–2 days",
+      objective:"Peak Summit / High Alpine Trekking", terrain:"Forested slopes and rocky ridges",
+      season:"mid-July–Sept", hazards:"Weather changes, altitude effects",
+      culminating_objective:"Quandary Peak, 14,265 ft", objective_class:"Class 1",
+      strategic_advantage:"Straightforward climb; quick summit adventure.", route_type:"Out-and-Back",
+      logistics:"- Permit: No\n- Trailhead Access: Easy\n- Water: Plan to carry\n- Campsite: Limited\n- Exit Strategy: Commit to full route",
+      intel:{ Solitude:4, "Photo Ops":8, "Physical Challenge":6, "Navigation Difficulty":2, "Scenic Reward":9 },
+      blueprint_url:"https://www.expeditionintel.com/upgrade?source=scout&option=3"
     }
-
-    const rawTitle = d.title || d.day_title || d.label || '';
-    const rawDesc  = d.preview || d.day_preview || d.description || d.details || d.summary || '';
-
-    const isBareDay   = /^\s*day\s*\d+\s*$/i.test(String(rawTitle || ''));
-    const sourceTitle = (!rawTitle || isBareDay) ? (rawDesc || '') : rawTitle;
-
-    let parsed = parseLineForTitleAndChips(sourceTitle);
-
-    if ((!parsed.title || parsed.title.length < 4) && rawDesc){
-      const firstSentence = String(rawDesc).split('.').shift().trim();
-      if (firstSentence && firstSentence.length > 6) parsed.title = firstSentence;
-    }
-
-    const chips = { ...parsed.chips };
-    if (typeof d.distance_and_elevation === 'string' && !chips.distance){
-      const mm = d.distance_and_elevation.match(/^\s*([^,]+)\s*,\s*(.+)$/);
-      chips.distance  = (mm ? mm[1] : d.distance_and_elevation).trim();
-      chips.elevation = (mm ? mm[2] : '').trim() || chips.elevation || '';
-    }
-
-    if (d.primary_trail)     chips.trail     = d.primary_trail;
-    if (d.terrain)           chips.terrain   = d.terrain;
-    if (d.notable_features)  chips.features  = d.notable_features;
-    if (d.key_features)      chips.features  = chips.features || d.key_features;
-    if (d.key_water_sources) chips.water     = d.key_water_sources;
-    if (d.campsite_location) chips.campsite  = d.campsite_location;
-    if (d.safety)            chips.safety    = d.safety;
-    if (d.trail_tip)         chips.tip       = d.trail_tip;
-    if (d.bailout)           chips.bailout   = d.bailout;
-    if (d.decision_point)    chips.decision  = d.decision_point;
-    if (d.morale_marker)     chips.morale    = d.morale_marker;
-
-let finalTitle =
-  d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
-
-// If the title already contains a full sentence of narrative,
-// keep only the route portion (e.g., "Start → End")
-if ((/→| to /i.test(finalTitle)) && /\.\s/.test(finalTitle)) {
-  finalTitle = finalTitle.split('.').shift().trim();
-}
-
-const previewRaw = rawDesc || '';
-let finalPreview = String(previewRaw || '');
-if (finalPreview && finalTitle) {
-  const esc  = finalTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');     
-  const lead = new RegExp('^\\s*' + esc + '[:,.\\s—–-]*', 'i');       
-  finalPreview = finalPreview.replace(lead, '').trim();
-}
-
-// after you compute finalTitle & finalPreview
-// strip any trailing "X miles, +A ft / -B ft" from the preview paragraph
-finalPreview = finalPreview.replace(
-  /(?:^|\s)(~?\d+(?:\.\d+)?)\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,
-  ''
-).trim();
-
-return { title: finalTitle, preview: finalPreview, chips };
-  }
-
-  function findScenario(base, key){
-    if (!base) return null;
-    const k = (key||'').toLowerCase();
-    if (Array.isArray(base.scenarios)){
-      return base.scenarios.find(s => (s.key||s.label||'').toLowerCase() === k) || base.scenarios[0] || null;
-    }
-    if (base.scenarios && typeof base.scenarios === 'object'){
-      return base.scenarios[k] || base[k] || null;
-    }
-    return null;
-  }
-
-  function updateGPX(gpxURL, startTH, endTH){
-    const wrap=$('gpxEmbedWrap'), iframe=$('gpxStudio'), link=$('gpxStudioLink'), btn=$('gpxBtn'), bar=$('gpxActions'), th=$('trailheads');
-    if(!wrap) return;
-    let msg = wrap.querySelector('#gpxMissing');
-    if(!msg){
-      msg=document.createElement('div');
-      msg.id='gpxMissing';
-      msg.style.cssText='opacity:.7;font-size:14px';
-      msg.textContent='No GPX URL set.';
-      wrap.appendChild(msg);
-    }
-    if(!gpxURL){
-      if(iframe) iframe.removeAttribute('src');
-      msg.style.display=''; if(bar) bar.style.display='none'; if(th) th.textContent='';
-      return;
-    }
-    msg.style.display='none'; if(bar) bar.style.display='';
-    const studio='https://gpx.studio/embed?options='+encodeURIComponent(JSON.stringify({
-      token:'pk.eyJ1IjoiZXhwZWQtaW50ZWwiLCJhIjoiY21kc3Vrc2FtMHZkNjJrcTN6ajlmZzhlMyJ9.APi1rguilYM8GZKBnbyWFg',
-      files:[gpxURL], distanceUnits:'imperial'
-    }));
-    if(iframe && iframe.src !== studio) iframe.src = studio;
-    if(link) link.href = studio;
-    if(btn){
-      const slug=(window.EI_DATA && window.EI_DATA.slug) || 'route';
-      btn.href=gpxURL; btn.download=slug+'.gpx';
-    }
-    if(th) th.textContent=[startTH,endTH].filter(Boolean).join(' → ');
-  }
-
-  function updateMap(url){
-    const ifr = document.getElementById('mapEmbed') ||
-                document.getElementById('map_embed') ||
-                document.getElementById('shuttle_map');
-    if (!ifr) return;
-    if (url){ ifr.src = url; ifr.parentElement.style.display=''; }
-    else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
-  }
-
-/* ---------- render one scenario (called on every tab click) ---------- */
-function renderScenario(name){
-  const base = addScenariosFromString(getBase());
-  const raw  = findScenario(base, name) || null;
-
-  // --- helpers (local) ---
-  const clean = s => String(s || '').trim();
-  const stripMilesTail = s =>
-    clean(s).replace(/\s*\b\d+(?:\.\d+)?\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,'').trim();
-
-  // ========== DAYS: merge/patch FIRST ==========
-  const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
-  const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
-  const daysStrategy =
-    (raw?.days_strategy === 'replace' || raw?.replaceDays === true) ? 'replace' : 'patch';
-
-  let finalDaysRaw;
-  if (scenDaysRaw.length === 0){
-    // No scenario days: use baseline days
-    finalDaysRaw = baseDaysRaw.slice();
-  } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0){
-    // Scenario provided full replacement (or no baseline)
-    finalDaysRaw = scenDaysRaw.slice();
-  } else {
-    // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
-    const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-    finalDaysRaw = scenDaysRaw.map((d, i) => {
-      const b = baseMap.get(normDayKey(d, i)) || {};
-      const out = { ...b, ...d };
-      if (!out.preview && b.preview) out.preview = b.preview;
-      if (!out.chips) out.chips = {};
-      if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-      return out;
-    });
-  }
-
-// --- DRIVEN polish: normalize titles to Start → End without "Stage" fallbacks ---
-(function normalizeDriven(){
-  if (String(name).toLowerCase() !== 'driven' || !Array.isArray(finalDaysRaw) || !finalDaysRaw.length) return;
-
-  const clean = s => String(s || '').trim();
-  const partsFrom = (t) => {
-    const x = clean(t);
-    if (!x) return [];
-    if (x.includes('→')) return x.split('→').map(s => clean(s));
-    if (/ to /i.test(x)) return x.split(/ to /i).map(s => clean(s));
-    return [];
-  };
-  const titleFromParts = (arr) => clean(arr.filter(Boolean).join(' → '));
-
-  // prefer explicit waypoint hints, then header trailheads
-  const thStr = clean(raw?.header?.trailheads || base.trailheads || '');
-  const [thA, thB] = thStr.split('→').map(s => clean(s));
-  const startTH = clean(raw?.waypoint_hints?.start_trailhead || base.start_trailhead || thA || '');
-  const endTH   = clean(raw?.waypoint_hints?.end_trailhead   || base.end_trailhead   || thB || '');
-
-  // helper: get [start,end] from a day using your robust extractor + backups
-  const getParts = (d) => {
-    const p = _routePartsFrom({
-      title: d.title || d.day_title || d.label || '',
-      description: d.preview || d.description || '',
-      campsite_location: d.campsite_location || d?.chips?.campsite || ''
-    });
-    if (p) return p;
-
-    // backup: try raw title parsing
-    const tParts = partsFrom(d.title || d.day_title || d.label || '');
-    if (tParts.length === 2) return tParts;
-
-    // last-ditch end from campsite text
-    const camp = clean((d.campsite_location || d?.chips?.campsite || '').split('–')[0].split('-')[0]);
-    return camp ? ['', camp] : [];
-  };
-
-  if (finalDaysRaw.length === 1) {
-    const d0 = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
-    let parts = getParts(d0);
-
-    // force to "Start → End" using hinted trailheads if we have them
-    if (!parts.length) parts = [startTH, endTH].filter(Boolean);
-    if (startTH) parts[0] = startTH || parts[0];
-    if (endTH)   parts[1] = endTH   || parts[1];
-
-    // only set a title if we actually have something real
-    d0.title = titleFromParts(parts) || d0.title || 'Single-day push';
-
-  } else {
-    // Multi-day Driven: fix first and last titles only.
-    const first = finalDaysRaw[0] = { ...(finalDaysRaw[0] || {}) };
-    const last  = finalDaysRaw[finalDaysRaw.length - 1] = { ...(finalDaysRaw.at(-1) || {}) };
-
-    // FIRST DAY: StartTH → (derived end)
-    {
-      let parts = getParts(first);
-      if (!parts.length) parts = partsFrom(first.title || '') || [];
-      // ensure start side is the trailhead if provided
-      if (startTH) {
-        if (parts.length < 2) parts = [startTH, parts[0] || ''];
-        else parts[0] = startTH;
-      }
-      first.title = titleFromParts(parts) || (startTH ? `${startTH} → ` : (first.title || ''));
-    }
-
-    // LAST DAY: (derived start) → EndTH
-    {
-      let parts = getParts(last);
-      if (!parts.length) parts = partsFrom(last.title || '') || [];
-      // ensure end side is the trailhead if provided
-      if (endTH) {
-        if (parts.length < 2) parts = [parts[0] || '', endTH];
-        else parts[parts.length - 1] = endTH;
-      }
-      last.title = titleFromParts(parts) || (endTH ? ` → ${endTH}` : (last.title || ''));
-    }
-  }
-})();
-  // --- Adapt for renderer, and remove trailing "X miles, +A / -B" duplication from preview ---
-  let finalDays = (finalDaysRaw || []).map(adaptDay)
-    .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
-
-  // Paint days
-  const daysEl = document.getElementById('itineraryDays');
-  if (daysEl){
-   daysEl.innerHTML = finalDays.map((d,i) => renderDay(d,i)).join('');
-    if (window.EI_refreshSections) window.EI_refreshSections();
-    if (window.EI_initAccordions) window.EI_initAccordions();
-    document.dispatchEvent(new CustomEvent('ei:days-updated'));
-  }
-
-  // ========== TOP ITINERARY (recompute from days AFTER merge) ==========
-  const totals = sumScenarioTotals(finalDays);
-
-  // Build/merge itinerary header object
-  const itin = {
-    ...(base.expedition_itinerary || {}),
-    ...(raw?.header ? headerToItin(raw.header) : {})
-  };
-
-  // Force totals to reflect actual per-scenario days
-  itin.mileage   = totals.mileage;
-  itin.elevation = totals.elevation;
-  // Duration: scenario header if explicit, else count of days
-  itin.duration  = (raw?.header?.duration || totals.duration);
-
-  // Render header + chips
-  renderExpeditionKV(itin);
-  renderExpeditionChips(itin);
-  $('expItin').style.display = '';
-
-  // Tagline under "Expedition Itinerary"
-  const taglineEl = document.getElementById('scenarioTagline');
-  if (taglineEl){
-    taglineEl.textContent = clean(raw?.tagline?.marketing || raw?.tagline?.functional || '');
-  }
-
-  // ========== GPX + MAP ==========
-  const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
-  const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
-  const end   = (raw?.waypoint_hints?.end_trailhead)   || base.end_trailhead   || '';
-  
-  // Always use the mission_text map for ALL scenarios (no per-scenario override)
-  const map = base.map_embed_url || base.map_embed || '';
-
-  updateGPX(gpx, start, end);
-  updateMap(map);
-
-  // ========== TEXT SECTIONS ==========
-  const sec = [
-    'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
-    'key_considerations','campsite_intel','weather_altitude','gear_checklist',
-    'optional_mod','risk_matrix','conditions_watch','bailout_summary','emergency',
-    'final_brief','field_disclaimer'
   ];
-  sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
+  ACTIVE = 0; renderTabs(); setActive(0);
+});
 
-// Force Shuttle / Transportation to always come from mission_text (base), not scenarios
-kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
+/* ===== EDGE SUBMIT ===== */
+const ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/shadow-scout-recon-send";
 
-  console.log('[EI] rendered scenario →', name, { days: finalDays.length, totals });
-}
+$id("scoutForm")?.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const f = e.currentTarget;
+  const get = (n)=> (f.elements.namedItem(n)?.value || "").trim();
 
-  /* ---------- tabs wiring ---------- */
-  const tabs = document.querySelectorAll('.ei-tab');
-  if (!tabs.length) return;
+  // combine destination dropdown + free text
+  const pref = (f.querySelector("#fDestination")?.value || "").trim();
+  const idea = get("destination_idea");
+  const destination_idea = pref ? (idea ? `${pref}: ${idea}` : pref) : idea;
 
-  function setActive(btn){
-    tabs.forEach(t => t.setAttribute('aria-selected', t === btn ? 'true' : 'false'));
+  // derive season from date
+  function seasonFromISODate(iso){
+    if(!iso) return "";
+    const m = Number(iso.slice(5,7));
+    if([12,1,2].includes(m)) return "Winter";
+    if([3,4,5].includes(m))  return "Spring";
+    if([6,7,8].includes(m))  return "Summer";
+    return "Fall";
   }
+  const dateISO = get("tripDate");
+  const season  = seasonFromISODate(dateISO);
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      setActive(btn);
-      renderScenario(btn.dataset.scenario);
+  const payload = {
+    name:get("name"),
+    email:get("email"),
+    based_in:get("based_in"),
+    experience_level:get("experience_level"),
+    primary_objective:get("primary_objective"),
+    ideal_trip_length:get("ideal_trip_length"),
+    preferred_terrain:get("preferred_terrain"),
+    destination_idea,
+    additional:get("additional"),
+    trip_window: season
+  };
+
+  const required = ["name","email","based_in","experience_level","primary_objective","ideal_trip_length"];
+  const miss = required.filter(k=>!payload[k]);
+  if (miss.length){ alert("Please complete:\n• " + miss.join("\n• ")); return; }
+
+  const btn = $id("btnGenerate");
+  if (btn){ btn.disabled = true; btn.textContent = "Generating…"; }
+
+  const card = $id("optCard");
+  if (card) card.innerHTML = `
+    <div id="scoutLoading">
+      <div class="spin"></div>
+      <div>
+        <div class="h">Generating your Scout Recon</div>
+        <div class="p">Compiling routes and intel…</div>
+        <div class="bar"><span></span></div>
+      </div>
+    </div>`;
+
+  try{
+    const res = await fetch(ENDPOINT, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload),
+      keepalive:true
     });
-  });
+    const text = await res.text();
+    if (!res.ok || !text){ card && (card.innerHTML = `<div class="empty">Something went wrong. Please try again.</div>`); return; }
 
-  // first paint
-  const selected =
-    Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
-  if (selected){
-    setActive(selected);
-    renderScenario(selected.dataset.scenario);
+    const opts = parseScoutOptions(text);
+    if (!opts.length){
+      console.warn("Could not parse Scout text:", text);
+      card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
+      return;
+    }
+    SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+    ACTIVE = 0; renderTabs(); setActive(0);
+  }catch(err){
+    console.error(err);
+    card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
+  }finally{
+    if (btn){ btn.disabled = false; btn.textContent = "Generate Scout"; }
   }
+});
 
-  // repaint if data arrives later
-  window.addEventListener('ei:data-ready', () => {
-    const active =
-      Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
-    if (active) renderScenario(active.dataset.scenario);
-  });
+/* init */
+(function initPreview(){
+  ensureCTA();
 })();
 </script>
 </body>
 </html>
-
