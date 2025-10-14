@@ -264,6 +264,10 @@
   border:3px solid rgba(0,0,0,.12); border-top-color:var(--accent);
   animation: ei-spin .8s linear infinite;
 }
+  #pv_hero {
+  background: linear-gradient(145deg, #f2f2f2, #d9d9d9);
+  object-fit: cover;
+}
 </style>
 </head>
 <body>
@@ -395,16 +399,18 @@
         </div>
 
         <figure class="hero">
-  <img id="pv_hero" alt="Hero image" src="" />
-  
-  <div id="hero_loading" hidden>
+  <img id="pv_hero"
+       alt="Hero image"
+       src="/assets/recon-placeholder.jpg"
+       decoding="async"
+       loading="eager" />
+
+  <div id="hero_loading" hidden aria-live="polite">
     <div class="spin"></div>
-    <span>Locating Your Terrain…</span>
+    <span>Recon in progress — locating your terrain…</span>
   </div>
 
-  <figcaption id="pv_credit" style="display:none;padding:6px 8px;font-size:13px;">
-    <!-- set via JS if available -->
-  </figcaption>
+  <figcaption id="pv_credit" style="display:none;padding:6px 8px;font-size:13px;"></figcaption>
 </figure>
 
         <nav class="tabs" aria-label="Options">
@@ -735,10 +741,16 @@ async function updateHeroIfNeeded(placeText) {
     if (!heroImg) return;
 
     if (!placeText || placeText.trim().length < 3) {
-      showHeroLoading(false);
-      heroImg.removeAttribute("src");
-      return;
-    }
+  // show a static default so users see something right away
+  heroImg.src = "/assets/recon-placeholder.jpg"; 
+  const credit = document.getElementById("pv_credit");
+  if (credit) { 
+    credit.textContent = ""; 
+    credit.style.display = "none"; 
+  }
+  showHeroLoading(false);
+  return;
+}
 
     // show loading overlay
     showHeroLoading(true);
