@@ -536,10 +536,14 @@ function buildScoutCard(opt, index){
     </div>
   `;
 }
+<script>
 // === CHECKOUT (Scout ➜ Blueprint) ===
 const CHECKOUT_ENDPOINT =
   "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session";
-  
+
+// 👉 Put your Stripe Price ID here (from the Scout → Blueprint product)
+const PRICE_UPGRADE = "price_1S4jmKKyANuReHHWTf5jC6CB"; // <-- replace with your real Price ID
+
 /* ===== CTA wiring ===== */
 function ensureCTA(){
   const card=$id('optCard'); if(!card) return;
@@ -550,6 +554,7 @@ function ensureCTA(){
     card.appendChild(wrap);
   }
 }
+
 function saveScoutContext(optIndex){
   try {
     const ctx = { options: SCOUT.options || [], chosenIndex: optIndex, createdAt: Date.now() };
@@ -565,10 +570,14 @@ async function startCheckout(opt){
 
   try {
     const payload = {
+      price_id: PRICE_UPGRADE, // ✅ REQUIRED by your edge function
       customer_email: document.getElementById("fEmail")?.value || "",
       metadata: {
         option_index: ACTIVE + 1,
         option_title: opt.title || `Option ${ACTIVE + 1}`,
+        // add anything useful for webhook / orders:
+        intake_id: window.EI_INTAKE_ID || "",
+        source: "scout_preview"
       }
     };
 
@@ -586,9 +595,9 @@ async function startCheckout(opt){
     console.error(err);
     alert("Checkout unavailable. Please try again.");
   } finally {
-    if (btn) { 
-      btn.disabled = false; 
-      btn.textContent = `Blueprint this route →`; 
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = `Blueprint this route →`;
     }
   }
 }
