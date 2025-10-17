@@ -742,13 +742,29 @@ const payload = {
     </div>`;
 
   try {
-    const res  = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      keepalive: true
-    });
-    const text = await res.text();
+    const res = await fetch(ENDPOINT, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+  keepalive: true
+});
+
+// Try to parse JSON (new mode: includes intake_id + text)
+let data = {};
+try {
+  data = await res.json();
+} catch {
+  // Fallback if old text-only response
+  const txt = await res.text();
+  data = { text: txt };
+}
+
+// ✅ Store intake_id (used later in Stripe upgrade metadata)
+if (data.intake_id) {
+  localStorage.setItem("ei_intake_id", data.intake_id);
+}
+
+const text = data.text || "";
 
     if (!res.ok || !text) {
       card && (card.innerHTML = `<div class="empty">Something went wrong. Please try again.</div>`);
