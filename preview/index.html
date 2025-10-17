@@ -574,6 +574,7 @@ async function startCheckout(opt){
       metadata: {
         option_index: ACTIVE + 1,
         option_title: opt.title || `Option ${ACTIVE + 1}`,
+        user_name: document.getElementById("fName")?.value?.trim() || ""
         // add anything useful for webhook / orders:
         intake_id: window.EI_INTAKE_ID || "",
         source: "scout_preview"
