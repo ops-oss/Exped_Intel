@@ -667,6 +667,9 @@ document.getElementById("loadSample")?.addEventListener("click", ()=>{
 /* ===== Submit to Edge ===== */
 const ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/shadow-scout-recon-send";
 
+// Make sure intake ID persists between form submit and checkout
+window.EI_INTAKE_ID = localStorage.getItem("ei_intake_id") || "";
+  
 // === HERO IMAGE ENDPOINT ===
 const HERO_ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/hero-image";
 // Cancel in-flight lookups when user types fast
