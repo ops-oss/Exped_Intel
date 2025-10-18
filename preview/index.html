@@ -104,6 +104,33 @@
 .btn.cta:hover .label.hover   { opacity: 1; }
 
 @media (max-width:640px){ .actions.duo { grid-template-columns: 1fr; } }
+
+  .actions.actions--form{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:10px;
+  width:100%;
+}
+@media (max-width:720px){ .actions.actions--form{ grid-template-columns:1fr; } }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:48px; padding:0 16px; border-radius:10px;
+  border:1px solid var(--chip-border, rgba(0,0,0,.22));
+  font:600 16px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  letter-spacing:.01em; white-space:nowrap; cursor:pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+.btn--full{ width:100%; }
+
+.btn--ghost{ background:transparent; color:var(--ink); }
+.btn--ghost:hover{ background:var(--ink); color:var(--paper); }
+
+.btn--cta{ background:var(--ink); color:var(--paper); border-color:transparent; }
+.btn--cta:hover{ background:var(--accent); color:var(--paper); }
+
+.actions--form .btn{ overflow:hidden; text-overflow:ellipsis; }
  
   /* Right preview */
   .preview{background:transparent; padding:0}
@@ -449,17 +476,14 @@
         </div>
 
         <!-- Actions -->
-<div class="actions duo" style="margin-top:6px;">
-  <!-- Free Scout -->
-  <button id="btnGenerateScout" class="btn ghost" type="submit">
-    <span class="label default">Generate Scout</span>
-    <span class="label hover">Discover Free Scout</span>
+<!-- Actions -->
+<div class="actions actions--form">
+  <button id="btnGenerateScout" class="btn btn--ghost btn--full" type="submit">
+    Discover Free Scout
   </button>
 
-  <!-- Paid Blueprint -->
-  <button id="btnBuyBlueprint" class="btn cta" type="button">
-    <span class="label default">Advance to Expedition Blueprint $99</span>
-    <span class="label hover">Advance to Expedition Blueprint $99</span>
+  <button id="btnBuyBlueprint" class="btn btn--cta btn--full" type="button">
+    Advance to Expedition Blueprint $99
   </button>
 </div>
       </form>
@@ -1012,7 +1036,7 @@ async function updateHeroIfNeeded(placeText) {
     const f = getFormValues();
     if (!f.email) { alert("Please add your email so we can send your Blueprint."); return; }
 
-    const BLUEPRINT_PRICE_ID = "price_XXXXXXXXXXXXXXXX"; // TODO: your real Stripe price
+    const BLUEPRINT_PRICE_ID = "price_1S4ZxUKyANuReHHW6nEWWQFf"; // TODO: your real Stripe price
     const payload = {
       price_id: BLUEPRINT_PRICE_ID,
       customer_email: f.email,
