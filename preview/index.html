@@ -560,7 +560,8 @@
     <!-- LEFT: form -->
     <aside class="panel form-panel">
       <h2>Discover. Decide. Design.</h2>
-      <p class="muted">Start with recon or straight to the Blueprint. Your intel builds live.</p>
+      <p style="font-weight:700; font-size:1.5em;">
+        Start with recon or straight to the Blueprint. Your intel builds live.</p>
 
       <form id="scoutForm" class="grp" novalidate>
         <!-- Trip title -->
@@ -1160,7 +1161,7 @@ async function updateHeroIfNeeded(placeText) {
   const dateISO = getMeta("date");
   const season  = seasonFromISODate(dateISO) || "—";
 
-  OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Scout Recon");
+  OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Type to Set Objective");
   OUT.category && (OUT.category.textContent = getMeta("category") || "—");
   OUT.season   && (OUT.season.textContent   = season);
   OUT.location && (OUT.location.textContent = getMeta("location") || "—");
@@ -1195,15 +1196,16 @@ async function updateHeroIfNeeded(placeText) {
   });
 })();
 </script>
-  <!-- other existing scripts for form handling, Scout generation, etc. -->
-
-<!-- PURCHASE EXPEDITION BLUEPRINT HANDLER -->
+  <!-- PURCHASE EXPEDITION BLUEPRINT HANDLER -->
 <script>
-(function(){
-  const $ = (sel)=>document.querySelector(sel);
-  const val = (sel)=>{ const el = $(sel); return el ? (el.value || "").trim() : ""; };
+document.addEventListener("DOMContentLoaded", () => {
+  const $ = (sel) => document.querySelector(sel);
+  const val = (sel) => {
+    const el = $(sel);
+    return el ? (el.value || "").trim() : "";
+  };
 
-  function getFormValues(){
+  function getFormValues() {
     return {
       title: val('[name="trip_title"], #trip_title, [data-ei="trip_title"]'),
       trip_date: val('[name="trip_date"], #trip_date, [data-ei="trip_date"]'),
@@ -1220,11 +1222,17 @@ async function updateHeroIfNeeded(placeText) {
     };
   }
 
-  async function buyBlueprintDirect(){
-    const f = getFormValues();
-    if (!f.email) { alert("Please add your email so we can send your Blueprint."); return; }
+  async function buyBlueprintDirect() {
+    console.log("✅ buyBlueprintDirect fired");
 
-    const BLUEPRINT_PRICE_ID = "price_1S4ZxUKyANuReHHW6nEWWQFf"; // TODO: your real Stripe price
+    const f = getFormValues();
+    if (!f.email) {
+      alert("Please add your email so we can send your Blueprint.");
+      return;
+    }
+
+    const BLUEPRINT_PRICE_ID = "price_1S4ZxUKyANuReHHW6nEWWQFf";
+
     const payload = {
       price_id: BLUEPRINT_PRICE_ID,
       customer_email: f.email,
@@ -1247,19 +1255,37 @@ async function updateHeroIfNeeded(placeText) {
       }
     };
 
-    const res = await fetch("https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const j = await res.json();
-    if (!res.ok || !j.url) { console.error(j); alert("Checkout error. Try again."); return; }
-    window.location.href = j.url;
+    try {
+      const res = await fetch("https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const j = await res.json();
+      console.log("Stripe response:", j);
+
+      if (!res.ok || !j.url) {
+        console.error("❌ Checkout error:", j);
+        alert("Checkout error. Try again.");
+        return;
+      }
+
+      window.location.href = j.url;
+    } catch (e) {
+      console.error("❌ Network or fetch error:", e);
+      alert("Network error. Try again.");
+    }
   }
 
   const btn = document.getElementById("btnBuyBlueprint");
-  if (btn) btn.addEventListener("click", buyBlueprintDirect);
-})();
+  if (btn) {
+    btn.addEventListener("click", buyBlueprintDirect);
+    console.log("⚙️ Blueprint listener attached to #btnBuyBlueprint");
+  } else {
+    console.error("❌ Button not found: #btnBuyBlueprint");
+  }
+});
 </script>
 </body>
 </html>
