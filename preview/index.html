@@ -10,8 +10,21 @@
   body{ margin:0; background:var(--bg); color:var(--ink);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  .shell{display:grid; grid-template-columns:minmax(320px,460px) 1fr; gap:16px; max-width:1200px; margin:0 auto; padding:16px;}
-  @media (max-width:980px){ .shell{ grid-template-columns:1fr; } }
+  .shell {
+  display: grid;
+  grid-template-columns: 42% 58%; /* widen the right panel */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}
+  
 
   /* Left panel */
   .panel{ background:var(--paper); border:1px solid var(--div); border-radius:12px; padding:16px; }
