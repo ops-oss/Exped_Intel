@@ -53,6 +53,58 @@
   .btn[disabled]{ opacity:.55; cursor:default }
   .btn.ghost{ background:#fff !important; color:#111 !important; border:1px solid rgba(0,0,0,.18) !important; box-shadow:none !important; }
 
+.actions.duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Base */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 18px;
+  font-weight: 500;
+  border: 1px solid var(--chip-border, rgba(0,0,0,.22));
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.btn .label { transition: opacity .2s ease; }
+.btn .label.hover { opacity: 0; position: absolute; }
+
+/* Scout: ghost → black */
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn.ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn.ghost:hover .label.default { opacity: 0; }
+.btn.ghost:hover .label.hover   { opacity: 1; }
+
+/* Blueprint: black → orange */
+.btn.cta {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: transparent;
+}
+.btn.cta:hover {
+  background: var(--accent); /* your Expedition orange */
+  color: var(--paper);
+}
+.btn.cta:hover .label.default { opacity: 0; }
+.btn.cta:hover .label.hover   { opacity: 1; }
+
+@media (max-width:640px){ .actions.duo { grid-template-columns: 1fr; } }
+ 
   /* Right preview */
   .preview{background:transparent; padding:0}
   .page{background:transparent}
@@ -397,13 +449,19 @@
         </div>
 
         <!-- Actions -->
-        <div class="row-1" style="display:flex; gap:10px; align-items:center; margin-top:6px">
-          <button class="btn" id="btnGenerate" type="submit">Generate Scout</button>
-          <!-- REPLACE the Samples button with this -->
-<button id="btnBuyBlueprint" class="btn ghost" type="button">
-  Advance to Expedition Blueprint
-</button>
-        </div>
+<div class="actions duo" style="margin-top:6px;">
+  <!-- Free Scout -->
+  <button id="btnGenerateScout" class="btn ghost" type="submit">
+    <span class="label default">Generate Scout</span>
+    <span class="label hover">Discover Free Scout</span>
+  </button>
+
+  <!-- Paid Blueprint -->
+  <button id="btnBuyBlueprint" class="btn cta" type="button">
+    <span class="label default">Advance to Expedition Blueprint $99</span>
+    <span class="label hover">Advance to Expedition Blueprint $99</span>
+  </button>
+</div>
       </form>
     </aside>
 
@@ -977,7 +1035,7 @@ async function updateHeroIfNeeded(placeText) {
       }
     };
 
-    const res = await fetch("/functions/v1/create-checkout-session", {
+    const res = await fetch("https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
