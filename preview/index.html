@@ -386,7 +386,7 @@
         </div>
         <div>
           <label for="fIdea">Destination idea</label>
-          <input id="fIdea" name="destination_idea" data-ei-meta="location" type="text" placeholder="e.g., Wheeler Peak, Lost Coast…"/>
+          <input id="fIdea" name="destination_idea" data-ei-meta="location" type="text" placeholder="e.g., Mt Whitney, Lost Coast Trail…"/>
         </div>
 
         <!-- Additional details -->
@@ -399,7 +399,10 @@
         <!-- Actions -->
         <div class="row-1" style="display:flex; gap:10px; align-items:center; margin-top:6px">
           <button class="btn" id="btnGenerate" type="submit">Generate Scout</button>
-          <button class="btn ghost" id="loadSample" data-dev type="button">Load sample 3 options</button>
+          <!-- REPLACE the Samples button with this -->
+<button id="btnBuyBlueprint" class="btn ghost" type="button">
+  Advance to Expedition Blueprint
+</button>
         </div>
       </form>
     </aside>
@@ -920,6 +923,72 @@ async function updateHeroIfNeeded(placeText) {
     label.classList.toggle('is-required',  ctrl.matches('[required]'));
     label.classList.toggle('is-optional', !ctrl.matches('[required]'));
   });
+})();
+</script>
+  <!-- other existing scripts for form handling, Scout generation, etc. -->
+
+<!-- PURCHASE EXPEDITION BLUEPRINT HANDLER -->
+<script>
+(function(){
+  const $ = (sel)=>document.querySelector(sel);
+  const val = (sel)=>{ const el = $(sel); return el ? (el.value || "").trim() : ""; };
+
+  function getFormValues(){
+    return {
+      title: val('[name="trip_title"], #trip_title, [data-ei="trip_title"]'),
+      trip_date: val('[name="trip_date"], #trip_date, [data-ei="trip_date"]'),
+      based_in: val('[name="city"], [name="based_in"], #based_in, [data-ei="based_in"]'),
+      destination: val('[name="destination"], #destination, [data-ei="destination"]'),
+      destination_idea: val('[name="destination_idea"], #destination_idea, [data-ei="destination_idea"]'),
+      name: val('[name="name"], #name, [data-ei="name"]'),
+      email: val('[name="email"], #email, [data-ei="email"]'),
+      experience_level: val('[name="experience_level"], #experience_level, [data-ei="experience_level"]'),
+      primary_objective: val('[name="primary_objective"], #primary_objective, [data-ei="primary_objective"]'),
+      ideal_trip_length: val('[name="ideal_trip_length"], #ideal_trip_length, [data-ei="ideal_trip_length"]'),
+      preferred_terrain: val('[name="preferred_terrain"], #preferred_terrain, [data-ei="preferred_terrain"]'),
+      additional: val('[name="additional"], #additional, [data-ei="additional"]')
+    };
+  }
+
+  async function buyBlueprintDirect(){
+    const f = getFormValues();
+    if (!f.email) { alert("Please add your email so we can send your Blueprint."); return; }
+
+    const BLUEPRINT_PRICE_ID = "price_XXXXXXXXXXXXXXXX"; // TODO: your real Stripe price
+    const payload = {
+      price_id: BLUEPRINT_PRICE_ID,
+      customer_email: f.email,
+      success_url: "https://www.expeditionintel.com/success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://www.expeditionintel.com/checkout/canceled",
+      metadata: {
+        source: "blueprint_direct",
+        user_name: f.name,
+        user_email: f.email,
+        title: f.title,
+        trip_date: f.trip_date,
+        based_in: f.based_in,
+        destination: f.destination,
+        destination_idea: f.destination_idea,
+        experience_level: f.experience_level,
+        primary_objective: f.primary_objective,
+        ideal_trip_length: f.ideal_trip_length,
+        preferred_terrain: f.preferred_terrain,
+        notes: f.additional
+      }
+    };
+
+    const res = await fetch("/functions/v1/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const j = await res.json();
+    if (!res.ok || !j.url) { console.error(j); alert("Checkout error. Try again."); return; }
+    window.location.href = j.url;
+  }
+
+  const btn = document.getElementById("btnBuyBlueprint");
+  if (btn) btn.addEventListener("click", buyBlueprintDirect);
 })();
 </script>
 </body>
