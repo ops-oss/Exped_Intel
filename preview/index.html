@@ -1161,7 +1161,7 @@ async function updateHeroIfNeeded(placeText) {
   const dateISO = getMeta("date");
   const season  = seasonFromISODate(dateISO) || "—";
 
-  OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Type to Set Objective");
+  OUT.title    && (OUT.title.textContent    = getMeta("title")    || "Type & Set Objective");
   OUT.category && (OUT.category.textContent = getMeta("category") || "—");
   OUT.season   && (OUT.season.textContent   = season);
   OUT.location && (OUT.location.textContent = getMeta("location") || "—");
