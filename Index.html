@@ -1751,6 +1751,105 @@ if (data.image_link) {
 
   // Ordered sections
   kvOrParagraph('permits_entry', data.permits_entry);
+
+<style>
+  /* ── Permits CTA styles (Blueprint) ───────────────────────── */
+  .permits-cta { margin-top: 12px; }
+  .permits-cta .btn-primary {
+    display:inline-block; padding:10px 16px; border-radius:10px; font-weight:600;
+    background:#FF6A00; color:#fff; text-decoration:none; transition:all .15s ease;
+  }
+  .permits-cta .btn-primary:hover   { background:#E65F00; transform:translateY(-1px); }
+  .permits-cta .btn-primary:active  { background:#CC5400; transform:translateY(0); }
+  .permits-cta .btn-primary:focus-visible { outline: 3px solid rgba(255,106,0,.35); outline-offset:2px; }
+  .permits-cta .btn-primary[disabled] { background:#FFB380; cursor:not-allowed; opacity:.75; }
+  .permits-cta .subhead { margin-top:6px; color:var(--muted, #6b7280); font-size:.95rem; }
+  .entrances-list { margin:10px 0 0; padding-left:18px; }
+  .entrances-list li { margin:2px 0; }
+  details.permit-more { margin-top:10px; }
+  summary.permit-toggle { cursor:pointer; color:var(--muted, #6b7280); }
+</style>
+
+<script>
+// ── Permits CTA + summary render (Blueprint) ─────────────────────────────────
+(() => {
+  try {
+    const d      = (window.__EXPEDITION__ || window.publicDoc || window.data || {});
+    const permit = d.permit || null;
+    const root   = document.getElementById("permits_entry");
+    if (!root) return;
+
+    // CTA container
+    const block = document.createElement("div");
+    block.className = "permits-cta";
+
+    // Button
+    const btn = document.createElement("a");
+    btn.className = "btn-primary";
+    btn.rel = "noopener";
+
+    // Subhead
+    const sub = document.createElement("div");
+    sub.className = "subhead";
+
+    const requires = (permit && permit.requires !== false);
+
+    if (requires) {
+      btn.textContent = "Secure Required Permits";
+      const href = (permit?.bookingUrl || d.permits_booking_url || "").toString();
+      if (href) { btn.href = href; btn.target = "_blank"; }
+      else { btn.setAttribute("disabled","true"); }
+      sub.textContent = "Links to official reservation and permit sites for this route.";
+    } else {
+      btn.textContent = "No Permit Required";
+      btn.href = "#";
+      sub.textContent = "This route does not require advance reservations or entry permits.";
+    }
+
+    block.appendChild(btn);
+    block.appendChild(sub);
+    root.appendChild(block);
+
+    // 5-line summary (from your KV-injected text if present)
+    // If your page exposes the KV lines as text already, you can skip this;
+    // otherwise, we can display a compact recap here in future.
+
+    // Optional: entrances (names only, max 3)
+    if (permit?.entrances?.length) {
+      const ul = document.createElement("ul");
+      ul.className = "entrances-list";
+      permit.entrances.slice(0, 3).forEach(e => {
+        const li = document.createElement("li");
+        li.textContent = e?.name || e?.id || "Entrance";
+        ul.appendChild(li);
+      });
+      root.appendChild(ul);
+    }
+
+    // Optional: collapsed "More details" (ready for when you provide long text)
+    // If you later extend the worker to include permit.moreText (cleaned provider text),
+    // we'll show it here. For now this stays hidden if empty.
+    if (permit && permit.moreText && permit.moreText.trim().length > 0) {
+      const det = document.createElement("details");
+      det.className = "permit-more";
+      const sum = document.createElement("summary");
+      sum.className = "permit-toggle";
+      sum.textContent = "More details";
+      const body = document.createElement("div");
+      body.style.marginTop = "6px";
+      body.textContent = permit.moreText;
+      det.appendChild(sum);
+      det.appendChild(body);
+      root.appendChild(det);
+    }
+
+    console.log("[viewer] permits rendered", { provider: permit?.provider, requires });
+  } catch (e) {
+    console.warn("[viewer] permits render error", e);
+  }
+})();
+</script>
+  
   kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
   const mapURL = data.map_embed_url || data.shuttle_map_url || "";
   if (mapURL && $('shuttle_map')) $('shuttle_map').src = mapURL;
