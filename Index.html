@@ -1752,66 +1752,144 @@ if (data.image_link) {
   // Ordered sections
   kvOrParagraph('permits_entry', data.permits_entry);
 
-// --- Permits CTA + summary render (Blueprint) -- safe JS-only insert ---
-try {
-  (function renderPermitsCTA() {
-    // Use the same data object already in scope
-    const d      = (window.__EXPEDITION__ || window.publicDoc || window.data || data || {});
-    const permit = d.permit || null;
-    const root   = document.getElementById('permits_entry');
-    if (!root) return;
+// --- Permits CTA + summary render (robust; waits for section to exist) -------
+(function installPermitsRenderer(){
+  var once = false;
 
-    // Container
-    const cta = document.createElement('div');
-    cta.className = 'permits-cta';  // if you don't have a style for it, it's harmless
+  function tryRender() {
+    if (once) return;
+    var w = (typeof window !== 'undefined') ? window : {};
+    var ctx =
+      (w.__EXPEDITION__) ||
+      (w.publicDoc)      ||
+      (w.data)           ||
+      (typeof data !== 'undefined' ? data : null) ||
+      {};
 
-    // Button (reuse your existing button styles; adjust if your site uses a different class)
-    const btn = document.createElement('a');
-    btn.className = 'btn btn-primary';   // <-- reuses your existing primary button styling
-    btn.rel = 'noopener';
+    var root =
+      document.getElementById('permits_entry') ||
+      document.querySelector('#permits_entry,[data-section="permits_entry"],[data-ei-section="permits_entry"]');
 
-    // Subhead (reuse your muted/body-small class if you have one, else inline style)
-    const sub = document.createElement('div');
-    sub.className = 'muted';  // or 'subhead' if you already have such a class
+    if (!root) {
+      // section not in DOM yet — retry on next frame
+      requestAnimationFrame(tryRender);
+      return;
+    }
+
+    // Avoid double-insert if this reruns
+    if (root.querySelector('.permits-cta')) {
+      once = true;
+      return;
+    }
+
+    var permit  = (ctx && ctx.permit) || null;
+    var booking = (permit && permit.bookingUrl) || (ctx && ctx.permits_booking_url) || '';
+    var requires = (permit && Object.prototype.hasOwnProperty.call(permit,'requires')) ? !!permit.requires : true;
+
+    console.log('[permits] data seen:', {
+      hasPermit: !!permit,
+      provider: (permit && permit.provider) || ctx.permits_provider || null,
+      booking:  !!booking
+    });
+
+    // Build a fallback if bookingUrl is still empty
+if (!booking) {
+  var park  = (ctx.park || ctx.destination || ctx.destination_idea || '').toString().trim();
+  var title = (ctx.title || (permit && permit.facilityName) || '').toString().trim();
+  var qfb   = [park, title, 'permits'].filter(Boolean).join(' ');
+  booking   = 'https://www.google.com/search?q=' + encodeURIComponent(qfb);
+}
+
+    // Build CTA container
+    var cta = document.createElement('div');
+    cta.className = 'permits-cta';
+
+    var btn = document.createElement('a');
+    btn.className = 'btn btn-primary'; // uses your existing primary button style
+    btn.rel = 'noreferrer noopener';
+
+    var sub = document.createElement('div');
+    sub.className = 'muted';
     sub.style.marginTop = '6px';
 
-    // Decide variant
-    const requires = (permit && permit.requires !== false);
     if (requires) {
-      btn.textContent = 'Secure Required Permits';
-      const href = (permit?.bookingUrl || d.permits_booking_url || '').toString();
-      if (href) { btn.href = href; btn.target = '_blank'; }
-      else { btn.removeAttribute('href'); btn.style.opacity = '.7'; btn.style.pointerEvents = 'none'; }
-      sub.textContent = 'Links to official reservation and permit sites for this route.';
-    } else {
-      btn.textContent = 'No Permit Required';
-      btn.removeAttribute('href'); // static
-      sub.textContent = 'This route does not require advance reservations or entry permits.';
-    }
+  btn.textContent = 'Secure Required Permits';
+  btn.href   = String(booking);
+  btn.target = '_blank';
+  sub.textContent = 'Links to official reservation and permit sites for this route.';
+} else {
+  btn.textContent = 'No Permit Required';
+  btn.removeAttribute('href');
+  sub.textContent = 'This route does not require advance reservations or entry permits.';
+}
 
-    // Append CTA
+    btn.setAttribute('aria-label', requires ? 'Open permits and reservations' : 'No permit required');
+
     cta.appendChild(btn);
     cta.appendChild(sub);
-    root.appendChild(cta);
 
-    // Optional: show up to 3 entrance names (no map)
-    if (permit?.entrances?.length) {
-      const ul = document.createElement('ul');
-      ul.style.margin = '10px 0 0';
-      ul.style.paddingLeft = '18px';
-      permit.entrances.slice(0, 3).forEach(e => {
-        const li = document.createElement('li');
-        li.textContent = e?.name || e?.id || 'Entrance';
-        ul.appendChild(li);
-      });
-      root.appendChild(ul);
-    }
+    // Friendly provider label (maps keys to readable names)
+var provKey = (permit && permit.provider) || ctx.permits_provider || '';
+var provLabel = ({
+  recgov:       'Recreation.gov',
+  parkscanada:  'Parks Canada',
+  bcparks:      'BC Parks',
+  albertaparks: 'Alberta Parks',
+  ontarioparks: 'Ontario Parks',
+  sepaq:        'Sépaq',
+  saskparks:    'Saskatchewan Parks',
+  nscotia:      'Nova Scotia Parks',
+  newbrunswick: 'NB Parks',
+  nlparks:      'NL Parks',
+  yukon:        'Yukon Parks',
+  usfs:         'US Forest Service'
+})[String(provKey).toLowerCase()] || (provKey || '');
 
-    console.log('[viewer] permits rendered', { provider: permit?.provider, requires });
-  })();
-} catch (e) {
-  console.warn('[viewer] permits render error', e);
+    // tiny provider note under the subhead (optional)
+if (provLabel) {
+  var small = document.createElement('div');
+  small.className = 'muted';
+  small.style.fontSize = '.85rem';
+  small.style.marginTop = '2px';
+  small.textContent = 'via ' + provLabel;
+  cta.appendChild(small);
 }
+  
+root.appendChild(cta);
+
+    // Optional: show up to 3 entrances (dedupe on re-render)
+if (permit && Array.isArray(permit.entrances) && permit.entrances.length) {
+  var prev = root.querySelector('.permits-entrances');
+  if (prev) prev.remove();
+
+  var ul = document.createElement('ul');
+  ul.className = 'permits-entrances';
+  ul.style.margin = '10px 0 0';
+  ul.style.paddingLeft = '18px';
+
+  permit.entrances.slice(0,3).forEach(function(e){
+    var li = document.createElement('li');
+    li.textContent = (e && (e.name || e.id)) ? (e.name || e.id) : 'Entrance';
+    ul.appendChild(li);
+  });
+
+  root.appendChild(ul);
+}
+
+    console.log('[permits] CTA rendered');
+    once = true;
+  }
+
+  // In case kvOrParagraph writes asynchronously, observe changes and render once.
+  var target = document.getElementById('permits_entry') || document.body;
+  var mo = new MutationObserver(function(){
+    tryRender();
+    if (once) mo.disconnect();
+  });
+  try { mo.observe(target, { childList:true, subtree:true }); } catch(_) {}
+  // Also try immediately for good measure:
+  tryRender();
+})();
 // --- End Permits CTA insert ---
   
   kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
