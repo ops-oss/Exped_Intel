@@ -1070,11 +1070,38 @@ const text = data.text || "";
       return;
     }
 
-    // Replace old options with fresh ones and drop any stale CTA URLs
-SCOUT.options = opts.sort((a, b) => a.index - b.index);
-SCOUT.options.forEach(o => {
-  o.blueprint_url = null; // drop stale cache links (forces rebuild)
-});
+    // Try to replace regex-parsed options with canonical UIDs from latest payload
+try {
+  const iid = window.EI_INTAKE_ID || "";
+  if (iid) {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/scout_payloads?select=options&intake_id=eq.${encodeURIComponent(iid)}&order=created_at.desc&limit=1`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const arr = await r.json().catch(()=>[]);
+    const canonical = Array.isArray(arr) && arr[0]?.options ? arr[0].options : null;
+    if (canonical && canonical.length) {
+      // map canonical -> the shape your UI expects (index/title/region/option_uid)
+      const withUids = canonical.map((o, i) => ({
+        index: Number(o.option_index ?? (i+1)),
+        title: String(o.title ?? `Option ${i+1}`),
+        region: String(o.region ?? ""),
+        option_uid: String(o.option_uid ?? "")
+      })).sort((a,b)=>a.index-b.index);
+
+      SCOUT.options = withUids;
+    } else {
+      SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+    }
+  } else {
+    SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+  }
+} catch (_) {
+  SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+}
+
+// drop any stale hrefs from older runs (safety)
+SCOUT.options.forEach(o => { o.blueprint_url = null; });
 
 ACTIVE = 0;
 renderTabs();
