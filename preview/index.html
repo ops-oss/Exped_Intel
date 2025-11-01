@@ -859,13 +859,13 @@ async function startCheckout(opt){
       price_id: PRICE_UPGRADE, // ✅ REQUIRED by your edge function
       customer_email: document.getElementById("fEmail")?.value || "",
       metadata: {
-  source:       "scout_preview",
-  intake_id:    window.EI_INTAKE_ID || "",
-  option_index: ACTIVE + 1,
-  option_title: opt.title || `Option ${ACTIVE + 1}`,
-  option_uid:   opt.option_uid || "",   // ✅ NEW — pass the UID
-  user_name:    document.getElementById("fName")?.value?.trim() || "",
-  user_email:   document.getElementById("fEmail")?.value?.trim() || ""
+  source: "scout_preview",
+  intake_id: (window.EI_INTAKE_ID || localStorage.getItem("EI_INTAKE_ID") || ""),
+  option_index: String(ACTIVE + 1),
+  option_title: String(opt.title || `Option ${ACTIVE + 1}`),
+  option_uid: String(opt.option_uid || ""),
+  user_name:  document.getElementById("fName")?.value?.trim() || "",
+  user_email: document.getElementById("fEmail")?.value?.trim() || ""
 }
     };
 
@@ -1051,9 +1051,13 @@ try {
   data = { text: txt };
 }
 
-// ✅ Store intake_id (used later in Stripe upgrade metadata)
+// ✅ Store intake_id for this preview session (used by checkout)
 if (data.intake_id) {
-  localStorage.setItem("ei_intake_id", data.intake_id);
+  try {
+    window.EI_INTAKE_ID = data.intake_id;
+    localStorage.setItem("EI_INTAKE_ID", data.intake_id);
+    console.debug("[preview] EI_INTAKE_ID set ->", data.intake_id);
+  } catch (_) {}
 }
 
 const text = data.text || "";
@@ -1064,40 +1068,62 @@ const text = data.text || "";
     }
 
     const opts = parseScoutOptions(text);
-    if (!opts.length) {
-      console.warn("Could not parse Scout text:", text);
-      card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
-      return;
-    }
+if (!opts.length) {
+  console.warn("Could not parse Scout text:", text);
+  card && (card.innerHTML = `<div class="empty">Scout was sent via email. (Preview parsing unavailable)</div>`);
+  return;
+}
 
-    // Try to replace regex-parsed options with canonical UIDs from latest payload
+/* --- D. Ensure each parsed option carries option_uid (fallback) --- */
+(function attachUidFallback() {
+  function extractUidFromUrl(href) {
+    try {
+      const u = new URL(href, location.origin);
+      const b64 = u.searchParams.get("b64");
+      if (b64) {
+        const decoded = JSON.parse(decodeURIComponent(atob(b64)));
+        return String(decoded?.metadata?.option_uid || "");
+      }
+      return String(u.searchParams.get("option_uid") || "");
+    } catch {
+      return "";
+    }
+  }
+  opts.forEach(o => {
+    const href = o?.cta?.url || o?.href || "";
+    if (!o.option_uid) o.option_uid = extractUidFromUrl(href);
+  });
+})();
+
+/* --- Prefer canonical from your schema: scout_latest_payload --- */
 try {
   const iid = window.EI_INTAKE_ID || "";
   if (iid) {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/scout_payloads?select=options&intake_id=eq.${encodeURIComponent(iid)}&order=created_at.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/scout_latest_payload?select=options&intake_id=eq.${encodeURIComponent(iid)}&limit=1`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
     );
-    const arr = await r.json().catch(()=>[]);
+    const arr = await r.json().catch(() => []);
     const canonical = Array.isArray(arr) && arr[0]?.options ? arr[0].options : null;
+
     if (canonical && canonical.length) {
-      // map canonical -> the shape your UI expects (index/title/region/option_uid)
+      // map canonical -> your UI shape (index/title/region/option_uid)
       const withUids = canonical.map((o, i) => ({
-        index: Number(o.option_index ?? (i+1)),
-        title: String(o.title ?? `Option ${i+1}`),
+        index:  Number(o.option_index ?? (i + 1)),
+        title:  String(o.title ?? `Option ${i + 1}`),
         region: String(o.region ?? ""),
         option_uid: String(o.option_uid ?? "")
-      })).sort((a,b)=>a.index-b.index);
+      })).sort((a, b) => a.index - b.index);
 
       SCOUT.options = withUids;
     } else {
-      SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+      SCOUT.options = opts.sort((a, b) => a.index - b.index);
     }
   } else {
-    SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+    SCOUT.options = opts.sort((a, b) => a.index - b.index);
   }
-} catch (_) {
-  SCOUT.options = opts.sort((a,b)=>a.index-b.index);
+} catch {
+  SCOUT.options = opts.sort((a, b) => a.index - b.index);
 }
 
 // drop any stale hrefs from older runs (safety)
