@@ -1801,6 +1801,29 @@ if (data.image_link) {
     cta.appendChild(btn);
     cta.appendChild(sub);
 
+// --- Secondary buttons when both required (e.g., Lottery + Wilderness) ---
+if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) {
+  const row = document.createElement('div');
+  row.style.display   = 'flex';
+  row.style.flexWrap  = 'wrap';
+  row.style.gap       = '8px';
+  row.style.marginTop = '8px';
+
+  permit.comboPermits.slice(0, 2).forEach(cp => {
+    if (!cp || !cp.url) return;
+    const a = document.createElement('a');
+    a.className = 'btn btn-secondary'; // or your "btn btn-outline" style
+    a.rel = 'noreferrer noopener';
+    a.target = '_blank';
+    a.href = String(cp.url);
+    a.textContent = String(cp.label || 'Additional Permit');
+    row.appendChild(a);
+  });
+
+  cta.appendChild(row);
+  cta.style.marginBottom = '10px';
+}
+    
     // optional description under the button
     if (blurb) {
       const desc = document.createElement('p');
