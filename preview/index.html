@@ -865,7 +865,15 @@ async function startCheckout(opt){
   option_title: String(opt.title || `Option ${ACTIVE + 1}`),
   option_uid: String(opt.option_uid || ""),
   user_name:  document.getElementById("fName")?.value?.trim() || "",
-  user_email: document.getElementById("fEmail")?.value?.trim() || ""
+  user_email: document.getElementById("fEmail")?.value?.trim() || "",
+  trip_date: document.getElementById("tripDate")?.value || "",
+  primary_objective: document.getElementById("fObjective")?.value || "",
+  preferred_terrain: document.getElementById("fTerrain")?.value || "",
+  ideal_trip_length: document.getElementById("fLength")?.value || "",
+  based_in: document.getElementById("fBasedIn")?.value || "",
+  destination_idea: document.getElementById("fIdea")?.value || "",
+  notes: (document.getElementById("fAdditional")?.value || "").slice(0,480),
+  trip_window: document.getElementById("tripDate")?.value || "",
 }
     };
 
@@ -1280,7 +1288,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getFormValues() {
     return {
       title: val('[name="trip_title"], #trip_title, [data-ei="trip_title"]'),
-      trip_date: val('[name="trip_date"], #trip_date, [data-ei="trip_date"]'),
+      trip_date: val('[name="trip_date"], #trip_date, [data-ei="trip_date"], #tripDate, [name="tripDate"]'),
       based_in: val('[name="city"], [name="based_in"], #based_in, [data-ei="based_in"]'),
       destination: val('[name="destination"], #destination, [data-ei="destination"]'),
       destination_idea: val('[name="destination_idea"], #destination_idea, [data-ei="destination_idea"]'),
