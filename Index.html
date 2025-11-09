@@ -1766,6 +1766,11 @@ if (data.image_link) {
     if (!booking) {
       const park  = (ctx?.park || ctx?.destination || ctx?.destination_id || '').toString().trim();
       const title = (ctx?.title || (permit && permit.facilityName) || '').toString().trim();
+      // Prefer a concrete Rec.gov link if we only have a generic search
+if ((!booking || /google\.com\/search/i.test(booking)) && permit && Array.isArray(permit.relatedPermits)) {
+  const recgov = permit.relatedPermits.find(p => /recreation\.gov\/(permits|search)/i.test(p?.url || ""));
+  if (recgov?.url) booking = recgov.url;
+}
       const qfb   = [park, title, 'permits'].filter(Boolean).join(' ');
       booking     = 'https://www.recreation.gov/search?q=' + encodeURIComponent(qfb);
     }
