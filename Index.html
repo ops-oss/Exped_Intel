@@ -1434,7 +1434,7 @@ const CHIP_SVG = {
   experience:'<svg><use href="#c-duration"/></svg>'     // 3-bar icon = level
   features:'<svg><use href="#c-features"/></svg>',
   tip:'<svg><use href="#c-tip"/></svg>',
-  bailout:'<svg><use href="#c-bailout"/></svg>',
+  bailout:'<svg><use href="#c-bailout"/></svg>'
 };
 const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary':''}">${CHIP_SVG[k]||''}${t}</span>`;
 
