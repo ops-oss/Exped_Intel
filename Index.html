@@ -1302,6 +1302,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
 <section id="expItin" class="section" style="display:none">
   <h3>Expedition Itinerary</h3>
   <p id="scenarioTagline" class="subhead"></p>
+  <div id="route_overview"></div>
   <div id="expKV" class="kv"></div>
   <div id="expChips" style="margin-top:8px"></div>
 </section>
@@ -1595,6 +1596,7 @@ function inflateFromMission(data){
     out.expedition_itinerary = { ...kv, elevation:elev||"", trailheads:th||"", gps:gps||"" };
   }
 
+  out.route_overview        ||= grab("ROUTE\\s+OVERVIEW");
   out.permits_entry         ||= grab("PERMITS\\s*&\\s*ENTRY");
   // accept either "SHUTTLE / TRANSPORTATION" or just "TRANSPORTATION"
   out.shuttle_transportation ||= grab("(?:SHUTTLE\\s*/\\s*TRANSPORTATION|TRANSPORTATION)");
@@ -2544,6 +2546,14 @@ function renderScenario(name){
     taglineEl.textContent = clean(raw?.tagline?.marketing || raw?.tagline?.functional || '');
   }
 
+
+kvOrParagraph(
+  'route_overview',
+  (raw && (raw.route_overview || raw.overview)) ||
+  first(base, ['route_overview','overview','user.0.route_overview','user.0.overview','user.0']) ||
+  ''
+);
+  
   // ========== GPX + MAP ==========
   const gpx   = (raw?.header?.gpx_download_link) || base.gpx_download_link || base.gpx_url || '';
   const start = (raw?.waypoint_hints?.start_trailhead) || base.start_trailhead || '';
