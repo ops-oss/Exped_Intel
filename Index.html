@@ -1714,7 +1714,11 @@ async function loadData(){
   let data={};
   try{ data = await loadData(); } catch(e){ console.error(e); status.textContent='Could not load expedition data.'; }
 
-  data = inflateFromMission(data);
+  // JSON → days (use first scenario). Fallback to prose only if empty.
+const s = typeof data.scenarios_json === 'string' ? JSON.parse(data.scenarios_json) : (data.scenarios || []);
+const a = Array.isArray(s) && s.length ? s[0] : null;
+data.days = a?.days?.map(d => ({ title: d.label || d.title || 'Day', description: d.description || '' })) || [];
+if (!data.days.length) data = inflateFromMission(data);
 
   // Title/meta
   $('title').textContent = data.title||'';
