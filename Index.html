@@ -1497,22 +1497,22 @@ function renderDay(day, idx){
 
   let html = `<article class="day"><h4>${title}</h4>`;
 
-  // preview = first line of description; fallback to preview
-const preview = (day.description && day.description.trim() ? day.description : (day.preview || '')).split('\n')[0].trim();
+// preview = first line of description; fallback to preview
+const preview = (day.description?.trim() || day.preview || '').split('\n')[0];
 if (preview) html += `<p class="preview">${preview}</p>`;
-
-  const chips = day.chips || {};
+// guard: days created from JSON may not have chips
+const _chips = (day && day.chips) ? day.chips : {};
 
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{
-    const content = renderChipField(k, chips[k], false);
+    const content = renderChipField(k, _chips[k], false);
     if (content) html+=`<div class="row"><div class="labelB">${l}:</div><div>${content}</div></div>`;
   });
 
   const secOrder=["trail","terrain","features","water","safety","tip","decision","bailout","morale"];
   const labels={trail:"Primary trail(s)",terrain:"Terrain",features:"Notable features",water:"Key water sources",safety:"Safety",tip:"Trail tip",decision:"Decision point",bailout:"Bailout",morale:"Morale marker"};
   secOrder.forEach(k=>{
-    const content = renderChipField(k, chips[k], true);
+    const content = renderChipField(k, _chips[k], true);
     if (content) html+=`<div class="row"><div class="labelB">${labels[k]}:</div><div>${content}</div></div>`;
   });
 
