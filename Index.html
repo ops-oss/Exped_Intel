@@ -2511,17 +2511,6 @@ function renderScenario(name){
   let finalDays = (finalDaysRaw || []).map(adaptDay)
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
   finalDays = finalDays.map((d,i) => ({ ...d, description: (finalDaysRaw?.[i]?.description || d.description || '').trim() }));
-
-  // Build "From → To" title using this scenario only (no globals)
-const startTH = (scenario?.waypoint_hints?.start_trailhead || '').trim();
-const endTH   = (scenario?.waypoint_hints?.end_trailhead   || '').trim();
-
-finalDays = finalDays.map((d,i) => {
-  const from = i === 0 ? startTH : (finalDaysRaw?.[i-1]?.campsite_location || '').trim();
-  const to   = i === finalDays.length - 1 ? endTH : (finalDaysRaw?.[i]?.campsite_location || '').trim();
-  const route = (finalDaysRaw?.[i]?.title || '').trim() || ((from && to) ? `${from} → ${to}` : '');
-  return { ...d, title: `Day ${i+1}${route ? `: ${route}` : ''}` };
-});
   
 window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
 window.trip    = { ...(window.trip||{}),    days: finalDays };
