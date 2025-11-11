@@ -1501,6 +1501,8 @@ function renderDay(day, idx){
 const preview = (day.description && day.description.trim() ? day.description : (day.preview || '')).split('\n')[0].trim();
 if (preview) html += `<p class="preview">${preview}</p>`;
 
+  const chips = day.chips || {};
+
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{
     const content = renderChipField(k, chips[k], false);
