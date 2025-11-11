@@ -2511,6 +2511,10 @@ function renderScenario(name){
   let finalDays = (finalDaysRaw || []).map(adaptDay)
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
 
+
+window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
+window.trip    = { ...(window.trip||{}),    days: finalDays };
+  
   // Paint days
   const daysEl = document.getElementById('itineraryDays');
   if (daysEl){
