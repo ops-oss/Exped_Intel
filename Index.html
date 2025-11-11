@@ -2510,7 +2510,7 @@ function renderScenario(name){
   // --- Adapt for renderer, and remove trailing "X miles, +A / -B" duplication from preview ---
   let finalDays = (finalDaysRaw || []).map(adaptDay)
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
-
+  finalDays = finalDays.map((d,i) => ({ ...d, description: (finalDaysRaw?.[i]?.description || d.description || '').trim() }));
 
 window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
 window.trip    = { ...(window.trip||{}),    days: finalDays };
