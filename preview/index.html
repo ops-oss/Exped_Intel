@@ -669,6 +669,69 @@
 #optCard a:hover {
   text-decoration: none;
 }
+
+  /* Match options card width to hero image */
+#optCard {
+  margin: 0 8px 16px;           /* same horizontal insets as .hero */
+  border-radius: 12px;
+  padding: 20px 24px;
+  background: #f7f7f7;
+  border: 1px solid #e3e3e3;
+}
+
+  /* Softer, pill-style tabs that float more */
+.tablist{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:0;
+  margin:0 8px 8px;        /* align with hero/card insets */
+  list-style:none;
+  justify-content:center;  /* center them under the image */
+}
+
+.ei-tab{
+  appearance:none;
+  border:1px solid var(--div);
+  background:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:8px 14px;
+  border-radius:999px;                         /* full pill */
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,.04);
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    background-color .15s ease,
+    transform .1s ease,
+    opacity .12s ease;
+}
+
+.ei-tab[aria-selected="false"]{
+  opacity:.7;
+}
+
+.ei-tab[aria-selected="true"]{
+  opacity:1;
+  background:#fff5ec;
+  border-color:#ff6a00;
+  color:#111;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  transform:translateY(-1px);
+}
+
+.ei-tab:hover{
+  border-color:#ff6a00;
+  box-shadow:0 3px 6px rgba(0,0,0,.08);
+  transform:translateY(-1px);
+}
 </style>
 </head>
 <body>
