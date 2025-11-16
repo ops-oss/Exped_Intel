@@ -732,6 +732,84 @@
   box-shadow:0 3px 6px rgba(0,0,0,.08);
   transform:translateY(-1px);
 }
+
+  /* Tabs wrapper: match hero/card insets */
+.tabs{
+  margin: 0 8px 8px;   /* same horizontal margin as .hero and #optCard */
+}
+
+/* Tab list: full width inside that wrapper */
+.tablist{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:0;
+  margin:0;
+  list-style:none;
+  justify-content:flex-start;  /* no centering, align like chips */
+}
+
+  /* Chip-style option tabs (no pills) */
+.ei-tab{
+  appearance:none;
+  border:1px solid rgba(0,0,0,.18);
+  background:#f5f5f5;                  /* like .chip.secondary */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:8px;                   /* match chip radius */
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.02em;
+  text-transform:none;                 /* text is already “OPTION 1 — …” */
+  cursor:pointer;
+  box-shadow:0 1px 0 rgba(0,0,0,.02);
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease,
+    opacity .12s ease;
+}
+
+.ei-tab[aria-selected="false"]{
+  opacity:.8;
+}
+
+.ei-tab[aria-selected="true"]{
+  opacity:1;
+  background:#fff;
+  border-color:#ff6a00;                /* brand orange */
+  box-shadow:0 2px 4px rgba(0,0,0,.08);
+}
+
+.ei-tab:hover{
+  background:#fff;
+  border-color:#ff6a00;
+}
+
+  @media (max-width:640px){
+  .tablist{
+    gap:6px;
+  }
+
+  /* Allow tabs to wrap but keep a clean grid feel */
+  .ei-tab{
+    flex: 1 1 calc(50% - 6px);  /* roughly 2-up on small screens */
+    justify-content:center;
+  }
+}
+
+  /* Scout options card: all content left-aligned */
+#optCard,
+#optCard p,
+#optCard .subhead,
+#optCard .subhead.muter,
+#optCard .row,
+#optCard .chips,
+#optCard .empty {
+  text-align: left;
+}
 </style>
 </head>
 <body>
