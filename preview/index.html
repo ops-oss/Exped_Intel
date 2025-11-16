@@ -566,6 +566,47 @@
   background: var(--accent, #ff6a00) !important;
   color: var(--paper) !important;
 }
+  .ei-footer {
+  background: #111;
+  color: #f5f5f5;
+  padding: 24px 16px 32px;
+  font-size: 12px;
+}
+
+.ei-footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ei-footer-mission {
+  color: #ff6a00; /* Expedition Intel orange */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 12px;
+}
+
+.ei-footer-meta {
+  margin: 0 0 4px;
+}
+
+.ei-footer-links {
+  margin: 0;
+}
+
+.ei-footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ei-footer a:hover {
+  text-decoration: underline;
+}
+
+.ei-footer-separator {
+  display: inline-block;
+  padding: 0 6px;
+}
 </style>
 </head>
 <body>
@@ -723,16 +764,64 @@
         </nav>
 
         <div class="card" id="optCard">
-          <p class="subhead muter">Your route options will appear here after you submit the form (or load samples).</p>
-          <div class="empty">No options loaded yet.</div>
-          <div class="cta" id="blueprintCta" style="display:none">
-            <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
-            <small id="ctaHint">Select an option above</small>
-          </div>
-        </div>
-      </div>
+  <p class="subhead muter">
+    Your route options will appear here after you submit the form (or load samples).
+  </p>
+
+  <p class="subhead muter">
+    <strong>Backcountry Risk Notice – Scout Recon</strong><br>
+    This Scout Recon is planning intel only. Expedition Intel does not guide trips, supervise you in the field, or provide rescue or emergency services. Backcountry travel involves serious risks, including injury and death.
+  </p>
+
+  <p class="subhead muter">
+    By viewing and using this intel, you acknowledge that you are solely responsible for verifying conditions, securing permits, preparing your team, and making all decisions in the field.
+  </p>
+
+  <p class="subhead muter">
+    Full details:
+    <a href="https://www.expeditionintel.com/terms-of-service" target="_blank" rel="noopener noreferrer">
+      Terms of Service
+    </a>
+    ·
+    <a href="https://www.expeditionintel.com/privacy-policy" target="_blank" rel="noopener noreferrer">
+      Privacy Policy
+    </a>
+  </p>
+
+  <div class="empty">No options loaded yet.</div>
+  <div class="cta" id="blueprintCta" style="display:none">
+    <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
+    <small id="ctaHint">Select an option above</small>
+  </div>
+</div>
     </section>
   </main>
+
+  <footer class="ei-footer">
+  <div class="ei-footer-inner">
+    <p class="ei-footer-mission">
+      MISSION NOTICE: Expedition Intel issues backcountry recon and route intel only. What you do with it is your call. 
+      The outdoors is unforgiving—injury, exposure, and death are possible outcomes. By using this site and our intel, 
+      you acknowledge that you are solely responsible for your preparation, decisions, and safety.
+
+      We are not your guide, not your rescue plan, and not your insurance.
+    </p>
+
+    <p class="ei-footer-meta">
+      © 2025 Expedition Intel
+    </p>
+
+    <p class="ei-footer-links">
+      <a href="https://www.expeditionintel.com/terms-of-service" target="_blank" rel="noopener noreferrer">
+        Terms &amp; Disclaimer
+      </a>
+      <span class="ei-footer-separator">|</span>
+      <a href="https://www.expeditionintel.com/privacy-policy" target="_blank" rel="noopener noreferrer">
+        Privacy Policy
+      </a>
+    </p>
+  </div>
+</footer>
 
 <script>
 /* ---------- tiny helpers ---------- */
