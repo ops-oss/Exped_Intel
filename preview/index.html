@@ -601,7 +601,7 @@
 }
 
 .ei-footer a {
-  color: inherit;
+  color: #ff6a00;
   text-decoration: none;
 }
 
@@ -645,6 +645,29 @@
 #optCard .subhead.muter a {
   text-decoration: underline;
   font-weight: 500;
+}
+
+  #optCard {
+  text-align: center;
+}
+
+#optCard .subhead.muter {
+  text-align: center;
+}
+
+#optCard .empty {
+  text-align: center;
+}
+
+  /* Make links in the options card orange */
+#optCard a {
+  color: #ff6a00;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+#optCard a:hover {
+  text-decoration: none;
 }
 </style>
 </head>
@@ -803,9 +826,6 @@
         </nav>
 
         <div class="card" id="optCard">
-  <p class="subhead muter">
-    Your route options will appear here after you submit the form (or load samples).
-  </p>
 
   <p class="subhead muter">
     <strong>Backcountry Risk Notice – Scout Recon</strong><br>
@@ -827,7 +847,7 @@
     </a>
   </p>
 
-  <div class="empty">No options loaded yet.</div>
+  <div class="empty">Your route options will appear here after you submit the form.</div>
   <div class="cta" id="blueprintCta" style="display:none">
     <button class="btn-cta" id="btnBlueprint" type="button" disabled>Blueprint this route →</button>
     <small id="ctaHint">Select an option above</small>
