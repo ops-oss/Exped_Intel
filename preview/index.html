@@ -810,6 +810,18 @@
 #optCard .empty {
   text-align: left;
 }
+
+  /* Kill iOS blue on selects (mobile + desktop) */
+#scoutForm select {
+  color: #222 !important;                 /* normal value color */
+  -webkit-text-fill-color: #222 !important;
+}
+
+/* Placeholder state (when the empty option is selected) */
+#scoutForm select:has(option[value=""]:checked) {
+  color: rgba(0,0,0,0.45) !important;     /* softer grey for "Select From Dropdown" */
+  -webkit-text-fill-color: rgba(0,0,0,0.45) !important;
+}
 </style>
 </head>
 <body>
