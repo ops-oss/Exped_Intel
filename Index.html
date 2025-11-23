@@ -1538,7 +1538,8 @@ function renderDay(day, idx){
     return '';
   };
 
-  let html = `<article class="day"><h4>${day.title || `Day ${idx+1}`}</h4>`;
+  const titleH = day.title || day.label || `Day ${idx+1}`;
+let html = `<article class="day"><h4>${titleH}</h4>`;
 
   // preview fallback to description’s first sentence
   const preview = (day.preview && day.preview.trim())
