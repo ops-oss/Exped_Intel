@@ -871,7 +871,20 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   margin: 4px 0 12px 0;     /* a little space above/below */
   line-height: 1.4;
 }
-
+  
+/* Let chip container wrap; prevent layout push on desktop */
+.day .row > .labelB { flex: 0 0 auto; }                  /* keep label width snug */
+.day .row > div:last-child{
+  display:flex;
+  flex-wrap:wrap;                                        /* ⟵ key: wrap chips */
+  gap:8px;
+  min-width:0;                                           /* allow shrinking in flex rows */
+  white-space:normal;                                    /* override any nowrap */
+}
+.day .row > div:last-child .chip{
+  flex:0 0 auto;
+  margin:4px 8px 0 0;
+}
 </style>
 </head>
 <body>
@@ -1525,7 +1538,7 @@ function renderDay(day, idx){
     return '';
   };
 
-  let html = `<article class="day"><h4>${title}</h4>`;
+  let html = `<article class="day"><h4>${day.title || `Day ${idx+1}`}</h4>`;
 
   // preview fallback to description’s first sentence
   const preview = (day.preview && day.preview.trim())
