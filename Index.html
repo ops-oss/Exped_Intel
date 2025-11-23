@@ -1585,7 +1585,7 @@ if (routeH) {
   const esc = routeH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   body = body.replace(new RegExp(`^(?:Day\\s*${idx+1}\\s*:\\s*)?${esc}[.!?\\s–—-]*`, 'i'), '').trim();
 }
-body = stripMilesTail(body).trim();
+body = body.replace(/\s*\d+(?:\.\d+)?\s*miles?\b[^.!?]*[.!?]?$/i, '').trim();
 if (body) html += `<p class="preview">${body}</p>`;
   
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
