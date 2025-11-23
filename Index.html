@@ -2555,24 +2555,35 @@ function renderScenario(name){
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
   finalDays = finalDays.map((d,i) => ({ ...d, description: (finalDaysRaw?.[i]?.description || d.description || '').trim() }));
 
-  // Build "Day N: From → To" safely using only what's in scope
-const sc = (typeof scenario !== "undefined" && scenario) ? scenario : null;
-const startTH = (sc?.waypoint_hints?.start_trailhead || "").trim();
-const endTH   = (sc?.waypoint_hints?.end_trailhead   || "").trim();
+  // Build "Day N: From → To" (robust Day 1 fallback)
+const clean = v => String(v || '').replace(/\s+/g,' ').trim();
+const splitTH = th => {
+  const [a,b] = String(th || '').split('→').map(s => s && s.trim());
+  return [clean(a), clean(b)];
+};
+
+const [hdrStart, hdrEnd] = splitTH(scenario?.header?.trailheads);
+const startTH = clean(scenario?.waypoint_hints?.start_trailhead || hdrStart);
+const endTH   = clean(scenario?.waypoint_hints?.end_trailhead   || hdrEnd);
 const lastIdx = (finalDaysRaw?.length || 0) - 1;
 
 finalDays = finalDays.map((d,i) => {
-  const prevCamp = (finalDaysRaw?.[i-1]?.campsite_location || "").trim();
-  const thisCamp = (finalDaysRaw?.[i]?.campsite_location   || "").trim();
+  const prevCamp = clean(finalDaysRaw?.[i-1]?.campsite_location);
+  const thisCamp = clean(finalDaysRaw?.[i]?.campsite_location);
 
-  const from = i === 0 ? startTH : prevCamp;
-  const to   = i === lastIdx ? endTH : thisCamp;
+  const from = i === 0 ? startTH : prevCamp;              // Day 1 uses start trailhead (with header fallback)
+  const to   = i === lastIdx ? endTH : thisCamp;          // Last day uses end trailhead
 
-  // prefer explicit title if the model provided one
-  const explicit = (finalDaysRaw?.[i]?.title || "").trim();
-  const route = explicit || ((from && to && from !== to) ? `${from} → ${to}` : "");
+  const explicit = clean(finalDaysRaw?.[i]?.title);
+  const route = explicit || (
+    from && to &&
+    from.toLowerCase() !== 'n/a' &&
+    to.toLowerCase()   !== 'n/a' &&
+    from.toLowerCase() !== to.toLowerCase()
+      ? `${from} → ${to}` : ''
+  );
 
-  return { ...d, title: `Day ${i+1}${route ? `: ${route}` : ""}` };
+  return { ...d, title: `Day ${i+1}${route ? `: ${route}` : ''}` };
 });
 
 window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
