@@ -1589,8 +1589,9 @@ if (m) body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
 if (body) html += `<p class="preview">${body}</p>`;
 
 // collapse accidental duplicated first sentence
-const m = body.match(/^([^.!?\n]+[.!?])\s+\1/i);
-if (m) body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
+if (/^([^.!?\n]+[.!?])\s+\1/i.test(body)) {
+  body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
+}
 
 if (body) html += `<p class="preview">${body}</p>`;
   
