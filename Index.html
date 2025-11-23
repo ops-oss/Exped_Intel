@@ -1539,57 +1539,53 @@ function renderDay(day, idx){
     return '';
   };
 
-  // — Header: force "Day N: From → To" (ignore model's title)
-let titleH = `Day ${idx+1}`;
-let html = '';
-try {
-  const state = (window.EI_DATA || window.trip || {});
-  const allDays = state.days || [];
-  const activeKey = (state.activeScenario || '').toLowerCase();
+  // Header: "Day N: From → To" built safely from what's available
+let routeH = '';
+// 1) Use route in label if present (after ":")
+const lbl = (day.label || '').trim();
+if (lbl.includes(':')) {
+  const rt = lbl.split(':').slice(1).join(':').trim();
+  if (rt.includes('→')) routeH = rt;
+}
+// 2) Else synthesize from camps and (for first/last day) trailheads
+if (!routeH) {
+  try {
+    const state = (window.EI_DATA || window.trip || {});
+    const all   = state.days || [];
+    const prevCamp = (all[idx - 1]?.chips?.campsite || '').trim();
+    const thisCamp = (day?.chips?.campsite || '').trim();
 
-  const scenarios = Array.isArray(state.scenarios)
-    ? state.scenarios
-    : (typeof state.scenarios_json === 'string' ? JSON.parse(state.scenarios_json) : []);
-  const sc = scenarios.find(s => (s.key || s.label || '').toLowerCase() === activeKey) || scenarios[0] || {};
+    let from = prevCamp, to = thisCamp;
 
-  // start/end trailheads; fallback to header.trailheads "A → B"
-  const thParts = (sc?.header?.trailheads || '').split('→').map(s => (s || '').trim());
-  const startTH = (sc?.waypoint_hints?.start_trailhead || thParts[0] || '').trim();
-  const endTH   = (sc?.waypoint_hints?.end_trailhead   || thParts[1] || '').trim();
+    // scenario for trailheads (fallbacks)
+    const scns = Array.isArray(state.scenarios)
+      ? state.scenarios
+      : (typeof state.scenarios_json === 'string' ? JSON.parse(state.scenarios_json) : []);
+    const activeKey = (state.activeScenario || '').toLowerCase();
+    const sc = scns.find(s => (s.key||s.label||'').toLowerCase() === activeKey) || scns[0] || {};
+    const th = (sc?.header?.trailheads || '').split('→').map(s => (s || '').trim());
+    const startTH = (sc?.waypoint_hints?.start_trailhead || th[0] || '').trim();
+    const endTH   = (sc?.waypoint_hints?.end_trailhead   || th[1] || '').trim();
 
-  // camps from adjacent days (already adapted into chips)
-  const prevCamp = (allDays[idx - 1]?.chips?.campsite || '').trim();
-  const thisCamp = (day?.chips?.campsite || '').trim();
+    if (idx === 0) from = startTH || from;
+    if (idx === (all.length ? all.length - 1 : idx)) to = endTH || to;
 
-  const from = idx === 0 ? startTH : prevCamp;
-  const to   = idx === allDays.length - 1 ? endTH : thisCamp;
-
-  // prefer route after ":" in label; else synthesize
-  const explicit = (day.label || '').includes(':')
-    ? (day.label || '').split(':').slice(1).join(':').trim()
-    : '';
-  const fallback = (from && to && from.toLowerCase() !== to.toLowerCase()) ? `${from} → ${to}` : '';
-  const routeH = explicit || fallback;
-
-  titleH = `Day ${idx+1}${routeH ? `: ${routeH}` : ''}`;
-  html = `<article class="day"><h4>${titleH}</h4>`;
-} catch (e) {
-  // safe fallback header
-  html = `<article class="day"><h4>Day ${idx+1}</h4>`;
+    if (from && to && from.toLowerCase() !== to.toLowerCase() && from.toLowerCase() !== 'n/a' && to.toLowerCase() !== 'n/a') {
+      routeH = `${from} → ${to}`;
+    }
+  } catch (_) {}
 }
 
-// — Paragraph: FULL description, strip any leading "Day N: From → To." and mile tail
+// Final header (bold)
+let html = `<article class="day"><h4>Day ${idx+1}${routeH ? `: ${routeH}` : ''}</h4>`;
+
+// Paragraph: full body, strip leading duplicate route if present, and strip mile tail
 let body = (day.description || day.preview || '').trim();
-const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
-if (headerRoute) {
-  const esc = headerRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+if (routeH) {
+  const esc = routeH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   body = body.replace(new RegExp(`^(?:Day\\s*${idx+1}\\s*:\\s*)?${esc}[.!?\\s–—-]*`, 'i'), '').trim();
 }
 body = stripMilesTail(body).trim();
-// collapse duplicated first sentence (5.1 sometimes repeats it)
-if (/^([^.!?\n]+[.!?])\s+\1/i.test(body)) {
-  body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
-}
 if (body) html += `<p class="preview">${body}</p>`;
   
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
