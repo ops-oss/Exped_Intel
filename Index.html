@@ -1574,12 +1574,24 @@ try {
   if (route && !headerHasRoute) html += `<div class="route">${route}</div>`;
 } catch (_) { /* no-op */ }
 
-  // preview fallback to description’s first sentence
-  const preview = (day.preview && day.preview.trim())
-      ? day.preview.trim()
-      : String(day.description||'').split('\n')[0];
-  if (preview) html += `<p class="preview">${preview}</p>`;
+  // body = full description; strip any leading "Day X: From → To." (since it's in the header/route)
+// and collapse a doubled first sentence (5.1 sometimes repeats it)
+const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
 
+let body = (day.description || day.preview || '').trim();
+
+if (headerRoute) {
+  const esc = headerRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  body = body.replace(new RegExp(`^(?:Day\\s*${idx+1}\\s*:\\s*)?${esc}[.!?\\s–—-]*`, 'i'), '').trim();
+}
+
+// collapse accidental duplicated first sentence
+const m = body.match(/^([^.!?\n]+[.!?])\s+\1/i);
+if (m) body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
+
+if (body) html += `<p class="preview">${body}</p>`;
+  
+  const chips = day.chips || {};
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{
     const content = renderChipField(k, chips[k], false);
