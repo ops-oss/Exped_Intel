@@ -1574,7 +1574,7 @@ try {
   if (route && !headerHasRoute) html += `<div class="route">${route}</div>`;
 } catch (_) { /* no-op */ }
 
-  // body = full description; strip any leading "Day X: From → To." (since it's in the header/route)
+// body = full description; strip any leading "Day X: From → To." (since it's in the header/route)
 // and collapse a doubled first sentence (5.1 sometimes repeats it)
 const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
 
@@ -1591,7 +1591,6 @@ if (m) body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
 
 if (body) html += `<p class="preview">${body}</p>`;
   
-  const chips = day.chips || {};
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
   prim.forEach(([k,l])=>{
     const content = renderChipField(k, chips[k], false);
