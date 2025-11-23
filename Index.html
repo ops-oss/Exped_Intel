@@ -1540,6 +1540,8 @@ function renderDay(day, idx){
   };
 
   // — Header: force "Day N: From → To" (ignore model's title)
+let titleH = `Day ${idx+1}`;
+let html = '';
 try {
   const state = (window.EI_DATA || window.trip || {});
   const allDays = state.days || [];
@@ -1550,7 +1552,7 @@ try {
     : (typeof state.scenarios_json === 'string' ? JSON.parse(state.scenarios_json) : []);
   const sc = scenarios.find(s => (s.key || s.label || '').toLowerCase() === activeKey) || scenarios[0] || {};
 
-  // start/end trailheads; fall back to header.trailheads "A → B"
+  // start/end trailheads; fallback to header.trailheads "A → B"
   const thParts = (sc?.header?.trailheads || '').split('→').map(s => (s || '').trim());
   const startTH = (sc?.waypoint_hints?.start_trailhead || thParts[0] || '').trim();
   const endTH   = (sc?.waypoint_hints?.end_trailhead   || thParts[1] || '').trim();
@@ -1562,37 +1564,32 @@ try {
   const from = idx === 0 ? startTH : prevCamp;
   const to   = idx === allDays.length - 1 ? endTH : thisCamp;
 
-  // prefer route after ":" in label if present; else synthesize
+  // prefer route after ":" in label; else synthesize
   const explicit = (day.label || '').includes(':')
-      ? (day.label || '').split(':').slice(1).join(':').trim()
-      : '';
+    ? (day.label || '').split(':').slice(1).join(':').trim()
+    : '';
   const fallback = (from && to && from.toLowerCase() !== to.toLowerCase()) ? `${from} → ${to}` : '';
   const routeH = explicit || fallback;
 
-  const titleH = `Day ${idx+1}${routeH ? `: ${routeH}` : ''}`;
-  let html = `<article class="day"><h4>${titleH}</h4>`;
+  titleH = `Day ${idx+1}${routeH ? `: ${routeH}` : ''}`;
+  html = `<article class="day"><h4>${titleH}</h4>`;
+} catch (e) {
+  // safe fallback header
+  html = `<article class="day"><h4>Day ${idx+1}</h4>`;
+}
 
-// body = full description; strip leading "Day X: From → To." if it repeats the header/route,
-// and collapse a doubled first sentence (5.1 sometimes repeats it)
-const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
-
+// — Paragraph: FULL description, strip any leading "Day N: From → To." and mile tail
 let body = (day.description || day.preview || '').trim();
-
+const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
 if (headerRoute) {
   const esc = headerRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   body = body.replace(new RegExp(`^(?:Day\\s*${idx+1}\\s*:\\s*)?${esc}[.!?\\s–—-]*`, 'i'), '').trim();
 }
-
-const m = body.match(/^([^.!?\n]+[.!?])\s+\1/i);
-if (m) body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
-
-if (body) html += `<p class="preview">${body}</p>`;
-
-// collapse accidental duplicated first sentence
+body = stripMilesTail(body).trim();
+// collapse duplicated first sentence (5.1 sometimes repeats it)
 if (/^([^.!?\n]+[.!?])\s+\1/i.test(body)) {
   body = body.replace(/^([^.!?\n]+[.!?])\s+\1/i, '$1').trim();
 }
-
 if (body) html += `<p class="preview">${body}</p>`;
   
   const prim=[["distance","Distance"],["elevation","Elevation Gain/Loss"],["campsite","Campsite"]];
