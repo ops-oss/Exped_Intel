@@ -1574,7 +1574,6 @@ try {
 
 // body = full description; strip leading "Day X: From → To." if it repeats the header/route,
 // and collapse a doubled first sentence (5.1 sometimes repeats it)
-const titleH = day.title || day.label || `Day ${idx+1}`;
 const headerRoute = titleH.includes(':') ? titleH.split(':').slice(1).join(':').trim() : '';
 
 let body = (day.description || day.preview || '').trim();
