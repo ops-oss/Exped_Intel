@@ -885,6 +885,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   flex:0 0 auto;
   margin:4px 8px 0 0;
 }
+  .day .route{ margin:4px 0 8px; font-size:0.95em; opacity:.85; line-height:1.3; }
 </style>
 </head>
 <body>
@@ -1539,7 +1540,39 @@ function renderDay(day, idx){
   };
 
   const titleH = day.title || day.label || `Day ${idx+1}`;
+  const headerHasRoute = /→/.test(titleH);
 let html = `<article class="day"><h4>${titleH}</h4>`;
+
+  // — From → To (render-time, safe; no schema changes)
+try {
+  const state = (window.EI_DATA || window.trip || {});
+  const allDays = state.days || [];
+  const activeKey = (state.activeScenario || '').toLowerCase();
+
+  // find current scenario for trailheads
+  const scenarios = Array.isArray(state.scenarios)
+    ? state.scenarios
+    : (typeof state.scenarios_json === 'string' ? JSON.parse(state.scenarios_json) : []);
+  const sc = scenarios.find(s => (s.key || s.label || '').toLowerCase() === activeKey) || scenarios[0] || {};
+
+  // start/end trailheads (fallback from header.trailheads "A → B")
+  const thParts = (sc.header?.trailheads || '').split('→').map(s => (s || '').trim());
+  const startTH = (sc.waypoint_hints?.start_trailhead || thParts[0] || '').trim();
+  const endTH   = (sc.waypoint_hints?.end_trailhead   || thParts[1] || '').trim();
+
+  // camps pulled from the already-adapted days (chips)
+  const prevCamp = (allDays[idx - 1]?.chips?.campsite || '').trim();
+  const thisCamp = (day.chips?.campsite || '').trim();
+
+  const from = idx === 0 ? startTH : prevCamp;
+  const to   = idx === allDays.length - 1 ? endTH : thisCamp;
+
+  // if the title/label already has a route after ":", prefer that
+  const explicit = (day.title || day.label || '').split(':').slice(1).join(':').trim();
+  const route = explicit || (from && to && from.toLowerCase() !== to.toLowerCase() ? `${from} → ${to}` : '');
+
+  if (route && !headerHasRoute) html += `<div class="route">${route}</div>`;
+} catch (_) { /* no-op */ }
 
   // preview fallback to description’s first sentence
   const preview = (day.preview && day.preview.trim())
@@ -2554,39 +2587,6 @@ function renderScenario(name){
   let finalDays = (finalDaysRaw || []).map(adaptDay)
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
   finalDays = finalDays.map((d,i) => ({ ...d, description: (finalDaysRaw?.[i]?.description || d.description || '').trim() }));
-
-  const sc = (typeof scenario !== "undefined" && scenario) ? scenario : null;
-
-  // Build "Day N: From → To" (robust Day 1 fallback)
-const clean = v => String(v || '').replace(/\s+/g,' ').trim();
-const splitTH = th => {
-  const [a,b] = String(th || '').split('→').map(s => s && s.trim());
-  return [clean(a), clean(b)];
-};
-
-const [hdrStart, hdrEnd] = splitTH(sc?.header?.trailheads);
-const startTH = clean(sc?.waypoint_hints?.start_trailhead || hdrStart);
-const endTH   = clean(sc?.waypoint_hints?.end_trailhead   || hdrEnd);
-const lastIdx = (finalDaysRaw?.length || 0) - 1;
-
-finalDays = finalDays.map((d,i) => {
-  const prevCamp = clean(finalDaysRaw?.[i-1]?.campsite_location);
-  const thisCamp = clean(finalDaysRaw?.[i]?.campsite_location);
-
-  const from = i === 0 ? startTH : prevCamp;              // Day 1 uses start trailhead (with header fallback)
-  const to   = i === lastIdx ? endTH : thisCamp;          // Last day uses end trailhead
-
-  const explicit = clean(finalDaysRaw?.[i]?.title);
-  const route = explicit || (
-    from && to &&
-    from.toLowerCase() !== 'n/a' &&
-    to.toLowerCase()   !== 'n/a' &&
-    from.toLowerCase() !== to.toLowerCase()
-      ? `${from} → ${to}` : ''
-  );
-
-  return { ...d, title: `Day ${i+1}${route ? `: ${route}` : ''}` };
-});
 
 window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
 window.trip    = { ...(window.trip||{}),    days: finalDays };
