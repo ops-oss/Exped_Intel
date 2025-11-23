@@ -886,6 +886,18 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
   margin:4px 8px 0 0;
 }
   .day .route{ margin:4px 0 8px; font-size:0.95em; opacity:.85; line-height:1.3; }
+
+  /* Force wrap for ALL trip titles (handles nested spans too) */
+.hero h1,
+.hero h1 *,
+h1#tripTitle,
+h1.title {
+  white-space: normal !important;   /* kill any nowrap */
+  overflow-wrap: anywhere;          /* wrap even with long words/NBSPs */
+  word-break: break-word;           /* Safari/iOS fallback */
+  hyphens: auto;
+  max-width: 100%;
+}
 </style>
 </head>
 <body>
