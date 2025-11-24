@@ -1655,6 +1655,8 @@ function renderExpeditionChips(info){
 }
 
 /* ---------- mission_text → structured fields ---------- */
+const FIELD_DISCLAIMER_TEXT = "This blueprint is intel, not a guarantee. Conditions change without warning. Trails wash out. Weather turns. Maps lie. You are responsible for verifying details, preparing your team, and making sound calls under pressure. Expedition Intel accepts no liability for accidents, injuries, or losses arising from this information. Carry your own plan. Carry your own way out.";
+
 function inflateFromMission(data){
   const out = { ...data };
   const txt = (data.mission_text || "")
@@ -1708,7 +1710,7 @@ function inflateFromMission(data){
   out.bailout_summary       ||= grab("BAILOUT\\s+SUMMARY");
   out.emergency             ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
   out.final_brief           ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
-  out.field_disclaimer      ||= grab("FIELD\\s+DISCLAIMER");
+  out.field_disclaimer      = FIELD_DISCLAIMER_TEXT;
 
   if(!Array.isArray(out.days) || out.days.length===0){
    const dayBlocks = txt
