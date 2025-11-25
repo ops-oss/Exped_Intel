@@ -2487,26 +2487,7 @@ return { title: finalTitle, preview: finalPreview, chips };
     if (!ifr) return;
     if (url){ ifr.src = url; ifr.parentElement.style.display=''; }
     else { ifr.removeAttribute('src'); ifr.parentElement.style.display='none'; }
-  }
-
-/* === Scenario guard: hide tabs + disable scenario system if none exist === */
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const base0 = window.EI_DATA || {};
-
-  const hasScenarios =
-    (Array.isArray(base0.scenarios) && base0.scenarios.length > 0) ||
-    (typeof base0.scenarios_json === "string" &&
-      base0.scenarios_json.trim().length > 0);
-
-  if (!hasScenarios) {
-    // Remove tab UI so daily blueprint stands alone cleanly
-    const tabsNav = document.querySelector(".ei-tabs");
-    if (tabsNav) tabsNav.remove();
-    // Prevent scenario code from ever initializing
-    return;
-  }
-})();
+  
   
 /* ---------- render one scenario (called on every tab click) ---------- */
 function renderScenario(name){
