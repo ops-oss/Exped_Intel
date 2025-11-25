@@ -1715,6 +1715,7 @@ function inflateFromMission(data){
   if(!Array.isArray(out.days) || out.days.length===0){
    const dayBlocks = txt
   .split(/\n\s*(?:—|⸻|---)\s*\n/g)
+  .map(s => s.trim())   
   .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
     out.days = dayBlocks.map(block=>{
       const title = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
