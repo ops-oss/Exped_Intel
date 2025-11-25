@@ -1712,27 +1712,62 @@ function inflateFromMission(data){
   out.final_brief           ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
   out.field_disclaimer      = FIELD_DISCLAIMER_TEXT;
 
-  if(!Array.isArray(out.days) || out.days.length===0){
-   const dayBlocks = txt
-  .split(/\n\s*(?:—|⸻|---)\s*\n/g)
-  .map(s => s.trim())   
-  .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
-    out.days = dayBlocks.map(block=>{
-      const title = block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
-      const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
-      const preview = afterTitle.split(/\n-\s/)[0].split(/\n{2,}/)[0].trim();
-      const pick = (re) => (afterTitle.match(re)?.[1]||"").trim();
-      const chips = {
-        distance: pick(/Distance[^:]*:\s*([^\n]+)/i) || pick(/Distance and elevation[^:]*:\s*([^,]+,[^\n]+)/i),
-        elevation: (()=>{ const s=pick(/Distance and elevation[^:]*:\s*([^\n]+)/i); const m=s.match(/([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i); return m?m[1]:""; })(),
-        campsite: pick(/Campsite location:\s*([^\n]+)/i),
-        trail:    pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
-        terrain:  pick(/Terrain:\s*([^\n]+)/i),
-        water:    pick(/Key water sources:\s*([^\n]+)/i),
-        safety:   pick(/Safety:\s*([^\n]+)/i),
-        decision: pick(/Decision point:\s*([^\n]+)/i),
-        morale:   pick(/Morale marker:\s*([^\n]+)/i)
-      };
+  if (!Array.isArray(out.days) || out.days.length === 0) {
+  const lines = txt.split('\n');
+
+  const dayBlocks = [];
+  let current = [];
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+
+    // New day header: "DAY 1:" or "DAYS 2–3:" etc
+    if (/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(trimmed)) {
+      if (current.length) {
+        dayBlocks.push(current.join('\n').trim());
+      }
+      current = [rawLine]; // start new block with this DAY header line
+    } else if (current.length) {
+      // we’re inside a day block; keep accumulating
+      current.push(rawLine);
+    }
+  }
+  if (current.length) {
+    dayBlocks.push(current.join('\n').trim());
+  }
+
+  out.days = dayBlocks.map(block => {
+    const title =
+      block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi)?.[0]?.trim() || "";
+
+    const afterTitle = block.split(/\n/).slice(1).join('\n').trim(); // everything after "DAY X:"
+    const preview = afterTitle
+      .split(/\n-\s/)[0]
+      .split(/\n{2,}/)[0]
+      .trim();
+
+    const pick = (re) => (afterTitle.match(re)?.[1] || "").trim();
+
+    const chips = {
+      distance:
+        pick(/Distance[^:]*:\s*([^\n]+)/i) ||
+        pick(/Distance and elevation[^:]*:\s*([^,]+,[^\n]+)/i),
+      elevation: (() => {
+        const s = pick(/Distance and elevation[^:]*:\s*([^\n]+)/i);
+        const m = s.match(
+          /([+-]?\d[\d,]*\s*ft\s*\/\s*[+-]?\d[\d,]*\s*ft)/i
+        );
+        return m ? m[1] : "";
+      })(),
+      campsite: pick(/Campsite location:\s*([^\n]+)/i),
+      trail: pick(/Primary trail\(s\) used:\s*([^\n]+)/i),
+      terrain: pick(/Terrain:\s*([^\n]+)/i),
+      water: pick(/Key water sources:\s*([^\n]+)/i),
+      safety: pick(/Safety:\s*([^\n]+)/i),
+      decision: pick(/Decision point:\s*([^\n]+)/i),
+      morale: pick(/Morale marker:\s*([^\n]+)/i),
+    };
+
       // --- Multi-campsite support for "- Campsites:" bullet list on range days ---
 (function(){
   // Scan the bullet block:
