@@ -1760,20 +1760,27 @@ const grab = (label) => {
 
     out.days = dayBlocks.map((block, idx) => {
       // Header line: "DAY 1: Cottonwood Lakes Trailhead TO Chicken Spring Lake"
-      const headerMatch =
-        block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
-      const rawHeader = headerMatch ? headerMatch[0].trim() : "";
-      const rawRoute  = headerMatch ? headerMatch[2].trim() : "";
+        const headerMatch =
+    block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
+  const rawHeader = headerMatch ? headerMatch[0].trim() : "";
+  const rawRoute  = headerMatch ? headerMatch[2].trim() : "";
 
-      const dayNumMatch = rawHeader.match(/\d+/);
-      const dayNum = dayNumMatch ? dayNumMatch[0] : String(idx + 1);
+  const dayNumMatch = rawHeader.match(/\d+/);
+  const dayNum = dayNumMatch ? dayNumMatch[0] : String(idx + 1);
 
-      // Normalize route to use arrow instead of "to"
-      const routeNorm = rawRoute.replace(/\s+to\s+/i, " → ");
+  // Use DAY route if present, else fall back to itinerary trailheads
+  const trailheads = out.expedition_itinerary?.trailheads || "";
+  const routeSource = rawRoute || trailheads;
+  const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
 
-      const label = routeNorm
-        ? `Day ${dayNum}: ${routeNorm}`
-        : `Day ${dayNum}`;
+  // If we still have nothing, keep whatever text was after the colon
+  const fallbackTitle =
+    headerMatch ? (headerMatch[2].trim() || `Day ${dayNum}`) : `Day ${dayNum}`;
+
+  const label = routeNorm
+    ? `Day ${dayNum}: ${routeNorm}`
+    : `Day ${dayNum}: ${fallbackTitle}`;
+
 
       // Everything after the first line is the body
       const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
