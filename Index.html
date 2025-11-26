@@ -1670,7 +1670,7 @@ if (!txt) return out;
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    `(^|\\n)${label}(?:\\s*\$begin:math:text$\[\^\\\\n\)\]\*\\$end:math:text$)?\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
     'i'
   );
   const m = txt.match(re);
@@ -1759,39 +1759,44 @@ const grab = (label) => {
     }
 
     out.days = dayBlocks.map((block, idx) => {
-      // Header line: "DAY 1: Cottonwood Lakes Trailhead TO Chicken Spring Lake"
-        const headerMatch =
-    block.match(/^DAYS?\s+\d+(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
-  const rawHeader = headerMatch ? headerMatch[0].trim() : "";
-  const rawRoute  = headerMatch ? headerMatch[2].trim() : "";
+  // Header line: "DAY 1: ..." or "DAYS 1–3: ..."
+  const headerMatch =
+    block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
 
-  const dayNumMatch = rawHeader.match(/\d+/);
-  const dayNum = dayNumMatch ? dayNumMatch[0] : String(idx + 1);
+  const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
+  const rawRoute = headerMatch ? headerMatch[2].trim() : "";
 
-  // Use DAY route if present, else fall back to itinerary trailheads
+  // Is this a range like "1-3" or a single day like "1"?
+  const isRange = /[-–]/.test(rawIndex);
+
+  // If the DAY line didn’t give us a route, fall back to the itinerary trailheads
   const trailheads = out.expedition_itinerary?.trailheads || "";
   const routeSource = rawRoute || trailheads;
   const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
 
-  // If we still have nothing, keep whatever text was after the colon
-  const fallbackTitle =
-    headerMatch ? (headerMatch[2].trim() || `Day ${dayNum}`) : `Day ${dayNum}`;
+  let label;
+  if (routeNorm) {
+    // "Days 1–3: A → B" or "Day 4: A → B"
+    label = isRange
+      ? `Days ${rawIndex}: ${routeNorm}`
+      : `Day ${rawIndex}: ${routeNorm}`;
+  } else {
+    // Fallback: no clear route, just keep the index
+    label = isRange
+      ? `Days ${rawIndex}`
+      : `Day ${rawIndex}`;
+  }
 
-  const label = routeNorm
-    ? `Day ${dayNum}: ${routeNorm}`
-    : `Day ${dayNum}: ${fallbackTitle}`;
+  // Everything after the first line is the body
+  const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
 
+  // Preview = first paragraph / sentences before bullets
+  const preview = afterTitle
+    .split(/\n-\s/)[0]
+    .split(/\n{2,}/)[0]
+    .trim();
 
-      // Everything after the first line is the body
-      const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
-
-      // Preview = first paragraph / sentences before bullets
-      const preview = afterTitle
-        .split(/\n-\s/)[0]
-        .split(/\n{2,}/)[0]
-        .trim();
-
-      const pick = (re) => (afterTitle.match(re)?.[1] || "").trim();
+  const pick = (re) => (afterTitle.match(re)?.[1] || "").trim();
 
       const distance_and_elevation_raw =
         pick(/Distance[^:]*:\s*([^\n]+)/i) ||
@@ -2011,16 +2016,39 @@ if (data.image_link) {
     let   booking = (permit && permit.bookingUrl) || (ctx && ctx.permits_booking_url) || '';
     const requires = (permit && Object.prototype.hasOwnProperty.call(permit,'requires')) ? !!permit.requires : true;
 
-    if (!booking) {
-      const park  = (ctx?.park || ctx?.destination || ctx?.destination_id || '').toString().trim();
-      const title = (ctx?.title || (permit && permit.facilityName) || '').toString().trim();
-      // Prefer a concrete Rec.gov link if we only have a generic search
-if ((!booking || /google\.com\/search/i.test(booking)) && permit && Array.isArray(permit.relatedPermits)) {
-  const recgov = permit.relatedPermits.find(p => /recreation\.gov\/(permits|search)/i.test(p?.url || ""));
-  if (recgov?.url) booking = recgov.url;
-}
-      const qfb   = [park, title, 'permits'].filter(Boolean).join(' ');
-      booking     = 'https://www.recreation.gov/search?q=' + encodeURIComponent(qfb);
+        // If we have richer Rec.gov links attached, prefer a concrete product page
+    if (permit && Array.isArray(permit.relatedPermits) && permit.relatedPermits.length) {
+      const current = String(booking || "");
+      const looksGeneric =
+        !current ||
+        /google\.com\/search/i.test(current) ||
+        /recreation\.gov\/search/i.test(current);
+
+      if (looksGeneric) {
+        // Product page (> search) if we can spot it
+        const prod = permit.relatedPermits.find(p =>
+          /recreation\.gov\/permits\/\d+/i.test(p?.url || "")
+        );
+        const srch = permit.relatedPermits.find(p =>
+          /recreation\.gov\/search/i.test(p?.url || "")
+        );
+        if (prod?.url) booking = prod.url;
+        else if (srch?.url) booking = srch.url;
+      }
+    }
+
+        if (!booking) {
+      // Fallback: build a gentle Rec.gov search by park/region only (not blueprint title)
+      const park =
+        (ctx?.park ||
+         ctx?.destination ||
+         ctx?.location ||      // blueprints: region / park name
+         ctx?.destination_id ||
+         '').toString().trim();
+
+      const seed = park || (permit && permit.facilityName) || '';
+      const qfb  = [seed, 'permits'].filter(Boolean).join(' ');
+      booking    = 'https://www.recreation.gov/search?q=' + encodeURIComponent(qfb);
     }
 
     // carry forward any descriptive text (from permit-outlines/recgov)
@@ -2028,15 +2056,6 @@ if ((!booking || /google\.com\/search/i.test(booking)) && permit && Array.isArra
       (permit?.details && permit.details.summary) ??
       (permit?.recgov && permit.recgov.description) ??
       '';
-
-    // Prefer a concrete Rec.gov link if present in relatedPermits
-if (permit && Array.isArray(permit.relatedPermits)) {
-  // product page (> search) if we can spot it
-  const prod = permit.relatedPermits.find(p => /recreation\.gov\/permits\/\d+/i.test(p.url || ""));
-  const srch = permit.relatedPermits.find(p => /recreation\.gov/i.test(p.url || ""));
-  if (prod?.url) booking = prod.url;
-  else if (srch?.url) booking = srch.url;
-}
 
     // === CTA container
     const cta = document.createElement('div');
