@@ -1670,11 +1670,11 @@ if (!txt) return out;
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    // match any header line that contains the label (e.g. "GEAR CHECKLIST (MIN)")
+    // HEADER: any line that contains the label, e.g. "GEAR CHECKLIST (MIN)"
     `(^|\\n)[^\\n]*${label}[^\\n]*\\n` +
-      // then grab everything until a divider, next DAY(S), or end of text
-      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\nDAYS?\\s+\\d|$)`,
-    'i'
+      // BODY: everything until the next divider, ALL-CAPS header, or DAY(S)
+      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---|-)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    "i"
   );
   const m = txt.match(re);
   return m ? m[2].trim() : "";
@@ -2109,11 +2109,21 @@ if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) 
 
     // “via …” provider chip
     const provKey = (permit && permit.provider) || (ctx && ctx.permits_provider) || '';
-    const provLabel = ({
-      recgov:'Recreation.gov', parkscanada:'Parks Canada', bcparks:'BC Parks',
-      albertaparks:'Alberta Parks', ontarioparks:'Ontario Parks', sepaq:'Sépaq',
-      saskparks:'Saskatchewan Parks', nscotia:'Nova Scotia Parks',
-      newbrunswick:'NB Parks', nlparks:'NL Parks', yukon:'Yukon Parks', usfs:'US Forest Service'
+        const provLabel = ({
+      recgov:       'Recreation.gov',
+      parkscanada:  'Parks Canada',
+      bcparks:      'BC Parks',
+      albertaparks: 'Alberta Parks',
+      ontarioparks: 'Ontario Parks',
+      sepaq:        'Sépaq',
+      saskparks:    'Saskatchewan Parks',
+      nscotia:      'Nova Scotia Parks',
+      newbrunswick: 'NB Parks',
+      nlparks:      'NL Parks',
+      yukon:        'Yukon Parks',
+      usfs:         'US Forest Service',
+      nps:          'National Park Service (NPS)',
+      state:        'State Parks / DNR'
     }[String(provKey).toLowerCase()] || (provKey || ''));
     if (provLabel) {
       const small = document.createElement('div');
