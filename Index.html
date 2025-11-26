@@ -1670,11 +1670,8 @@ if (!txt) return out;
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    // HEADER: any line that contains the label, e.g. "GEAR CHECKLIST (MIN)"
-    `(^|\\n)[^\\n]*${label}[^\\n]*\\n` +
-      // BODY: everything until the next divider, ALL-CAPS header, or DAY(S)
-      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---|-)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
-    "i"
+    `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    'i'
   );
   const m = txt.match(re);
   return m ? m[2].trim() : "";
@@ -1715,9 +1712,9 @@ const grab = (label) => {
   out.permit_timeline        ||= grab("PERMIT\\s*&\\s*SHUTTLE\\s+TIMELINE");
   out.campsite_intel         ||= grab("CAMPSITE\\s+INTEL");
   out.weather_altitude       ||= grab("WEATHER\\s*&\\s*ALTITUDE\\s+NOTES");
-  out.gear_checklist         ||= grab("GEAR\\s+CHECKLIST");
+  out.gear_checklist         ||= grab("GEAR\\s+CHECKLIST(?:\\s*\\(MIN\\))?");
   out.optional_mod           ||= grab("OPTIONAL\\s+MODIFICATION");
-  out.risk_matrix            ||= grab("RISK\\s+MATRIX\\s*&\\s*HAZARD\\s+TIMELINE");
+  out.risk_matrix            ||= grab("RISK\\s+MATRIX\\s*&\\s*HAZARD\\s+TIMELINE(?:\\s*\\(MIN\\))?");
   out.conditions_watch       ||= grab("CONDITIONS\\s+WATCH");
   out.bailout_summary        ||= grab("BAILOUT\\s+SUMMARY");
   out.emergency              ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
