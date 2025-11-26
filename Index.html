@@ -1728,7 +1728,7 @@ const grab = (label) => {
     const dayBlocks = [];
     let current = [];
 
-    for (const rawLine of lines) {
+        for (const rawLine of lines) {
       const trimmed = rawLine.trim();
 
       // New day header: "DAY 1:" or "DAYS 2–3:" etc
@@ -1736,9 +1736,21 @@ const grab = (label) => {
         if (current.length) {
           dayBlocks.push(current.join('\n').trim());
         }
-        current = [rawLine]; // start new block with this DAY header line
-      } else if (current.length) {
-        // we’re inside a day block; keep accumulating
+        current = [rawLine];
+        continue;
+      }
+
+      // If we're inside a day block and hit a NEW SECTION HEADER
+      // like "CAMPSITE INTEL", "OPTIONAL MODIFICATION", etc.,
+      // close the current day block here.
+      if (current.length && /^[A-Z][A-Z &]+$/.test(trimmed)) {
+        dayBlocks.push(current.join('\n').trim());
+        current = [];
+        continue;
+      }
+
+      // Otherwise, keep accumulating lines for this day
+      if (current.length) {
         current.push(rawLine);
       }
     }
