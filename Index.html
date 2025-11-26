@@ -1522,7 +1522,8 @@ function _formatDayHeader(day, idx){
 }
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
-  const title = _formatDayHeader(day, idx);
+  const d = day || {};
+  const title = d.title || _formatDayHeader(d, idx);
 
   // normalize & allow aliases + arrays
   const src = { ...(day.chips||{}), ...(day||{}) };
