@@ -1729,12 +1729,8 @@ const grab = (label) => {
   out.final_brief            ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
   out.field_disclaimer         = FIELD_DISCLAIMER_TEXT;
 
-  // ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
-  if (
-  !Array.isArray(out.days) ||
-  out.days.length === 0 ||
-  out.days.every(d => !d || !d.label)
-) {
+// ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
+if (true) {
     const lines = txt.split('\n');
 
     const dayBlocks = [];
