@@ -1670,11 +1670,10 @@ if (!txt) return out;
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    // match a FULL HEADER LINE that contains the label anywhere on it,
-    // e.g. "GEAR CHECKLIST (MIN)" or "RISK MATRIX & HAZARD TIMELINE (MIN)"
+    // match any header line that contains the label (e.g. "GEAR CHECKLIST (MIN)")
     `(^|\\n)[^\\n]*${label}[^\\n]*\\n` +
-      // then capture everything until the next divider, ALL-CAPS header, or DAY(S)
-      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+      // then grab everything until a divider, next DAY(S), or end of text
+      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\nDAYS?\\s+\\d|$)`,
     'i'
   );
   const m = txt.match(re);
@@ -1764,32 +1763,22 @@ const grab = (label) => {
 
      out.days = dayBlocks.map((block, idx) => {
     // Header line: "DAY 1: ..." or "DAYS 1–3: ..."
-    const headerMatch =
-      block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
+const headerMatch =
+  block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
 
-    // "1" or "1–3"
-    const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
-    const rawRoute = headerMatch ? headerMatch[2].trim() : "";
+// rawIndex is "1" or "1–3"
+const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
+const rawRoute = headerMatch ? headerMatch[2].trim() : "";
 
-    const isRange = /[-–]/.test(rawIndex);
+// If DAY line didn’t give us a route, fall back to itinerary trailheads
+const trailheads = out.expedition_itinerary?.trailheads || "";
+const routeSource = rawRoute || trailheads;
+const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
 
-    // If DAY line didn’t give us a route, fall back to itinerary trailheads
-    const trailheads = out.expedition_itinerary?.trailheads || "";
-    const routeSource = rawRoute || trailheads;
-    const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
-
-    let label;
-    if (routeNorm) {
-      // "Days 1–3: A → B" or "Day 4: A → B"
-      label = isRange
-        ? `Days ${rawIndex}: ${routeNorm}`
-        : `Day ${rawIndex}: ${routeNorm}`;
-    } else {
-      // No clear route, just keep the index
-      label = isRange
-        ? `Days ${rawIndex}`
-        : `Day ${rawIndex}`;
-    }
+// Always start with "Day", even for ranges like "1–3"
+const label = routeNorm
+  ? `Day ${rawIndex}: ${routeNorm}`   // e.g. "Day 1–3: A → B"
+  : `Day ${rawIndex}`;
 
   // Everything after the first line is the body
   const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
@@ -2141,30 +2130,47 @@ if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) 
     list.style.margin = '10px 0 0';
     list.style.paddingLeft = '18px';
 
-    const items = [];
+        const items = [];
+
+    // Entrances first (up to 3)
     if (Array.isArray(permit?.entrances)) {
-      items.push(...permit.entrances
-        .slice(0, 3)
-        .map(e => ({ title: e?.name || e?.id, url: e?.url }))
-        .filter(x => x && x.title));
+      items.push(
+        ...permit.entrances
+          .slice(0, 3)
+          .map(e => ({ title: e?.name || e?.id, url: e?.url }))
+          .filter(x => x && x.title)
+      );
     }
+
+    // Then relatedPermits (up to 3)
     if (Array.isArray(permit?.relatedPermits)) {
       permit.relatedPermits.slice(0, 3).forEach(r => {
+        if (!r) return;
         items.push({ title: r.title || r.url, url: r.url });
       });
     }
+
+    // Render, de‑duplicating by URL so we don’t show the same link twice
     if (items.length) {
+      const seen = new Set();
       items.forEach(it => {
+        const url = String(it.url || booking || "").trim();
+        if (!url || seen.has(url)) return;
+        seen.add(url);
+
         const li = document.createElement('li');
         const a = document.createElement('a');
-        a.href = String(it.url || booking);
+        a.href = url;
         a.target = '_blank';
         a.rel = 'noreferrer noopener';
         a.textContent = it.title || 'Learn more';
         li.appendChild(a);
         list.appendChild(li);
       });
-      cta.appendChild(list);
+
+      if (list.childElementCount) {
+        cta.appendChild(list);
+      }
     }
 
     // finally insert the CTA block
