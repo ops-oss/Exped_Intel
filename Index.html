@@ -1660,23 +1660,24 @@ const FIELD_DISCLAIMER_TEXT = "This blueprint is intel, not a guarantee. Conditi
 function inflateFromMission(data){
   const out = { ...data };
   const txt = (data.mission_text || "")
-  .replace(/\r/g, '')
-  .replace(/\u2013/g, '-')  // en dash → hyphen
-  .replace(/\u2014/g, '-')  // em dash → hyphen
-  .trim();
-if (!txt) return out;
+    .replace(/\r/g, '')
+    .replace(/\u2013/g, '-')  // en dash → hyphen
+    .replace(/\u2014/g, '-')  // em dash → hyphen
+    .trim();
+  if (!txt) return out;
 
-// accept em dash (—), double dash (⸻), or plain hyphen (---)
-const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
-const grab = (label) => {
-  const re = new RegExp(
-    `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
-    'i'
-  );
-  const m = txt.match(re);
-  return m ? m[2].trim() : "";
-};
-  // ===== Header → expedition_itinerary =====
+  // accept em dash (—), double dash (⸻), or plain hyphen (---)
+  const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
+  const grab = (label) => {
+    const re = new RegExp(
+      `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+      'i'
+    );
+    const m = txt.match(re);
+    return m ? m[2].trim() : "";
+  };
+
+  // ===== header → expedition_itinerary =====
   {
     const head = parts[0] || "";
     const getLine = (aliasRE) =>
@@ -1688,7 +1689,7 @@ const grab = (label) => {
       duration:   getLine("TRIP\\s+DURATION"),
       mileage:    getLine("TOTAL\\s+ESTIMATED\\s+MILEAGE"),
       experience: getLine("EXPERIENCE\\s+LEVEL"),
-      terrain:    getLine("TERRAIN\\s+TYPE"),
+      terrain:    getLine("TERRAIN\\s+TYPE")
     };
 
     const elev = head.match(/Cumulative elevation[^:]*:\s*([^\n]+)/i)?.[1];
@@ -1699,11 +1700,11 @@ const grab = (label) => {
       ...kv,
       elevation:  elev || "",
       trailheads: th   || "",
-      gps:        gps  || "",
+      gps:        gps  || ""
     };
   }
 
-  // ===== Section slices (unchanged from your current logic) =====
+  // ===== section slices (same as before) =====
   out.route_overview         ||= grab("ROUTE\\s+OVERVIEW");
   out.permits_entry          ||= grab("PERMITS\\s*&\\s*ENTRY");
   out.shuttle_transportation ||= grab("(?:SHUTTLE\\s*/\\s*TRANSPORTATION|TRANSPORTATION)");
@@ -1721,118 +1722,120 @@ const grab = (label) => {
   out.final_brief            ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
   out.field_disclaimer         = FIELD_DISCLAIMER_TEXT;
 
-  // ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
+  // ===== DAYS: parse blocks that start with DAY / DAYS =====
   if (!Array.isArray(out.days) || out.days.length === 0) {
-  const dayBlocks = txt
-    .split(/\n\s*(?:—|⸻|---)\s*\n/g)
-    .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
+    const dayBlocks = txt
+      .split(/\n\s*(?:—|⸻|---)\s*\n/g)
+      .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
 
-  out.days = dayBlocks.map((block, idx) => {
-    // "DAY 3: A to B" / "DAYS 2–3: A to B"
-    const headerMatch =
-      block.match(/^DAYS?\s+(\d+)(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
+    out.days = dayBlocks.map((block, idx) => {
+      const headerMatch =
+        block.match(/^DAYS?\s+(\d+)(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
 
-    const dayNum = headerMatch ? headerMatch[1] : String(idx + 1);
-    const rawRoute = headerMatch ? headerMatch[3].trim() : "";
-    const routeNorm = rawRoute.replace(/\s+to\s+/i, " → ");
+      const dayNum = headerMatch ? headerMatch[1] : String(idx + 1);
+      const rawRoute = headerMatch ? headerMatch[3].trim() : "";
+      const routeNorm = rawRoute.replace(/\s+to\s+/i, " → ");
 
-    const title = routeNorm
-      ? `Day ${dayNum}: ${routeNorm}`
-      : `Day ${dayNum}`;
+      const title = routeNorm
+        ? `Day ${dayNum}: ${routeNorm}`
+        : `Day ${dayNum}`;
 
-    const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
+      const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
 
-    // First paragraph only (before bullets)
-    const preview = afterTitle
-      .split(/\n-\s/)[0]
-      .split(/\n{2,}/)[0]
-      .trim();
+      const preview = afterTitle
+        .split(/\n-\s/)[0]
+        .split(/\n{2,}/)[0]
+        .trim();
 
-    const pick = (re) => (afterTitle.match(re)?.[1] || "").trim();
+      const pick = (re) => (afterTitle.match(re)?.[1] || "").trim();
 
-    let distance_and_elevation =
-      pick(/Distance and elevation[^:]*:\s*([^\n]+)/i) ||
-      pick(/Distance[^:]*:\s*([^\n]+)/i) ||
-      "";
+      let distance_and_elevation =
+        pick(/Distance and elevation[^:]*:\s*([^\n]+)/i) ||
+        pick(/Distance[^:]*:\s*([^\n]+)/i) ||
+        "";
 
-    // Fallback distance if we didn't capture the full string
-    if (!distance_and_elevation) {
-      const dm = afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i);
-      if (dm) distance_and_elevation = dm[1];
-    }
+      if (!distance_and_elevation) {
+        const dm = afterTitle.match(/(\d+(\.\d+)?\s*miles?)/i);
+        if (dm) distance_and_elevation = dm[1];
+      }
 
-    const primary_trail =
-      pick(/Primary trail\(s\) used:\s*([^\n]+)/i);
-    const terrain =
-      pick(/Terrain:\s*([^\n]+)/i);
-    const key_features_line =
-      pick(/Notable features:\s*([^\n]+)/i);
-    const key_features = key_features_line
-      ? key_features_line.split(/,\s*/).map(s => s.trim()).filter(Boolean)
-      : [];
-    const key_water_sources =
-      pick(/Key water sources:\s*([^\n]+)/i);
-    let campsite_location =
-      pick(/Campsite location:\s*([^\n]+)/i);
-    const safety =
-      pick(/Safety:\s*([^\n]+)/i);
-    const trail_tip =
-      pick(/Trail tip:\s*([^\n]+)/i);
-    const bailout =
-      pick(/Bailout:\s*([^\n]+)/i);
-    const decision_point =
-      pick(/Decision point:\s*([^\n]+)/i);
-    const morale_marker =
-      pick(/Morale marker:\s*([^\n]+)/i);
+      const primary_trail =
+        pick(/Primary trail\(s\) used:\s*([^\n]+)/i);
+      const terrain =
+        pick(/Terrain:\s*([^\n]+)/i);
+      const key_features_line =
+        pick(/Notable features:\s*([^\n]+)/i);
+      const key_features = key_features_line
+        ? key_features_line.split(/,\s*/).map(s => s.trim()).filter(Boolean)
+        : [];
+      const key_water_sources =
+        pick(/Key water sources:\s*([^\n]+)/i);
+      let campsite_location =
+        pick(/Campsite location:\s*([^\n]+)/i);
+      const safety =
+        pick(/Safety:\s*([^\n]+)/i);
+      const trail_tip =
+        pick(/Trail tip:\s*([^\n]+)/i);
+      const bailout =
+        pick(/Bailout:\s*([^\n]+)/i);
+      const decision_point =
+        pick(/Decision point:\s*([^\n]+)/i);
+      const morale_marker =
+        pick(/Morale marker:\s*([^\n]+)/i);
 
-    // --- Multi-campsite support for "- Campsites:" bullet list ---
-    (function(){
-      const lines = String(afterTitle||'').split(/\r?\n/);
-      let inBlock = false;
-      const labels = [];
+      // Multi-campsite support
+      (function(){
+        const lines = String(afterTitle||'').split(/\r?\n/);
+        let inBlock = false;
+        const labels = [];
 
-      for (const raw of lines){
-        const line = raw.replace(/\u00A0/g,' ').trim();
-        if (!inBlock && /^-\s*campsites?\s*:/i.test(line)) { inBlock = true; continue; }
-        if (!inBlock) continue;
-        if (!/^\s*[-•]\s+/.test(line)) break;
+        for (const raw of lines){
+          const line = raw.replace(/\u00A0/g,' ').trim();
+          if (!inBlock && /^-\s*campsites?\s*:/i.test(line)) { inBlock = true; continue; }
+          if (!inBlock) continue;
+          if (!/^\s*[-•]\s+/.test(line)) break;
 
-        const m = line.replace(/^\s*[-•]\s+/, '')
-                      .match(/night\s*(\d+)\s*:\s*([^–—-]+)(?:[–—-].*)?$/i);
-        if (m){
-          const n = +m[1];
-          const name = m[2].trim();
-          labels[n-1] = `Night ${n}: ${name}`;
+          const m = line.replace(/^\s*[-•]\s+/, '')
+                        .match(/night\s*(\d+)\s*:\s*([^–—-]+)(?:[–—-].*)?$/i);
+          if (m){
+            const n = +m[1];
+            const name = m[2].trim();
+            labels[n-1] = `Night ${n}: ${name}`;
+          }
         }
-      }
 
-      const camps = labels.filter(Boolean);
-      const isRange = /DAYS?\s+\d+\s*[-–]\s*\d+:/i.test(block);
+        const camps = labels.filter(Boolean);
+        const isRange = /DAYS?\s+\d+\s*[-–]\s*\d+:/i.test(block);
 
-      if (camps.length){
-        campsite_location = isRange ? camps.join(', ') : (campsite_location || camps[0]);
-      }
-    })();
+        if (camps.length){
+          campsite_location = isRange ? camps.join(', ')
+                                      : (campsite_location || camps[0]);
+        }
+      })();
 
-    return {
-      title,
-      // label for any code that looks there instead of title
-      label: title,
-      preview,
-      description: afterTitle.trim(), // full body if anything needs it
-      distance_and_elevation,
-      primary_trail,
-      terrain,
-      key_features,
-      key_water_sources,
-      campsite_location,
-      safety,
-      trail_tip,
-      bailout,
-      decision_point,
-      morale_marker
-    };
-  });
+      const description = afterTitle.trim();
+
+      return {
+        title,
+        label: title,
+        preview,
+        description,
+        distance_and_elevation,
+        primary_trail,
+        terrain,
+        key_features,
+        key_water_sources,
+        campsite_location,
+        safety,
+        trail_tip,
+        bailout,
+        decision_point,
+        morale_marker
+      };
+    });
+  }
+
+  return out;
 }
 /* ---------- data loader ---------- */
 const SUPABASE_BASE = 'https://rtpfkfhvlkuagwqdsnfj.supabase.co/storage/v1/object/public/expedition/';
