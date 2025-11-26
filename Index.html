@@ -1510,16 +1510,35 @@ function _routePartsFrom(day){
 
 function _formatDayHeader(day, idx){
   const d = day || {};
-  const labelText = String(d.label || d.title || "").trim();
+  const desc = String(d.description || d.preview || "").trim();
 
-  // Grab "1" or "1–3" from the label/title, or fall back to idx+1
-  const m = labelText.match(/\b(\d+(?:\s*[-–]\s*\d+)?)\b/);
-  const num = m ? m[1] : (idx + 1);
+  // 1) Look for "Night X:" lines to infer multi-day span (1–3, 4–6, etc)
+  const nightNums = [];
+  const nightRe = /Night\s*(\d+)/gi;
+  let m;
+  while ((m = nightRe.exec(desc)) !== null) {
+    const n = parseInt(m[1], 10);
+    if (!Number.isNaN(n)) nightNums.push(n);
+  }
 
+  let indexPart;
+
+  if (nightNums.length) {
+    const minN = Math.min(...nightNums);
+    const maxN = Math.max(...nightNums);
+    indexPart = (minN === maxN) ? String(minN) : `${minN}–${maxN}`;
+  } else {
+    // no "Night X" info → fall back to label/title or idx+1
+    const labelText = String(d.label || d.title || "").trim();
+    const m2 = labelText.match(/\b(\d+(?:\s*[-–]\s*\d+)?)\b/);
+    indexPart = m2 ? m2[1].replace(/\s+/g, "") : String(idx + 1);
+  }
+
+  // 2) Keep your existing from → to behavior
   const parts = _routePartsFrom(d);
   return parts
-    ? `Day ${num}: ${parts[0]} \u2192 ${parts[1]}`
-    : `Day ${num}`;
+    ? `Day ${indexPart}: ${parts[0]} \u2192 ${parts[1]}`
+    : `Day ${indexPart}`;
 }
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
