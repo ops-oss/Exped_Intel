@@ -1510,17 +1510,20 @@ function _routePartsFrom(day){
 
 function _formatDayHeader(day, idx){
   const d = day || {};
-  const labelText = String(d.label || "").trim();
+  const titleText = String(d.title || "").trim();
 
-  // If this is a multi-day label ("Day 1–3: ..."), just use it as-is
-  if (/Day\s+\d+\s*[-–]\s*\d+:/i.test(labelText)) {
-    return labelText;
+  // Try to pull everything between "Day" and ":" from the existing title
+  // e.g. "Day 7-9: GLEN AULIN → TUOLUMNE MEADOWS" => "7-9"
+  let indexPart = String(idx + 1);
+  const m = titleText.match(/^Day\s+(.+?):/i);
+  if (m) {
+    indexPart = m[1].trim();  // "7-9" or "1"
   }
 
-  // Otherwise fall back to the existing from→to logic
-  const num = (String(d.title || "").match(/\d+/) || [idx + 1])[0];
   const parts = _routePartsFrom(d);
-  return parts ? `Day ${num}: ${parts[0]} \u2192 ${parts[1]}` : `Day ${num}`;
+  return parts
+    ? `Day ${indexPart}: ${parts[0]} \u2192 ${parts[1]}`
+    : `Day ${indexPart}`;
 }
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
