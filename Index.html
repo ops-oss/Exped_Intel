@@ -1722,17 +1722,27 @@ function inflateFromMission(data){
   out.final_brief            ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
   out.field_disclaimer         = FIELD_DISCLAIMER_TEXT;
 
-  // ===== DAYS: parse blocks that start with DAY / DAYS =====
+  /  // ===== DAYS: parse only inside DAILY ITINERARY =====
   if (!Array.isArray(out.days) || out.days.length === 0) {
-    const dayBlocks = txt
+    // Grab just the DAILY ITINERARY block, nothing after it
+    const diMatch = txt.match(
+      /DAILY ITINERARY\s*\n([\s\S]*?)(?=\n[A-Z][A-Z &]+(?:\n|$)|$)/i
+    );
+    const diBody = diMatch ? diMatch[1].trim() : "";
+    if (!diBody) return out;
+
+    // Split that block into DAY / DAYS segments
+    const dayBlocks = diBody
       .split(/\n\s*(?:—|⸻|---)\s*\n/g)
+      .map(s => s.trim())
       .filter(s => /^DAYS?\s+\d+(\s*[-–]\s*\d+)?:/i.test(s));
 
     out.days = dayBlocks.map((block, idx) => {
+      // "DAY 3: A to B" / "DAYS 2–3: A to B"
       const headerMatch =
         block.match(/^DAYS?\s+(\d+)(\s*[-–]\s*\d+)?:\s*(.+)$/mi);
 
-      const dayNum = headerMatch ? headerMatch[1] : String(idx + 1);
+      const dayNum   = headerMatch ? headerMatch[1] : String(idx + 1);
       const rawRoute = headerMatch ? headerMatch[3].trim() : "";
       const routeNorm = rawRoute.replace(/\s+to\s+/i, " → ");
 
@@ -1783,7 +1793,7 @@ function inflateFromMission(data){
       const morale_marker =
         pick(/Morale marker:\s*([^\n]+)/i);
 
-      // Multi-campsite support
+      // Multi-campsite bullet list
       (function(){
         const lines = String(afterTitle||'').split(/\r?\n/);
         let inBlock = false;
