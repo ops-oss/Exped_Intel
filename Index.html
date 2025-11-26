@@ -1510,20 +1510,15 @@ function _routePartsFrom(day){
 
 function _formatDayHeader(day, idx){
   const d = day || {};
-  const titleText = String(d.title || "").trim();
 
-  // Try to pull everything between "Day" and ":" from the existing title
-  // e.g. "Day 7-9: GLEN AULIN → TUOLUMNE MEADOWS" => "7-9"
-  let indexPart = String(idx + 1);
-  const m = titleText.match(/^Day\s+(.+?):/i);
-  if (m) {
-    indexPart = m[1].trim();  // "7-9" or "1"
+  // If the parser gave us a title ("Day 7-9: GLEN AULIN → TUOLUMNE MEADOWS"),
+  // just use it as-is.
+  if (d.title && String(d.title).trim()) {
+    return String(d.title).trim();
   }
 
-  const parts = _routePartsFrom(d);
-  return parts
-    ? `Day ${indexPart}: ${parts[0]} \u2192 ${parts[1]}`
-    : `Day ${indexPart}`;
+  // Fallback: generic "Day N" if title is missing
+  return `Day ${idx + 1}`;
 }
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
