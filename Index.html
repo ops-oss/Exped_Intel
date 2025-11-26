@@ -1670,7 +1670,11 @@ if (!txt) return out;
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    `(^|\\n)${label}(?:\\s*\$begin:math:text$\[\^\\\\n\)\]\*\\$end:math:text$)?\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    // match a FULL HEADER LINE that contains the label anywhere on it,
+    // e.g. "GEAR CHECKLIST (MIN)" or "RISK MATRIX & HAZARD TIMELINE (MIN)"
+    `(^|\\n)[^\\n]*${label}[^\\n]*\\n` +
+      // then capture everything until the next divider, ALL-CAPS header, or DAY(S)
+      `([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
     'i'
   );
   const m = txt.match(re);
@@ -1758,34 +1762,34 @@ const grab = (label) => {
       dayBlocks.push(current.join('\n').trim());
     }
 
-    out.days = dayBlocks.map((block, idx) => {
-  // Header line: "DAY 1: ..." or "DAYS 1–3: ..."
-  const headerMatch =
-    block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
+     out.days = dayBlocks.map((block, idx) => {
+    // Header line: "DAY 1: ..." or "DAYS 1–3: ..."
+    const headerMatch =
+      block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
 
-  const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
-  const rawRoute = headerMatch ? headerMatch[2].trim() : "";
+    // "1" or "1–3"
+    const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
+    const rawRoute = headerMatch ? headerMatch[2].trim() : "";
 
-  // Is this a range like "1-3" or a single day like "1"?
-  const isRange = /[-–]/.test(rawIndex);
+    const isRange = /[-–]/.test(rawIndex);
 
-  // If the DAY line didn’t give us a route, fall back to the itinerary trailheads
-  const trailheads = out.expedition_itinerary?.trailheads || "";
-  const routeSource = rawRoute || trailheads;
-  const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
+    // If DAY line didn’t give us a route, fall back to itinerary trailheads
+    const trailheads = out.expedition_itinerary?.trailheads || "";
+    const routeSource = rawRoute || trailheads;
+    const routeNorm = routeSource.replace(/\s+to\s+/i, " → ");
 
-  let label;
-  if (routeNorm) {
-    // "Days 1–3: A → B" or "Day 4: A → B"
-    label = isRange
-      ? `Days ${rawIndex}: ${routeNorm}`
-      : `Day ${rawIndex}: ${routeNorm}`;
-  } else {
-    // Fallback: no clear route, just keep the index
-    label = isRange
-      ? `Days ${rawIndex}`
-      : `Day ${rawIndex}`;
-  }
+    let label;
+    if (routeNorm) {
+      // "Days 1–3: A → B" or "Day 4: A → B"
+      label = isRange
+        ? `Days ${rawIndex}: ${routeNorm}`
+        : `Day ${rawIndex}: ${routeNorm}`;
+    } else {
+      // No clear route, just keep the index
+      label = isRange
+        ? `Days ${rawIndex}`
+        : `Day ${rawIndex}`;
+    }
 
   // Everything after the first line is the body
   const afterTitle = block.split(/\n/).slice(1).join('\n').trim();
