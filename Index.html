@@ -1768,9 +1768,9 @@ const grab = (label) => {
      out.days = dayBlocks.map((block, idx) => {
     // Header line: "DAY 1: ..." or "DAYS 1–3: ..."
 const headerMatch =
-  block.match(/^DAYS?\s+(\d+(?:\s*[-–]\s*\d+)?):\s*(.+)$/mi);
+  block.match(/^DAYS?\s+([^:]+):\s*(.+)$/mi);
 
-// rawIndex is "1" or "1–3"
+// rawIndex is "1" or "1–3" (whatever is between "DAY(S)" and ":")
 const rawIndex = headerMatch ? headerMatch[1].trim() : String(idx + 1);
 const rawRoute = headerMatch ? headerMatch[2].trim() : "";
 
