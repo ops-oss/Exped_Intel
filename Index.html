@@ -1660,24 +1660,22 @@ const FIELD_DISCLAIMER_TEXT = "This blueprint is intel, not a guarantee. Conditi
 function inflateFromMission(data){
   const out = { ...data };
   const txt = (data.mission_text || "")
-    .replace(/\r/g, '')
-    .trim();
-  if (!txt) return out;
+  .replace(/\r/g, '')
+  .replace(/\u2013/g, '-')  // en dash → hyphen
+  .replace(/\u2014/g, '-')  // em dash → hyphen
+  .trim();
+if (!txt) return out;
 
-  // Divider between major sections (handles em dash, triple dash, or lone hyphen line)
-  const dividerRe = /\n?\s*(?:—|⸻|---|-)\s*\n?/g;
-
-  const parts = txt.split(dividerRe);
-
-  const grab = (label) => {
-    const re = new RegExp(
-      `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---|-)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
-      'i'
-    );
-    const m = txt.match(re);
-    return m ? m[2].trim() : "";
-  };
-
+// accept em dash (—), double dash (⸻), or plain hyphen (---)
+const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
+const grab = (label) => {
+  const re = new RegExp(
+    `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    'i'
+  );
+  const m = txt.match(re);
+  return m ? m[2].trim() : "";
+};
   // ===== Header → expedition_itinerary =====
   {
     const head = parts[0] || "";
