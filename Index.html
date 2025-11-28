@@ -1583,6 +1583,37 @@ function _formatDayHeader(day, idx){
   // Fallback: generic "Day N" if title is missing
   return `Day ${idx + 1}`;
 }
+
+// Strip elevation / meta notes from campsite names, keep just the name
+function _campNameOnly(val){
+  if (Array.isArray(val)) {
+    // if it's an array of camps (multi‑night), use the last one
+    val = val[val.length - 1];
+  }
+  let s = String(val || '').trim();
+  if (!s) return '';
+
+  // Drop things like "Night 2: "
+  s = s.replace(/^Night\s*\d+\s*:\s*/i, '');
+
+  // Repeatedly strip trailing (...) blocks that look like metadata
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const m = s.match(/\(([^)]*)\)\s*$/); // last (...) at end
+    if (!m) break;
+    const inside = m[1].toLowerCase();
+
+    // Only strip if it's clearly not part of the place name
+    if (/\b(elev|elevation|ft|feet|same as|select|legal|near)\b/.test(inside)) {
+      s = s.slice(0, m.index).trim();
+      changed = true;
+    }
+  }
+
+  return s;
+}
+  
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
   const d = day || {};
@@ -1621,27 +1652,30 @@ function renderDay(day, idx){
     return '';
   };
 
-    // Header: prefer an explicit "Day 1–3: …" title if we have it,
-  // otherwise fall back to "Day N: From → To" like before.
-  const explicitTitle = String(d.title || '').trim();
-
+    // Header: "Day N: From → To" built safely from what's available
   let routeH = '';
+
   // 1) Use route in label if present (after ":")
   const lbl = (day.label || '').trim();
   if (lbl.includes(':')) {
     const rt = lbl.split(':').slice(1).join(':').trim();
     if (rt.includes('→')) routeH = rt;
   }
+
   // 2) Else synthesize from camps and (for first/last day) trailheads
   if (!routeH) {
     try {
       const state = (window.EI_DATA || window.trip || {});
       const all   = state.days || [];
-      const prevCamp = (all[idx - 1]?.chips?.campsite || '').trim();
-      const thisCamp = (day?.chips?.campsite || '').trim();
 
-      let from = prevCamp, to = thisCamp;
+      const prevDay  = all[idx - 1] || {};
+      const rawPrev  = prevDay?.chips?.campsite;
+      const rawThis  = day?.chips?.campsite;
 
+      let from = _campNameOnly(rawPrev);   // strip "(elev …)" etc
+      let to   = _campNameOnly(rawThis);
+
+      // scenario for trailheads (fallbacks)
       const scns = Array.isArray(state.scenarios)
         ? state.scenarios
         : (typeof state.scenarios_json === 'string'
@@ -1649,21 +1683,30 @@ function renderDay(day, idx){
             : []);
 
       const activeKey = (state.activeScenario || '').toLowerCase();
-      const sc = scns.find(s => (s.key||s.label||'').toLowerCase() === activeKey) || scns[0] || {};
+      const sc = scns.find(s => (s.key || s.label || '').toLowerCase() === activeKey) || scns[0] || {};
       const th = (sc?.header?.trailheads || '').split('→').map(s => (s || '').trim());
-      const startTH = (sc?.waypoint_hints?.start_trailhead || th[0] || '').trim();
-      const endTH   = (sc?.waypoint_hints?.end_trailhead   || th[1] || '').trim();
+
+      const startTH = _campNameOnly(sc?.waypoint_hints?.start_trailhead || th[0] || '');
+      const endTH   = _campNameOnly(sc?.waypoint_hints?.end_trailhead   || th[1] || '');
 
       if (idx === 0) from = startTH || from;
       if (idx === (all.length ? all.length - 1 : idx)) to = endTH || to;
 
-      if (from && to &&
-          from.toLowerCase() !== to.toLowerCase() &&
-          from.toLowerCase() !== 'n/a' &&
-          to.toLowerCase()   !== 'n/a') {
+      // Final sanity-clean, in case start/end came from camps
+      from = _campNameOnly(from);
+      to   = _campNameOnly(to);
+
+      if (
+        from && to &&
+        from.toLowerCase() !== to.toLowerCase() &&
+        from.toLowerCase() !== 'n/a' &&
+        to.toLowerCase() !== 'n/a'
+      ) {
         routeH = `${from} → ${to}`;
       }
-    } catch (_) {}
+    } catch (_) {
+      // quiet fallback
+    }
   }
 
   // Final header text
