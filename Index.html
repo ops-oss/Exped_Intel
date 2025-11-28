@@ -1467,15 +1467,18 @@ const chipHTML=(k,t,secondary=false)=>`<span class="chip${secondary?' secondary'
 /* ---------- KV or paragraph-only renderer ---------- */
 function kvOrParagraph(containerId, text){
   const el = $(containerId); 
-  if(!el){ return; }
-  if(!text){ el.innerHTML=''; return; }
+  if (!el) return;
+  if (!text) { el.innerHTML = ''; return; }
 
-  // SPECIAL CASE: Route Overview is always narrative text,
-  // never a key/value table, even if it contains "something: something".
-  if (containerId === 'route_overview') {
+  const id = String(containerId || '');
+
+  // Sections that are ALWAYS narrative text, even if they contain colons
+  const paragraphOnly = new Set(['route_overview', 'final_brief']);
+
+  if (paragraphOnly.has(id)) {
     const paras = String(text)
       .trim()
-      .split(/\n{2,}/)           // blank line = new paragraph
+      .split(/\n{2,}/)          // blank line = new paragraph
       .map(s => s.trim())
       .filter(Boolean);
 
@@ -1487,17 +1490,58 @@ function kvOrParagraph(containerId, text){
       }</div></div>`;
     return;
   }
-  
-  const lines = String(text).split(/\r?\n/).map(s => s.trim().replace(/^-\s*/, "")).filter(Boolean);
-  const hasKV = lines.some(l => /^[^:]+:\s*\S/.test(l));
-  if(hasKV){
-    const rows=[];
-    for(const l of lines){ const m=l.match(/^([^:]+):\s*(.*)$/); if(m){ rows.push(`<div class="k">${m[1]}</div><div class="v">${m[2]}</div>`); } }
-    el.innerHTML = `<div class="kv">${rows.join('')}</div>`;
-  }else{
-    el.innerHTML = `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
+
+  // General case: decide per line whether it's "Label: value"
+  const lines = String(text)
+    .split(/\r?\n/)
+    .map(s => s.trim().replace(/^-\s*/, ""))   // strip leading "- "
+    .filter(Boolean);
+
+  const kvRows = [];
+  const paraLines = [];
+
+  for (const l of lines) {
+    const m = l.match(/^([^:]+):\s*(.*)$/);
+    if (!m) {
+      paraLines.push(l);
+      continue;
+    }
+
+    const key = m[1].trim();
+    const val = m[2].trim();
+    const wordCount = key.split(/\s+/).length;
+
+    // Treat as key/value only if the "key" part is reasonably short.
+    // Long clauses like "This 4‑day Core Enchantments Traverse delivers…"
+    // will be treated as plain narrative instead of a KV label.
+    if (wordCount <= 6) {
+      kvRows.push({ k: key, v: val });
+    } else {
+      paraLines.push(l);
+    }
   }
+
+  // No short "Label: value" lines → just render paragraphs
+  if (!kvRows.length) {
+    el.innerHTML =
+      `<div class="kv single"><div class="v">${lines.join('<br/>')}</div></div>`;
+    return;
+  }
+
+  // We have some KV rows; render them. Any leftover narrative lines
+  // get appended as one extra paragraph row at the bottom.
+  let html = '<div class="kv">';
+  kvRows.forEach(({k, v}) => {
+    html += `<div class="k">${k}</div><div class="v">${v}</div>`;
+  });
+  if (paraLines.length) {
+    html += `<div class="k"></div><div class="v">${paraLines.join('<br/>')}</div>`;
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
 }
+
 
 // Extract "Start → End" from a day's fields (title/desc), with safe fallbacks.
 function _routePartsFrom(day){
