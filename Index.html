@@ -2658,13 +2658,20 @@ if (finalPreview && finalTitle) {
 
 // after you compute finalTitle & finalPreview
 // strip any trailing "X miles, +A ft / -B ft" from the preview paragraph
-finalPreview = finalPreview.replace(
-  /(?:^|\s)(~?\d+(?:\.\d+)?)\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,
-  ''
-).trim();
+  finalPreview = finalPreview.replace(
+    /(?:^|\s)(~?\d+(?:\.\d+)?)\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,
+    ''
+  ).trim();
 
-return { title: finalTitle, preview: finalPreview, chips };
-  }
+  // keep original fields (incl. label) but normalize title/preview/chips
+  return {
+    ...d,
+    title:   finalTitle,
+    preview: finalPreview,
+    chips
+  };
+}
+
 
   function findScenario(base, key){
     if (!base) return null;
@@ -2740,18 +2747,29 @@ function renderScenario(name){
   } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0){
     // Scenario provided full replacement (or no baseline)
     finalDaysRaw = scenDaysRaw.slice();
-  } else {
+    } else {
     // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
     const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
     finalDaysRaw = scenDaysRaw.map((d, i) => {
-      const b = baseMap.get(normDayKey(d, i)) || {};
+      const b   = baseMap.get(normDayKey(d, i)) || {};
       const out = { ...b, ...d };
+
+      // --- keep the rich mission-text label if the scenario only says "Day N" ---
+      if (b.label) {
+        const scenLabel = typeof d.label === 'string' ? d.label.trim() : '';
+        if (!scenLabel || /^day\s*\d+\s*$/i.test(scenLabel)) {
+          // e.g. "Day 1: Snow Lakes Trailhead → Enchantments Core zone"
+          out.label = b.label;
+        }
+      }
+
       if (!out.preview && b.preview) out.preview = b.preview;
       if (!out.chips) out.chips = {};
       if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
       return out;
     });
   }
+
 
 // --- DRIVEN polish: normalize titles to Start → End without "Stage" fallbacks ---
 (function normalizeDriven(){
