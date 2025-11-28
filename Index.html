@@ -2642,10 +2642,19 @@ function sumScenarioTotals(days = []) {
 let finalTitle =
   d.route || d.day_title || parsed.title || rawTitle || 'Itinerary Day';
 
-// If the title already contains a full sentence of narrative,
-// keep only the route portion (e.g., "Start → End")
-if ((/→| to /i.test(finalTitle)) && /\.\s/.test(finalTitle)) {
-  finalTitle = finalTitle.split('.').shift().trim();
+// If this is already a clean "Day X: Start → End" label that came from
+// mission_text (e.g., "Day 4: DOUBLE SPRING GAP SHELTER → MT. COLLINS SHELTER"),
+// trust it exactly — even if it contains abbreviations like "Mt."
+const isDayLabel = /^\s*days?\s+\d+/i.test(finalTitle);
+
+// Otherwise, if the title mixes route + narrative
+// (e.g., "Snow Lakes Trailhead → Core zone. Expect a long, strenuous climb…"),
+// trim off the obvious narrative sentence that starts with Expect / Begin / This / The.
+if (!isDayLabel && /→| to /i.test(finalTitle)) {
+  const m = finalTitle.match(/^(.*?)(?=\.\s+(?:Expect|Begin|This|The)\b)/);
+  if (m && m[1]) {
+    finalTitle = m[1].trim();
+  }
 }
 
 const previewRaw = rawDesc || '';
