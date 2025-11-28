@@ -2805,37 +2805,22 @@ function renderScenario(name){
   const stripMilesTail = s =>
     clean(s).replace(/\s*\b\d+(?:\.\d+)?\s*miles?\s*,\s*[+\-]?\d[\d,]*\s*ft\s*\/\s*[+\-]?\d[\d,]*\s*ft\.?\s*$/i,'').trim();
 
-  // ========== DAYS: merge/patch FIRST ==========
+    // ========== DAYS: pick the right source per scenario ==========
   const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
   const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
+  const scenarioKey = String(name || raw?.key || '').toLowerCase();
 
-  let finalDaysRaw;
+  let finalDaysRaw = [];
 
-  // 1) Baseline tab (or no explicit scenario days) → use mission_text days as‑is
-  if (!scenDaysRaw.length || String(name).toLowerCase() === 'baseline') {
-    finalDaysRaw = baseDaysRaw.slice();
-
-  } else if (baseDaysRaw.length === 0) {
-    // 2) No mission_text days at all → just use whatever the scenario gives us
+  if (scenarioKey === 'baseline') {
+    // Baseline = ground truth from mission_text
+    finalDaysRaw = baseDaysRaw.length ? baseDaysRaw.slice() : scenDaysRaw.slice();
+  } else if (scenDaysRaw.length) {
+    // Anchor / Driven (or any other variants) use their own days
     finalDaysRaw = scenDaysRaw.slice();
-
   } else {
-    // 3) Anchor / Driven: scenario days override baseline, matched by day number
-    const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
-
-    finalDaysRaw = scenDaysRaw.map((d, i) => {
-      const key = normDayKey(d, i);      // e.g. "d1", "d2"…
-      const b   = baseMap.get(key) || {}; // baseline day (same number), if any
-
-      const out = { ...b, ...d };        // scenario overrides baseline fields
-
-      // Borrow preview / chips if scenario left them empty
-      if (!out.preview && b.preview) out.preview = b.preview;
-      if (!out.chips) out.chips = {};
-      if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
-
-      return out;
-    });
+    // Safety fallback if scenario forgot to define days
+    finalDaysRaw = baseDaysRaw.slice();
   }
 
 // --- DRIVEN polish: normalize titles to Start → End without "Stage" fallbacks ---
