@@ -1709,15 +1709,9 @@ function renderDay(day, idx){
     }
   }
 
-  // Final header text
-  let headerText;
-  // If inflateFromMission / scenarios gave us a proper "Day 1–3: …" title, trust it.
-  if (/^Day\s+\d+(\s*[-–]\s*\d+)?\s*:/i.test(explicitTitle)) {
-    headerText = explicitTitle;
-  } else {
-    // Otherwise keep the old behaviour: "Day N: From → To"
-    headerText = routeH ? `Day ${idx+1}: ${routeH}` : `Day ${idx+1}`;
-  }
+// Final header text + element
+const headerText = routeH ? `Day ${idx+1}: ${routeH}` : `Day ${idx+1}`;
+let html = `<article class="day"><h4>${headerText}</h4>`;
 
   // Final header (bold)
   let html = `<article class="day"><h4>${headerText}</h4>`;
