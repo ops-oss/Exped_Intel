@@ -1469,6 +1469,25 @@ function kvOrParagraph(containerId, text){
   const el = $(containerId); 
   if(!el){ return; }
   if(!text){ el.innerHTML=''; return; }
+
+  // SPECIAL CASE: Route Overview is always narrative text,
+  // never a key/value table, even if it contains "something: something".
+  if (containerId === 'route_overview') {
+    const paras = String(text)
+      .trim()
+      .split(/\n{2,}/)           // blank line = new paragraph
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    el.innerHTML =
+      `<div class="kv single"><div class="v">${
+        (paras.length ? paras : [text])
+          .map(p => String(p).replace(/\n/g, ' '))
+          .join('<br/><br/>')
+      }</div></div>`;
+    return;
+  }
+  
   const lines = String(text).split(/\r?\n/).map(s => s.trim().replace(/^-\s*/, "")).filter(Boolean);
   const hasKV = lines.some(l => /^[^:]+:\s*\S/.test(l));
   if(hasKV){
