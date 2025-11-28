@@ -922,7 +922,7 @@
           </select>
         </div>
         <div>
-          <label for="fIdea">Destination idea</label>
+          <label for="fIdea">Destination idea (required for blueprint) </label>
           <input id="fIdea" name="destination_idea" data-ei-meta="location" type="text" placeholder="e.g., Mt Whitney, Lost Coast Trail…"/>
         </div>
 
@@ -1607,10 +1607,14 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ buyBlueprintDirect fired");
 
     const f = getFormValues();
-    if (!f.email) {
-      alert("Please add your email so we can send your Blueprint.");
-      return;
-    }
+if (!f.email) {
+  alert("Please add your email so we can send your Blueprint.");
+  return;
+}
+if (!f.destination_idea) {
+  alert("Add a Destination idea so we can build your Blueprint correctly.");
+  return;
+}
 
     const BLUEPRINT_PRICE_ID = "price_1SRw3ZKyANuReHHWei4HLs5K";
 
