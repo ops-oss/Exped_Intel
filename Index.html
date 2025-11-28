@@ -2091,6 +2091,20 @@ if (data.image_link) {
       (permit?.recgov && permit.recgov.description) ??
       '';
 
+        // If primary is just a Google search but we have a nicer concrete link in comboPermits,
+    // promote that combo to be the main button target.
+    if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) {
+      const primaryIsGoogle = /google\.com\/search/i.test(String(booking || ""));
+      if (primaryIsGoogle) {
+        const bestCombo =
+          permit.comboPermits.find(cp => cp && cp.url && !/google\.com\/search/i.test(cp.url)) ||
+          permit.comboPermits[0];
+        if (bestCombo && bestCombo.url) {
+          booking = bestCombo.url;
+        }
+      }
+    }
+
     // === CTA container
     const cta = document.createElement('div');
     cta.className = 'permits-cta';
@@ -2147,7 +2161,7 @@ if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) 
       desc.textContent = String(blurb).replace(/\s+/g, ' ').slice(0, 220) + (blurb.length > 220 ? '…' : '');
       cta.appendChild(desc);
     }
-
+    
     // “via …” provider chip
     const provKey = (permit && permit.provider) || (ctx && ctx.permits_provider) || '';
         const provLabel = ({
