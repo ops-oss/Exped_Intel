@@ -2368,18 +2368,20 @@ function hideTrulyEmptySections(){
     s.style.display = hasContent ? '' : 'none';
   });
 }
-window.EI_refreshSections = hideTrulyEmptySections; // expose for tabs
+  window.EI_refreshSections = hideTrulyEmptySections; // expose for tabs
 
-// …after hideTrulyEmptySections();
-hideTrulyEmptySections();
+  // …after hideTrulyEmptySections();
+  hideTrulyEmptySections();
 
-status.textContent='';
-setTimeout(()=>status.remove(),10);
+  status.textContent = '';
+  setTimeout(() => status.remove(), 10);
 
-/* PATCH 3 — expose data for the tabs */
-window.EI_DATA = data;
-window.dispatchEvent(new CustomEvent('ei:data-ready'));
+  /* PATCH 3 — expose data for the tabs */
+  window.__EXPEDITION__ = data;   // immutable base (mission_text, canonical days)
+  window.EI_DATA        = data;   // mutable “current scenario” view
+  window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
+
 
 /* ===== In-page nav: build from h3s ===== */
 (() => {
@@ -2560,7 +2562,9 @@ window.addEventListener('beforeprint', () => {
   const $ = (id) => document.getElementById(id);
 
   const getBase = () =>
-    (window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {};
+  (window.__EXPEDITION__ && Object.keys(window.__EXPEDITION__).length)
+    ? window.__EXPEDITION__
+    : ((window.EI_DATA && Object.keys(window.EI_DATA).length) ? window.EI_DATA : {});
 
   // If scenarios come in as a JSON string or fenced block, normalize to array
   function addScenariosFromString(base){
@@ -2804,39 +2808,35 @@ function renderScenario(name){
   // ========== DAYS: merge/patch FIRST ==========
   const baseDaysRaw = Array.isArray(base?.days) ? base.days : [];
   const scenDaysRaw = Array.isArray(raw?.days)  ? raw.days  : [];
-  const daysStrategy =
-    (raw?.days_strategy === 'replace' || raw?.replaceDays === true) ? 'replace' : 'patch';
 
   let finalDaysRaw;
-  if (scenDaysRaw.length === 0){
-    // No scenario days: use baseline days
+
+  // 1) Baseline tab (or no explicit scenario days) → use mission_text days as‑is
+  if (!scenDaysRaw.length || String(name).toLowerCase() === 'baseline') {
     finalDaysRaw = baseDaysRaw.slice();
-  } else if (daysStrategy === 'replace' || baseDaysRaw.length === 0){
-    // Scenario provided full replacement (or no baseline)
+
+  } else if (baseDaysRaw.length === 0) {
+    // 2) No mission_text days at all → just use whatever the scenario gives us
     finalDaysRaw = scenDaysRaw.slice();
-    } else {
-    // Patch: scenario overrides baseline; borrow missing preview/chips by aligned key
+
+  } else {
+    // 3) Anchor / Driven: scenario days override baseline, matched by day number
     const baseMap = new Map(baseDaysRaw.map((d, i) => [normDayKey(d, i), d]));
+
     finalDaysRaw = scenDaysRaw.map((d, i) => {
-      const b   = baseMap.get(normDayKey(d, i)) || {};
-      const out = { ...b, ...d };
+      const key = normDayKey(d, i);      // e.g. "d1", "d2"…
+      const b   = baseMap.get(key) || {}; // baseline day (same number), if any
 
-      // --- keep the rich mission-text label if the scenario only says "Day N" ---
-      if (b.label) {
-        const scenLabel = typeof d.label === 'string' ? d.label.trim() : '';
-        if (!scenLabel || /^day\s*\d+\s*$/i.test(scenLabel)) {
-          // e.g. "Day 1: Snow Lakes Trailhead → Enchantments Core zone"
-          out.label = b.label;
-        }
-      }
+      const out = { ...b, ...d };        // scenario overrides baseline fields
 
+      // Borrow preview / chips if scenario left them empty
       if (!out.preview && b.preview) out.preview = b.preview;
       if (!out.chips) out.chips = {};
       if (b.chips && Object.keys(out.chips).length === 0) out.chips = b.chips;
+
       return out;
     });
   }
-
 
 // --- DRIVEN polish: normalize titles to Start → End without "Stage" fallbacks ---
 (function normalizeDriven(){
@@ -2923,8 +2923,15 @@ function renderScenario(name){
     .map(d => ({ ...d, preview: stripMilesTail(d.preview) }));
   finalDays = finalDays.map((d,i) => ({ ...d, description: (finalDaysRaw?.[i]?.description || d.description || '').trim() }));
 
-window.EI_DATA = { ...(window.EI_DATA||{}), days: finalDays };
-window.trip    = { ...(window.trip||{}),    days: finalDays };
+  // Expose the *current* scenario view so renderDay can see the right days
+  window.EI_DATA = {
+    ...(getBase() || {}),
+    activeScenario: String(name || '').toLowerCase(),
+    days: finalDays
+  };
+
+  // legacy fallback used elsewhere
+  window.trip = { ...(window.trip || {}), days: finalDays };
   
   // Paint days
   const daysEl = document.getElementById('itineraryDays');
