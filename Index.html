@@ -1480,14 +1480,16 @@ function kvOrParagraph(containerId, text){
       .trim()
       .split(/\n{2,}/)          // blank line = new paragraph
       .map(s => s.trim())
-      .filter(Boolean);
+      // strip leading bullet markers like "- Foo" or "• Foo"
+      .map(p => p.replace(/^\s*[-•]\s+/, ''))
+      // drop paragraphs that are just "-" or "•"
+      .filter(p => p && !/^[-•]\s*$/.test(p));
 
-    el.innerHTML =
-      `<div class="kv single"><div class="v">${
-        (paras.length ? paras : [text])
-          .map(p => String(p).replace(/\n/g, ' '))
-          .join('<br/><br/>')
-      }</div></div>`;
+    const out = (paras.length ? paras : [String(text).trim()])
+      .map(p => p.replace(/\n/g, ' '))
+      .join('<br/><br/>');
+
+    el.innerHTML = `<div class="kv single"><div class="v">${out}</div></div>`;
     return;
   }
 
@@ -1511,9 +1513,7 @@ function kvOrParagraph(containerId, text){
     const val = m[2].trim();
     const wordCount = key.split(/\s+/).length;
 
-    // Treat as key/value only if the "key" part is reasonably short.
-    // Long clauses like "This 4‑day Core Enchantments Traverse delivers…"
-    // will be treated as plain narrative instead of a KV label.
+    // Only treat as KV if "key" is reasonably short
     if (wordCount <= 6) {
       kvRows.push({ k: key, v: val });
     } else {
