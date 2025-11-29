@@ -1701,8 +1701,8 @@ function renderDay(day, idx){
   // Final header (bold)
   let html = `<article class="day"><h4>${headerText}</h4>`;
 
-// Paragraph: full body, strip leading duplicate route if present, and strip mile tail
-let body = (day.description || day.preview || '').trim();
+// Paragraph: use the narrative preview first; fall back to full description
+let body = (day.preview || day.description || '').trim();
 if (routeH) {
   const esc = routeH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   body = body.replace(new RegExp(`^(?:Day\\s*${idx+1}\\s*:\\s*)?${esc}[.!?\\s–—-]*`, 'i'), '').trim();
