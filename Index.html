@@ -2590,6 +2590,53 @@ function hideTrulyEmptySections(){
   heads.forEach(h => io.observe(h));
 })();
 </script>
+<script>
+/* ===== Section header icons (Tabler ids) ===== */
+(() => {
+  const iconMap = new Map([
+    ['expedition itinerary','h-itinerary'],
+    ['permits & entry','h-permits'],
+    ['shuttle / transportation','h-shuttle'],
+    ['permit & shuttle timeline','h-timeline'],
+    ['multi-trailhead logistics','h-multitrail'],
+    ['key considerations','h-considerations'],
+    ['itinerary overview','h-itinerary'],
+    ['gpx route & elevation','h-gpx'],
+    ['campsite intel','h-campsite'],
+    ['weather & altitude notes','h-weather'],
+    ['gear checklist','h-gear'],
+    ['optional modification','h-optional'],
+    ['risk matrix & hazard timeline','h-risk'],
+    ['conditions watch','h-conditions'],
+    ['bailout summary','h-bailout'],
+    ['emergency contacts & numbers','h-emergency'],
+    ['final brief summary','h-final'],
+    ['field disclaimer','h-disclaimer']
+  ]);
+
+  document.querySelectorAll('.section > h3').forEach(h3 => {
+    // don’t double-inject
+    if (h3.querySelector('.hdr-ico')) return;
+
+    const key = (h3.textContent || '').trim().toLowerCase();
+    const symId = iconMap.get(key);
+    if (!symId) return;
+
+    const svgNS   = 'http://www.w3.org/2000/svg';
+    const xlinkNS = 'http://www.w3.org/1999/xlink';
+
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'hdr-ico');
+
+    const use = document.createElementNS(svgNS, 'use');
+    use.setAttribute('href', `#${symId}`);
+    use.setAttributeNS(xlinkNS, 'xlink:href', `#${symId}`); // Safari
+
+    svg.appendChild(use);
+    h3.prepend(svg);
+  });
+})();
+</script>
 
 <script>
   // place this immediately before the PATCH 4 tabs script block
