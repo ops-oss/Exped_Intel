@@ -898,6 +898,28 @@ h1.title {
   hyphens: auto;
   max-width: 100%;
 }
+  /* === Desktop Hamburger Boost (no label) =============================== */
+@media (min-width: 960px){
+  body .ei-toc-toggle{
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--paper, #fff) 90%, var(--accent, #fe5733) 10%);
+    box-shadow: 0 4px 10px rgba(0,0,0,.16);
+    transform: translateY(2px); /* tiny drop so it feels anchored */
+  }
+
+  body .ei-toc-toggle .lines::before,
+  body .ei-toc-toggle .lines::after{
+    height: 2.5px; /* thicker bars */
+  }
+
+  body .ei-toc-toggle:hover{
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #fe5733) 40%, transparent);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2361,13 +2383,25 @@ $('itineraryDays').innerHTML = days.map((d,i) => renderDay(d,i)).join('');
 function hideTrulyEmptySections(){
   document.querySelectorAll('.section').forEach(s=>{
     if (s.querySelector('#gpxEmbedWrap')) return; // never auto-hide GPX wrapper
+
     const hasContent = Array.from(s.querySelectorAll('div[id]')).some(n=>{
       return (n.innerText && n.innerText.trim().length) || n.querySelector('iframe, a, .chip');
     });
-    // toggle BOTH ways
+
+    // toggle section
     s.style.display = hasContent ? '' : 'none';
+
+    // sync TOC item (if it exists)
+    const h3 = s.querySelector('h3');
+    if (h3 && h3.id) {
+      const link = document.querySelector('.ei-toc-list a[href="#' + h3.id + '"]');
+      if (link && link.parentElement) {
+        link.parentElement.style.display = hasContent ? '' : 'none';
+      }
+    }
   });
 }
+
   window.EI_refreshSections = hideTrulyEmptySections; // expose for tabs
 
   // …after hideTrulyEmptySections();
@@ -2385,7 +2419,13 @@ function hideTrulyEmptySections(){
 
 /* ===== In-page nav: build from h3s ===== */
 (() => {
-  const heads = [...document.querySelectorAll('.section > h3')];
+  const heads = [...document.querySelectorAll('.section > h3')]
+    // only include sections that are actually visible (Blueprint only)
+    .filter(h3 => {
+      const sec = h3.closest('.section');
+      return sec && sec.style.display !== 'none';
+    });
+
   if (!heads.length) return;
 
   const sections = heads.map(h3 => {
