@@ -2482,10 +2482,29 @@ if (sym) {
   a.textContent = title;
 }
 
-a.addEventListener('click', () => close(true));
-li.appendChild(a);
-ul.appendChild(li);
-});
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    // Close panel but DO NOT restore old scroll — we’re navigating now
+    close(false);
+
+    // Immediate visual feedback: mark this link active
+    links.forEach(x => x.removeAttribute('aria-current'));
+    a.setAttribute('aria-current', 'true');
+
+    // Smooth scroll to the section
+    const target = document.getElementById(id);
+    if (target) {
+      const headerOffset = 80; // roughly your fixed header height
+      const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      window.scrollTo({ top: y, behavior: 'smooth' });
+
+      // Give it focus after the scroll for a11y + iOS highlight
+      setTimeout(() => target.focus?.(), 400);
+    }
+  });
+
 
   document.body.append(btn, panel, dim);
 
@@ -2498,20 +2517,22 @@ const open = () => {
   (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
 };
 
-const close = (focusHeading) => {
+const close = (restoreScroll = true) => {
   const y = +(document.body.dataset.eiScrollY || 0);
   document.body.classList.remove('ei-open');
   document.body.style.top = '';
-  delete document.body.dataset.eiScrollY; // tidy up
-  window.scrollTo(0, y);
+  delete document.body.dataset.eiScrollY;
   btn.setAttribute('aria-label','Open section menu');
-  if (focusHeading) setTimeout(() => document.getElementById(location.hash.slice(1))?.focus?.(), 250);
+  if (restoreScroll) {
+    window.scrollTo(0, y);
+  }
 };
-  btn.addEventListener('click', () =>
-  document.body.classList.contains('ei-open') ? close() : open()
+
+btn.addEventListener('click', () =>
+  document.body.classList.contains('ei-open') ? close(true) : open()
 );
-  dim.addEventListener('click', () => close());
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+dim.addEventListener('click', () => close(true));
+window.addEventListener('keydown', e => { if (e.key === 'Escape') close(true); });
 
   const links = [...panel.querySelectorAll('a')];
   const byId = Object.fromEntries(sections.map(s => [s.id, links.find(a => a.hash === '#'+s.id)]));
