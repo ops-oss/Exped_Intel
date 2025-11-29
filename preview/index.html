@@ -323,15 +323,33 @@
   letter-spacing: 0;
 }
 
-/* ↓ Date input: shrink visible text & placeholder */
+/* ↓ Date input: full width + shrink text + kill iOS blue */
 #scoutForm input[type="date"]{
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+
   font-size: 14px !important;           /* was 16 */
+  background: #fff !important;          /* match other fields */
+  color: #222 !important;
+  -webkit-text-fill-color: #222 !important;
+  -webkit-appearance: none;             /* strip iOS native styling */
 }
+
 #scoutForm input[type="date"]::-webkit-datetime-edit{
   font-size: 14px !important;
 }
+
 #scoutForm input[type="date"]::placeholder{
   font-size: 14px !important;
+}
+
+/* Clean, non-blue focus state */
+#scoutForm input[type="date"]:focus {
+  background: #fff !important;
+  outline: 0;
+  border-color: rgba(0,0,0,.28);
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
 }
   .hero figcaption {
   font-size: 12px;
