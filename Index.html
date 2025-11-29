@@ -2416,16 +2416,9 @@ function hideTrulyEmptySections(){
   window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
 
-
 /* ===== In-page nav: build from h3s ===== */
 (() => {
-  const heads = [...document.querySelectorAll('.section > h3')]
-    // only include sections that are actually visible (Blueprint only)
-    .filter(h3 => {
-      const sec = h3.closest('.section');
-      return sec && sec.style.display !== 'none';
-    });
-
+  const heads = [...document.querySelectorAll('.section > h3')];
   if (!heads.length) return;
 
   const sections = heads.map(h3 => {
