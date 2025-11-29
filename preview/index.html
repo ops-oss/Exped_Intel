@@ -835,7 +835,7 @@
       <form id="scoutForm" class="grp" novalidate>
         <!-- Trip title -->
         <div class="row-1">
-          <label for="tripTitle">Trip title (optional)</label>
+          <label for="tripTitle">Trip title</label>
           <input id="tripTitle" name="title" data-ei-meta="title" placeholder="Zion West Rim Adventure"/>
         </div>
 
@@ -922,9 +922,15 @@
           </select>
         </div>
         <div>
-          <label for="fIdea">Destination idea</label>
-          <input id="fIdea" name="destination_idea" data-ei-meta="location" type="text" placeholder="e.g., Mt Whitney, Lost Coast Trail…"/>
-        </div>
+  <label for="fIdea" data-no-auto>Destination idea</label>
+  <input
+    id="fIdea"
+    name="destination_idea"
+    data-ei-meta="location"
+    type="text"
+    placeholder="e.g., Mt Whitney, Lost Coast Trail…"
+  />
+</div>
 
         <!-- Additional details -->
         <div class="row-1">
@@ -1612,7 +1618,7 @@ if (!f.email) {
   return;
 }
 if (!f.destination_idea) {
-  alert("Add a Destination idea so we can build your Blueprint correctly.");
+  alert("Add a Destination idea so we can build your Blueprint correctly, or choose “I want you to choose for me.”");
   return;
 }
 
