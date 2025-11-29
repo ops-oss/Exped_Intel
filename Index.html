@@ -2416,187 +2416,182 @@ function hideTrulyEmptySections(){
   window.dispatchEvent(new CustomEvent('ei:data-ready'));
 })();
 
+<script>
 /* ===== In-page nav: build from h3s ===== */
 (() => {
   const heads = [...document.querySelectorAll('.section > h3')];
   if (!heads.length) return;
 
+  // Build stable IDs + section list
   const sections = heads.map(h3 => {
     let id = h3.id || h3.textContent.trim().toLowerCase()
-      .replace(/[^a-z0-9\s\-&]+/g,'')
-      .replace(/\s*&\s*/g,'-and-')
-      .replace(/\s+/g,'-');
-    if (!id) id = 'sec-' + Math.random().toString(36).slice(2,7);
-    if (document.getElementById(id) && h3.id !== id) { id += '-' + Math.random().toString(36).slice(2,4); }
+      .replace(/[^a-z0-9\s\-&]+/g, '')
+      .replace(/\s*&\s*/g, '-and-')
+      .replace(/\s+/g, '-');
+
+    if (!id) id = 'sec-' + Math.random().toString(36).slice(2, 7);
+    if (document.getElementById(id) && h3.id !== id) {
+      id += '-' + Math.random().toString(36).slice(2, 4);
+    }
+
     h3.id = id;
-    if (!h3.hasAttribute('tabindex')) h3.setAttribute('tabindex','-1');
+    if (!h3.hasAttribute('tabindex')) h3.setAttribute('tabindex', '-1');
     return { id, title: h3.textContent.trim() };
   });
 
   const btn = document.createElement('button');
   btn.className = 'ei-toc-toggle';
   btn.type = 'button';
-  btn.setAttribute('aria-label','Open section menu');
+  btn.setAttribute('aria-label', 'Open section menu');
   btn.innerHTML = '<span class="lines" aria-hidden="true"></span>';
 
   const panel = document.createElement('aside');
   panel.className = 'ei-toc-panel';
-  panel.setAttribute('aria-label','Sections');
-  panel.innerHTML = '<div class="ei-toc-title">Sections</div><ul class="ei-toc-list" role="list"></ul>';
+  panel.setAttribute('aria-label', 'Sections');
+  panel.innerHTML =
+    '<div class="ei-toc-title">Sections</div><ul class="ei-toc-list" role="list"></ul>';
 
-  const dim = document.createElement('div'); dim.className = 'ei-toc-dim';
+  const dim = document.createElement('div');
+  dim.className = 'ei-toc-dim';
+
   const ul = panel.querySelector('.ei-toc-list');
+
   // icon ids for slider chips
-const tocIconMap = new Map([
-  ['expedition itinerary','h-itinerary'],
-  ['permits & entry','h-permits'],
-  ['shuttle / transportation','h-shuttle'],
-  ['permit & shuttle timeline','h-timeline'],
-  ['multi-trailhead logistics','h-multitrail'],
-  ['key considerations','h-considerations'],
-  ['itinerary overview','h-itinerary'],
-  ['campsite intel','h-campsite'],
-  ['weather & altitude notes','h-weather'],
-  ['gear checklist','h-gear'],
-  ['optional modification','h-optional'],
-  ['risk matrix & hazard timeline','h-risk'],
-  ['conditions watch','h-conditions'],
-  ['bailout summary','h-bailout'],
-  ['emergency contacts & numbers','h-emergency'],
-  ['final brief summary','h-final'],
-  ['field disclaimer','h-disclaimer'],
-  ['gpx route & elevation','h-gpx']
-]);
-  sections.forEach(({id, title}) => {
+  const tocIconMap = new Map([
+    ['expedition itinerary', 'h-itinerary'],
+    ['permits & entry', 'h-permits'],
+    ['shuttle / transportation', 'h-shuttle'],
+    ['permit & shuttle timeline', 'h-timeline'],
+    ['multi-trailhead logistics', 'h-multitrail'],
+    ['key considerations', 'h-considerations'],
+    ['itinerary overview', 'h-itinerary'],
+    ['campsite intel', 'h-campsite'],
+    ['weather & altitude notes', 'h-weather'],
+    ['gear checklist', 'h-gear'],
+    ['optional modification', 'h-optional'],
+    ['risk matrix & hazard timeline', 'h-risk'],
+    ['conditions watch', 'h-conditions'],
+    ['bailout summary', 'h-bailout'],
+    ['emergency contacts & numbers', 'h-emergency'],
+    ['final brief summary', 'h-final'],
+    ['field disclaimer', 'h-disclaimer'],
+    ['gpx route & elevation', 'h-gpx']
+  ]);
+
+  const links = [];
+
+  // Build the list items + links
+  sections.forEach(({ id, title }) => {
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.href = '#'+id;
+    a.href = '#' + id;
+
     const key = title.trim().toLowerCase();
-const sym = tocIconMap.get(key);
+    const sym = tocIconMap.get(key);
 
-if (sym) {
-  a.innerHTML = `<svg class="ico" aria-hidden="true">
-                   <use href="#${sym}" xlink:href="#${sym}"></use>
-                 </svg><span>${title}</span>`;
-} else {
-  a.textContent = title;
-}
-
-  a.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    // Close panel but DO NOT restore old scroll — we’re navigating now
-    close(false);
-
-    // Immediate visual feedback: mark this link active
-    links.forEach(x => x.removeAttribute('aria-current'));
-    a.setAttribute('aria-current', 'true');
-
-    // Smooth scroll to the section
-    const target = document.getElementById(id);
-    if (target) {
-      const headerOffset = 80; // roughly your fixed header height
-      const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
-
-      window.scrollTo({ top: y, behavior: 'smooth' });
-
-      // Give it focus after the scroll for a11y + iOS highlight
-      setTimeout(() => target.focus?.(), 400);
+    if (sym) {
+      a.innerHTML =
+        `<svg class="ico" aria-hidden="true">
+           <use href="#${sym}" xlink:href="#${sym}"></use>
+         </svg><span>${title}</span>`;
+    } else {
+      a.textContent = title;
     }
-  });
 
+    li.appendChild(a);
+    ul.appendChild(li);
+    links.push(a);
+  });
 
   document.body.append(btn, panel, dim);
 
-const open = () => {
-  const y = window.scrollY || document.documentElement.scrollTop || 0;
-  document.body.dataset.eiScrollY = String(y);
-  document.body.style.top = `-${y}px`;
-  document.body.classList.add('ei-open');
-  btn.setAttribute('aria-label','Close section menu');
-  (panel.querySelector('a[aria-current="true"]') || panel.querySelector('a'))?.focus();
-};
+  const open = () => {
+    const y =
+      window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.dataset.eiScrollY = String(y);
+    document.body.style.top = `-${y}px`;
+    document.body.classList.add('ei-open');
+    btn.setAttribute('aria-label', 'Close section menu');
+    (panel.querySelector('a[aria-current="true"]') ||
+      panel.querySelector('a'))?.focus();
+  };
 
-const close = (restoreScroll = true) => {
-  const y = +(document.body.dataset.eiScrollY || 0);
-  document.body.classList.remove('ei-open');
-  document.body.style.top = '';
-  delete document.body.dataset.eiScrollY;
-  btn.setAttribute('aria-label','Open section menu');
-  if (restoreScroll) {
-    window.scrollTo(0, y);
-  }
-};
+  const close = (restoreScroll = true) => {
+    const y = +(document.body.dataset.eiScrollY || 0);
+    document.body.classList.remove('ei-open');
+    document.body.style.top = '';
+    delete document.body.dataset.eiScrollY;
+    btn.setAttribute('aria-label', 'Open section menu');
+    if (restoreScroll) {
+      window.scrollTo(0, y);
+    }
+  };
 
-btn.addEventListener('click', () =>
-  document.body.classList.contains('ei-open') ? close(true) : open()
-);
-dim.addEventListener('click', () => close(true));
-window.addEventListener('keydown', e => { if (e.key === 'Escape') close(true); });
+  // Toggle button / dim / Esc
+  btn.addEventListener('click', () =>
+    document.body.classList.contains('ei-open') ? close(true) : open()
+  );
+  dim.addEventListener('click', () => close(true));
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') close(true);
+  });
 
-  const links = [...panel.querySelectorAll('a')];
-  const byId = Object.fromEntries(sections.map(s => [s.id, links.find(a => a.hash === '#'+s.id)]));
+  // Clicking a TOC item:
+  //   - closes panel without restoring old scroll
+  //   - smooth-scrolls to section
+  //   - immediately updates highlight
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.hash.slice(1);
 
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const link = byId[entry.target.id];
-      if (!link) return;
-      if (entry.isIntersecting) {
-        links.forEach(a => a.removeAttribute('aria-current'));
-        link.setAttribute('aria-current','true');
+      // Close the panel but don't snap back
+      close(false);
+
+      // Visual state
+      links.forEach(x => x.removeAttribute('aria-current'));
+      a.setAttribute('aria-current', 'true');
+
+      const target = document.getElementById(id);
+      if (target) {
+        const headerOffset = 80; // tweak if needed
+        const y =
+          target.getBoundingClientRect().top +
+          window.scrollY -
+          headerOffset;
+
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        setTimeout(() => target.focus?.(), 400);
       }
     });
-  }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.001] });
+  });
+
+  // IntersectionObserver keeps highlight in sync while scrolling
+  const byId = Object.fromEntries(
+    sections.map(s => [
+      s.id,
+      links.find(a => a.hash === '#' + s.id)
+    ])
+  );
+
+  const io = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        const link = byId[entry.target.id];
+        if (!link) return;
+        if (entry.isIntersecting) {
+          links.forEach(a => a.removeAttribute('aria-current'));
+          link.setAttribute('aria-current', 'true');
+        }
+      });
+    },
+    { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.001] }
+  );
+
   heads.forEach(h => io.observe(h));
 })();
-
-// Ensure printing never happens while the body is "frozen" for the TOC
-window.addEventListener('beforeprint', () => {
-  document.body.classList.remove('ei-open');
-  document.body.style.top = '';
-  delete document.body.dataset.eiScrollY;
-});
-
-/* ===== Section header icons (Tabler ids) ===== */
-(() => {
-  const map = new Map([
-    ['expedition itinerary','h-itinerary'],
-    ['permits & entry','h-permits'],
-    ['shuttle / transportation','h-shuttle'],
-    ['permit & shuttle timeline','h-timeline'],
-    ['multi-trailhead logistics','h-multitrail'],
-    ['key considerations','h-considerations'],
-    ['itinerary overview','h-itinerary'],
-    ['campsite intel','h-campsite'],
-    ['weather & altitude notes','h-weather'],
-    ['gear checklist','h-gear'],
-    ['optional modification','h-optional'],
-    ['risk matrix & hazard timeline','h-risk'],
-    ['conditions watch','h-conditions'],
-    ['bailout summary','h-bailout'],
-    ['emergency contacts & numbers','h-emergency'],
-    ['final brief summary','h-final'],
-    ['field disclaimer','h-disclaimer'],
-    ['gpx route & elevation','h-gpx']
-  ]);
-
-  document.querySelectorAll('.section > h3').forEach(h3 => {
-    if (h3.querySelector('.hdr-ico')) return;
-    const key = (h3.textContent||'').trim().toLowerCase();
-    const id = map.get(key);
-    if (!id) return;
-    const svgNS='http://www.w3.org/2000/svg';
-    const xlinkNS='http://www.w3.org/1999/xlink';
-    const svg = document.createElementNS(svgNS,'svg');
-    svg.setAttribute('class','hdr-ico');
-    const use = document.createElementNS(svgNS,'use');
-    use.setAttribute('href', `#${id}`);
-    use.setAttributeNS(xlinkNS, 'xlink:href', `#${id}`); // Safari
-    svg.appendChild(use);
-    h3.prepend(svg);
-  });
-})();
 </script>
+
 <script>
   // place this immediately before the PATCH 4 tabs script block
   (function primeEI(){
