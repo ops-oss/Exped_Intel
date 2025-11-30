@@ -10,14 +10,17 @@
   body{ margin:0; background:var(--bg); color:var(--ink);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  .shell {
+.shell {
   display: grid;
-  grid-template-columns: 35% 65%; /* widen the right panel */
+  grid-template-columns: 35% 65%;
   gap: 24px;
-  max-width: 1200px;
+
+  /* ↓ Narrow the overall canvas + add more side padding */
+  max-width: 1120px;          /* was 1200px */
   margin: 0 auto;
-  padding: 16px;
+  padding: 16px 24px;         /* was 16px (all sides) */
 }
+
 
 @media (max-width: 900px) {
   .shell {
