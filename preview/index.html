@@ -21,6 +21,18 @@
   padding: 16px 24px;         /* was 16px (all sides) */
 }
 
+/* iPad / small laptop tighten-up */
+@media (max-width: 1200px) and (min-width: 901px){
+  .shell {
+    max-width: 1040px;   /* pull everything in a bit */
+    padding: 12px 18px;  /* slightly smaller outer padding */
+    gap: 16px;           /* panels closer together */
+  }
+
+  .panel {
+    padding: 12px;       /* slimmer cards so the right edge doesn't clip */
+  }
+}
 
 @media (max-width: 900px) {
   .shell {
@@ -28,7 +40,6 @@
   }
 }
   
-
   /* Left panel */
   .panel{ background:var(--paper); border:1px solid var(--div); border-radius:12px; padding:16px; }
   .form-panel > h2{
