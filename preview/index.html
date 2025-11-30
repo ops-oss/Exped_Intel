@@ -1601,7 +1601,7 @@ async function updateHeroIfNeeded(placeText) {
   });
 })();
 </script>
-  <!-- PURCHASE EXPEDITION BLUEPRINT HANDLER -->
+<!-- PURCHASE EXPEDITION BLUEPRINT HANDLER -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (sel) => document.querySelector(sel);
@@ -1630,22 +1630,58 @@ document.addEventListener("DOMContentLoaded", () => {
   async function buyBlueprintDirect() {
     console.log("✅ buyBlueprintDirect fired");
 
+    // 1) Gate ALL orange-* fields (every control with [required])
+    const form = document.getElementById("scoutForm");
+    if (form) {
+      const missing = [];
+
+      form.querySelectorAll("[required]").forEach((el) => {
+        const value = (el.value || "").trim();
+        if (!value) {
+          // Find matching label text for a human-readable name
+          const label =
+            (el.id && form.querySelector(`label[for="${el.id}"]`)) || null;
+          const labelText = label
+            ? label.textContent.trim()
+            : (el.name || el.id || "This field");
+
+          if (!missing.includes(labelText)) {
+            missing.push(labelText);
+          }
+        }
+      });
+
+      if (missing.length) {
+        alert(
+          "To advance straight to an Expedition Blueprint, please complete:\n\n" +
+          missing.map((t) => "• " + t).join("\n")
+        );
+        return;
+      }
+    }
+
+    // 2) Existing form reads
     const f = getFormValues();
-if (!f.email) {
-  alert("Please add your email so we can send your Blueprint.");
-  return;
-}
-if (!f.destination_idea) {
-  alert("Add a Destination idea so we can build your Blueprint correctly, or choose “I want you to choose for me.”");
-  return;
-}
+
+    // Extra safety: email + destination idea
+    if (!f.email) {
+      alert("Please add your email so we can send your Blueprint.");
+      return;
+    }
+    if (!f.destination_idea) {
+      alert(
+        "Add a Destination idea so we can build your Blueprint correctly, or choose “I want you to choose for me.”"
+      );
+      return;
+    }
 
     const BLUEPRINT_PRICE_ID = "price_1SRw3ZKyANuReHHWei4HLs5K";
 
     const payload = {
       price_id: BLUEPRINT_PRICE_ID,
       customer_email: f.email,
-      success_url: "https://www.expeditionintel.com/success?session_id={CHECKOUT_SESSION_ID}",
+      success_url:
+        "https://www.expeditionintel.com/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.expeditionintel.com/checkout/canceled",
       metadata: {
         source: "blueprint_direct",
@@ -1665,11 +1701,14 @@ if (!f.destination_idea) {
     };
 
     try {
-      const res = await fetch("https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch(
+        "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }
+      );
 
       const j = await res.json();
       console.log("Stripe response:", j);
