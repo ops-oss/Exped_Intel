@@ -1327,6 +1327,39 @@ async function fetchHero({ place, region, orientation = "landscape" }) {
   const json = await res.json();             // { count, data: [ {src, credit, link, ...} ] }
   return (json.data && json.data[0]) || null;
 }
+
+/* ===== Rich loader: step progression (visual only) ===== */
+const SCOUT_STEPS = [
+  "Locking in your objective and trip window…",
+  "Scouting terrain that matches your experience level…",
+  "Checking season, access, and permit pressure…",
+  "Scoring routes for risk, logistics, and bailout options…",
+  "Formatting 3 route options for your inbox and preview…"
+];
+
+let scoutStepIndex = 0;
+let scoutStepTimer = null;
+
+function startScoutProgress() {
+  const label = document.getElementById("scoutStepLabel");
+  if (!label) return;
+
+  scoutStepIndex = 0;
+  label.textContent = SCOUT_STEPS[0];
+
+  // Rotate every ~2.2s while the recon runs
+  scoutStepTimer = setInterval(() => {
+    scoutStepIndex = (scoutStepIndex + 1) % SCOUT_STEPS.length;
+    label.textContent = SCOUT_STEPS[scoutStepIndex];
+  }, 2200);
+}
+
+function stopScoutProgress() {
+  if (scoutStepTimer) {
+    clearInterval(scoutStepTimer);
+    scoutStepTimer = null;
+  }
+}
   
 $id("scoutForm")?.addEventListener("submit", async (e)=>{
   e.preventDefault();
@@ -1369,16 +1402,26 @@ const payload = {
   const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
 
   const btn=$id("btnGenerate"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
-  const card=$id("optCard");
-  if(card) card.innerHTML=`
-    <div id="scoutLoading">
-      <div class="spin"></div>
-      <div>
-        <div class="h">Generating your Scout Recon</div>
-        <div class="p">Compiling routes and intel…</div>
-        <div class="bar"><span></span></div>
-      </div>
-    </div>`;
+  const card = $id("optCard");
+  if (card) {
+    card.innerHTML = `
+      <div id="scoutLoading">
+        <div class="spin"></div>
+        <div>
+          <div class="h">Generating your Scout Recon</div>
+          <div class="p" id="scoutStepLabel">Locking in your objective…</div>
+          <div class="bar"><span></span></div>
+          <div class="p" style="margin-top:8px;font-size:12px;opacity:.7;">
+            This usually takes under a minute. Behind the scenes we:
+            <br>• Save your intake
+            <br>• Generate 3 route options
+            <br>• Wire Blueprint upgrade links
+            <br>• Prep the email and preview
+          </div>
+        </div>
+      </div>`;
+  }
+  startScoutProgress();
 
   try {
     const res = await fetch(ENDPOINT, {
@@ -1483,8 +1526,13 @@ setActive(0);
     console.error(err);
     card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = "Generate Scout"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Discover Free Scout";
+    }
+    stopScoutProgress();
   }
+
 }); // <-- closes addEventListener
 /* =========================
    Live preview wiring
