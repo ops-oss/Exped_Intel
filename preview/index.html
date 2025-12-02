@@ -1327,7 +1327,6 @@ async function fetchHero({ place, region, orientation = "landscape" }) {
   const json = await res.json();             // { count, data: [ {src, credit, link, ...} ] }
   return (json.data && json.data[0]) || null;
 }
-
 /* ===== Rich loader: step progression (visual only) ===== */
 const SCOUT_STEPS = [
   "Locking in your objective and trip window…",
@@ -1360,8 +1359,7 @@ function stopScoutProgress() {
     scoutStepTimer = null;
   }
 }
-  
-$id("scoutForm")?.addEventListener("submit", async (e)=>{
+  $id("scoutForm")?.addEventListener("submit", async (e)=>{
   e.preventDefault();
   const f=e.currentTarget;
   const get=(n)=> (f.elements.namedItem(n)?.value || "").trim();
