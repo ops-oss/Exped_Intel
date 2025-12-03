@@ -1846,22 +1846,23 @@ function renderExpeditionChips(info){
 }
 
 /* ---------- mission_text → structured fields ---------- */
-const FIELD_DISCLAIMER_TEXT = "This Expedition Blueprint is intelligence only and does not constitute a
+const FIELD_DISCLAIMER_TEXT = `This Expedition Blueprint is intelligence only and does not constitute a
 guarantee of conditions, safety, or suitability. Trail conditions, weather,
 and maps may change without notice. You are solely responsible for verifying
-all details, preparing your team, and making sound decisions under pressure.  
+all details, preparing your team, and making sound decisions under pressure.
 
 By using this Blueprint you acknowledge and accept the waiver, release,
-indemnification, and limitation‑of‑liability provisions set forth in the
-Expedition Intel Terms of Service (link in footer). 
+indemnification, and limitation-of-liability provisions set forth in the
+Expedition Intel Terms of Service (link in footer).
 Expedition Intel’s liability for any claim arising from your use of this Blueprint is
 limited, to the maximum extent permitted by law, to the greater of the total
 amount you paid for the Blueprint in the twelve (12) months preceding the
-claim or $100.00 USD.  
+claim or $100.00 USD.
 
 You agree to indemnify and hold harmless Expedition Intel, its owners,
-employees, and agents from any third‑party claims arising out of your
-activities in the field, except as prohibited by Michigan law. ";
+employees, and agents from any third-party claims arising out of your
+activities in the field, except as prohibited by Michigan law.`;
+
 
 function inflateFromMission(data){
   const out = { ...data };
