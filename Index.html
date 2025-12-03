@@ -919,6 +919,54 @@ h1.title {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #fe5733) 40%, transparent);
   }
 }
+  .ei-footer {
+    background: #111;
+    color: #f5f5f5;
+    padding: 20px 16px 28px;
+    font-size: 11px;
+  }
+
+  .ei-footer-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /* Mission notice line */
+  .ei-footer-mission {
+    color: #ff6a00; /* Expedition Intel orange */
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 8px;
+    margin: 0 0 12px;
+  }
+
+  /* © line */
+  .ei-footer-meta {
+    margin: 0 0 4px;
+  }
+
+  /* Links line */
+  .ei-footer-links {
+    margin: 0;
+  }
+
+  .ei-footer a {
+    color: #ff6a00;
+    text-decoration: none;
+  }
+
+  .ei-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .ei-footer-separator {
+    display: inline-block;
+    padding: 0 6px;
+    opacity: 0.7;
+  }
 
 </style>
 </head>
@@ -1422,8 +1470,41 @@ h1.title {
   <section class="section"><h3>Field Disclaimer</h3><div id="field_disclaimer"></div></section>
 </div>
 
+<footer class="ei-footer">
+  <div class="ei-footer-inner">
+    <p class="ei-footer-mission">
+      MISSION NOTICE: Expedition Intel provides backcountry reconnaissance and route intelligence only.
+      We do not guarantee the accuracy, completeness, or safety of any information, and we do not
+      provide guiding, rescue, or insurance services. The backcountry is unforgiving—injury,
+      exposure, and death are possible outcomes.
+
+      By accessing this website, viewing any intel, and/or purchasing any product, you
+      acknowledge that you have read, understand, and agree to be bound by the
+      Expedition Intel Terms of Service—including the waiver, release, indemnification,
+      and limitation-of-liability provisions—and the Expedition Intel Privacy Policy.
+      You assume full responsibility for your choices, preparation, and safety in the
+      field.
+    </p>
+
+    <p class="ei-footer-meta">
+      © 2025 Expedition Intel
+    </p>
+
+    <p class="ei-footer-links">
+      <a href="https://www.expeditionintel.com/terms-of-service" target="_blank" rel="noopener noreferrer">
+        Terms &amp; Disclaimer
+      </a>
+      <span class="ei-footer-separator">|</span>
+      <a href="https://www.expeditionintel.com/privacy-policy" target="_blank" rel="noopener noreferrer">
+        Privacy Policy
+      </a>
+    </p>
+  </div>
+</footer>
+
 <script>
 /* ---------- utils ---------- */
+
 const $ = id => document.getElementById(id);
 const safeParse = t => { try { return JSON.parse(t); } catch { return null; } };
 const first = (obj, keys) => { for (const k of keys){ const v=k.split('.').reduce((a,c)=>a?.[c],obj); if(typeof v==="string"&&v.trim()) return v.trim(); if(v) return v; } return ""; };
