@@ -1576,7 +1576,7 @@ function kvOrParagraph(containerId, text){
   const id = String(containerId || '');
 
   // Sections that are ALWAYS narrative text, even if they contain colons
-  const paragraphOnly = new Set(['route_overview', 'final_brief']);
+  const paragraphOnly = new Set(['route_overview', 'final_brief', 'field_disclaimer']);
 
   if (paragraphOnly.has(id)) {
     const paras = String(text)
