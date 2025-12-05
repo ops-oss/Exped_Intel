@@ -3165,24 +3165,6 @@ kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
 
   console.log('[EI] rendered scenario →', name, { days: finalDays.length, totals });
 }
-
-  // ---- Scenario presence gate: hide tabs if no scenarios in JSON ----
-  const tabsRoot   = document.querySelector('.ei-tabs');
-  const baseForTabs = addScenariosFromString(getBase());
-  const scArr      = Array.isArray(baseForTabs.scenarios) ? baseForTabs.scenarios : [];
-  const hasScenarios = scArr.length > 0;
-
-  if (!hasScenarios) {
-    // No Baseline/Anchor/Driven array → no scenarios UI
-    if (tabsRoot) tabsRoot.style.display = 'none';
-
-    // Ensure the Expedition Itinerary card stays visible from mission_text
-    const itinSection = document.getElementById('expItin');
-    if (itinSection) itinSection.style.display = '';
-
-    // Skip all tab wiring + renderScenario logic
-    return;
-  }
   
   /* ---------- tabs wiring ---------- */
   const tabs = document.querySelectorAll('.ei-tab');
