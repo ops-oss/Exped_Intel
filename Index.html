@@ -3180,11 +3180,25 @@ kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
     const base = addScenariosFromString(getBase());
     const scArr = Array.isArray(base.scenarios) ? base.scenarios : [];
 
-    // If no scenarios in JSON, hide the tabs and leave the baseline days from mission_text
-    if (!scArr.length) {
+        if (!scArr.length) {
+      // No scenarios: hide tabs, keep Expedition Itinerary card visible
       tabsRoot.style.display = 'none';
       const itinSection = document.getElementById('expItin');
       if (itinSection) itinSection.style.display = '';
+
+      // Still render ROUTE OVERVIEW from the base Blueprint
+      const overviewText =
+        base.route_overview ||
+        first(base, [
+          'overview',
+          'user.0.route_overview',
+          'user.0.overview',
+          'user.0'
+        ]) ||
+        '';
+
+      kvOrParagraph('route_overview', overviewText);
+
       return;
     }
 
