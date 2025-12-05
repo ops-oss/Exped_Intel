@@ -3167,33 +3167,42 @@ kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
 }
   
   /* ---------- tabs wiring ---------- */
+  const tabsRoot = document.querySelector('.ei-tabs');
   const tabs = document.querySelectorAll('.ei-tab');
-  if (!tabs.length) return;
+  if (!tabsRoot || !tabs.length) return;
 
   function setActive(btn){
     tabs.forEach(t => t.setAttribute('aria-selected', t === btn ? 'true' : 'false'));
   }
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      setActive(btn);
-      renderScenario(btn.dataset.scenario);
-    });
-  });
-
-  // first paint
-  const selected =
-    Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
-  if (selected){
-    setActive(selected);
-    renderScenario(selected.dataset.scenario);
-  }
-
-  // repaint if data arrives later
+  // Only wire tabs AFTER data is loaded and we know if scenarios exist
   window.addEventListener('ei:data-ready', () => {
+    const base = addScenariosFromString(getBase());
+    const scArr = Array.isArray(base.scenarios) ? base.scenarios : [];
+
+    // If no scenarios in JSON, hide the tabs and leave the baseline days from mission_text
+    if (!scArr.length) {
+      tabsRoot.style.display = 'none';
+      const itinSection = document.getElementById('expItin');
+      if (itinSection) itinSection.style.display = '';
+      return;
+    }
+
+    // We DO have scenarios → wire up the tabs
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setActive(btn);
+        renderScenario(btn.dataset.scenario);
+      });
+    });
+
+    // First paint: use the tab marked selected, or fall back to Baseline
     const active =
       Array.from(tabs).find(b => b.getAttribute('aria-selected') === 'true') || tabs[0];
-    if (active) renderScenario(active.dataset.scenario);
+    if (active) {
+      setActive(active);
+      renderScenario(active.dataset.scenario);
+    }
   });
 })();
 </script>
