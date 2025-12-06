@@ -1696,6 +1696,43 @@ function _formatDayHeader(day, idx){
   // Fallback: generic "Day N" if title is missing
   return `Day ${idx + 1}`;
 }
+
+  function scrubShuttleText(text){
+  if (!text) return text;
+
+  const forbiddenHeads = [
+    'Recommended arrival',
+    'Pre-hike basecamp',
+    'Gear staging & storage',
+    'Post-hike basecamp',
+    'Resupply & groceries',
+    'Fuel & restricted items',
+    'Staging plan',
+    'Vehicle retrieval',
+    'Gear swap/transport',
+    'Backup plan',
+    'PRE/POST MISSION LOGISTICS',
+    'MULTI-TRAILHEAD LOGISTICS'
+  ];
+
+  const pattern = new RegExp(
+    '^\\s*[-•]?\\s*(' +
+      forbiddenHeads
+        .map(h => h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|') +
+      ')\\b',
+    'i'
+  );
+
+  const cleaned = String(text)
+    .split(/\r?\n/)
+    .filter(line => !pattern.test(line.trim()))
+    .join('\n')
+    .trim();
+
+  return cleaned;
+}
+
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
   const d = day || {};
@@ -1864,12 +1901,17 @@ You agree to indemnify and hold harmless Expedition Intel, its owners, employees
 
 function inflateFromMission(data){
   const out = { ...data };
-  const txt = (data.mission_text || "")
-  .replace(/\r/g, '')
-  .replace(/\u2013/g, '-')  // en dash → hyphen
-  .replace(/\u2014/g, '-')  // em dash → hyphen
-  .trim();
-if (!txt) return out;
+
+  let txt = (data.mission_text || "")
+    .replace(/\r/g, '')
+    .replace(/\u2013/g, '-')  // en dash → hyphen
+    .replace(/\u2014/g, '-')  // em dash → hyphen
+    .trim();
+
+  if (!txt) return out;
+
+  // HARD GUARD: strip any EI_DATA line and everything after it
+  txt = txt.replace(/\nEI_DATA:\s*\{[\s\S]*$/i, '').trim();
 
 // accept em dash (—), double dash (⸻), or plain hyphen (---)
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
@@ -1931,7 +1973,10 @@ const grab = (label) => {
   out.bailout_summary        ||= grab("BAILOUT\\s+SUMMARY");
   out.emergency              ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
   out.final_brief            ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
-  out.field_disclaimer       ||= grab("FIELD\\s+DISCLAIMER");
+  out.field_disclaimer = FIELD_DISCLAIMER_TEXT;   // ALWAYS hard-coded legal
+
+  // NEW: strip any pre/post or multi-trailhead bullets that bled into Shuttle
+  out.shuttle_transportation = scrubShuttleText(out.shuttle_transportation);
 
 
 // ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
@@ -3196,10 +3241,21 @@ kvOrParagraph(
     'field_disclaimer'
   ];
 
-  sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
+  sec.forEach(k => {
+    let value = (raw && raw[k]) || base[k] || '';
 
-// Force Shuttle / Transportation to always come from mission_text (base), not scenarios
-kvOrParagraph('shuttle_transportation', base.shuttle_transportation || '');
+    // Legal: always use canonical field disclaimer, never scenario override
+    if (k === 'field_disclaimer') {
+      value = base.field_disclaimer || FIELD_DISCLAIMER_TEXT;
+    }
+
+    // Shuttle: always use mission_text slice, not per-scenario overrides
+    if (k === 'shuttle_transportation') {
+      value = base.shuttle_transportation || value;
+    }
+
+    kvOrParagraph(k, value);
+  });
 
   console.log('[EI] rendered scenario →', name, { days: finalDays.length, totals });
 }
