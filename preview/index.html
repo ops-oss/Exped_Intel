@@ -910,38 +910,46 @@
             <option>Loop Hike</option>
             <option>End-To-End Traverse</option>
             <option>Peak Summit / High Alpine Trekking</option>
-            <option>Multi Week Section / Through Hike</option>
+            <option>Multi Week Section Hike (Long Trail)</option>
+            <option>Full Through Hike (Long Trail)</option>
             <option>Summit Expedition</option>
             <option>Packrafting / Paddling Expedition</option>
             <option>Hybrid / Multi-Sport Traverse</option>
           </select>
         </div>
 
-        <!-- Ideal trip length + Preferred terrain -->
+       <!-- Ideal trip length + Preferred terrain -->
+<div>
+  <label for="fLength">Ideal trip length (days on trail)</label>
+  <select id="fLength" name="ideal_trip_length" required>
+    <option value="">Select From Dropdown</option>
+    <option>1–2 days (overnight / quick hit)</option>
+    <option>3–4 days (long weekend)</option>
+    <option>5–7 days (week-long)</option>
+    <option>8+ days (extended expedition)</option>
+  </select>
+</div>
+
         <div>
-          <label for="fLength">Ideal Trip Length?</label>
-          <select id="fLength" name="ideal_trip_length" required>
-            <option value="">Select From Dropdown</option>
-            <option>1–2</option>
-            <option>3–4</option>
-            <option>5–6</option>
-            <option>7+</option>
-          </select>
-        </div>
-        <div>
-          <label for="fTerrain">Preferred terrain</label>
-          <select id="fTerrain" name="preferred_terrain" required>
-            <option value="">Select From Dropdown</option>
-            <option>Alpine Lakes</option>
-            <option>Large Mountains</option>
-            <option>Coastal</option>
-            <option>Forest</option>
-            <option>Rivers</option>
-            <option>Desert</option>
-            <option>Glacial / Snowfield</option>
-            <option>Scrambling & Peakbagging</option>
-          </select>
-        </div>
+        <label for="fTerrain">Preferred terrain</label>
+<select id="fTerrain" name="preferred_terrain" required>
+  <option value="">Select From Dropdown</option>
+  <option>Alpine Lakes & Basins</option>
+  <option>Mountains & Ridges</option>
+  <option>Coastal / Sea Cliffs</option>
+  <option>Forest</option>
+  <option>Deep Forest / Rainforest</option>
+  <option>Rivers</option>
+  <option>River Corridors & Gorges</option>
+  <option>Desert</option>
+  <option>High Desert / Plateau</option>
+  <option>Glacial / Snowfield</option>
+  <option>Scrambling & Peakbagging</option>
+  <option>Canyons & Red Rock</option>
+  <option>Off-Trail / Cross-Country</option>
+  <option>No Strong Preference / Mixed Terrain</option>
+</select>
+</div>
 
         <!-- Destination + idea -->
         <div>
@@ -968,7 +976,7 @@
         <div class="row-1">
           <label for="fAdditional">Additional details</label>
           <textarea id="fAdditional" name="additional" rows="5"
-            placeholder="Fitness, recent trips, gear constraints, permit constraints, group size, etc."></textarea>
+            placeholder="Add optional details such as preferred campsites, zero days, side hikes, milestones, dog or group needs, or conditions to plan around."></textarea>
         </div>
 
 <!-- Actions -->
