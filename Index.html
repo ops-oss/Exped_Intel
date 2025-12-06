@@ -1733,6 +1733,21 @@ function _formatDayHeader(day, idx){
   return cleaned;
 }
 
+  function scrubPrePostText(text){
+  if (!text) return text;
+
+  const pattern = /^\s*MULTI-TRAILHEAD LOGISTICS\s*$/i;
+
+  const cleaned = String(text)
+    .split(/\r?\n/)
+    .filter(line => !pattern.test(line.trim()))
+    .join('\n')
+    .trim();
+
+  return cleaned;
+}
+
+
 /* ---------- day + expedition render ---------- */
 function renderDay(day, idx){
   const d = day || {};
@@ -1977,6 +1992,9 @@ const grab = (label) => {
 
   // NEW: strip any pre/post or multi-trailhead bullets that bled into Shuttle
   out.shuttle_transportation = scrubShuttleText(out.shuttle_transportation);
+
+  // NEW: strip stray section header line from Pre/Post block
+  out.prepost_logistics = scrubPrePostText(out.prepost_logistics);
 
 
 // ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
