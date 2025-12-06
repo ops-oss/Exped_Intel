@@ -1438,6 +1438,11 @@ h1.title {
     <div class="embed" style="margin-top:10px"><iframe id="shuttle_map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
   </section>
 
+    <section class="section">
+    <h3>Pre/Post Mission Logistics</h3>
+    <div id="prepost_logistics"></div>
+  </section>
+
   <section class="section"><h3>Permit & Shuttle Timeline</h3><div id="permit_timeline"></div></section>
   <section class="section"><h3>Multi-Trailhead Logistics</h3><div id="multi_trailhead"></div></section>
   <section class="section"><h3>Key Considerations</h3><div id="key_considerations"></div></section>
@@ -1463,6 +1468,11 @@ h1.title {
   <section class="section"><h3>Gear Checklist</h3><div id="gear_checklist"></div></section>
   <section class="section"><h3>Optional Modification</h3><div id="optional_mod"></div></section>
   <section class="section"><h3>Risk Matrix & Hazard Timeline</h3><div id="risk_matrix"></div></section>
+    <section class="section">
+    <h3>Sustainment Plan</h3>
+    <div id="sustainment_plan"></div>
+  </section>
+
   <section class="section"><h3>Conditions Watch</h3><div id="conditions_watch"></div></section>
   <section class="section"><h3>Bailout Summary</h3><div id="bailout_summary"></div></section>
   <section class="section"><h3>Emergency Contacts & Numbers</h3><div id="emergency"></div></section>
@@ -1908,13 +1918,21 @@ const grab = (label) => {
   out.campsite_intel         ||= grab("CAMPSITE\\s+INTEL");
   out.weather_altitude       ||= grab("WEATHER\\s*&\\s*ALTITUDE\\s+NOTES");
   out.gear_checklist         ||= grab("GEAR\\s+CHECKLIST(?:\\s*\\(MIN\\))?");
-  out.optional_mod           ||= grab("OPTIONAL\\s+MODIFICATION");
+
+  // UPDATED: allow singular/plural for Optional Mod
+  out.optional_mod           ||= grab("OPTIONAL\\s+MODIFICATIONS?");
+
+  // NEW: map PRE/POST MISSION LOGISTICS and SUSTAINMENT PLAN
+  out.prepost_logistics      ||= grab("PRE/POST\\s+MISSION\\s+LOGISTICS");
+  out.sustainment_plan       ||= grab("SUSTAINMENT\\s+PLAN");
+
   out.risk_matrix            ||= grab("RISK\\s+MATRIX\\s*&\\s*HAZARD\\s+TIMELINE(?:\\s*\\(MIN\\))?");
   out.conditions_watch       ||= grab("CONDITIONS\\s+WATCH");
   out.bailout_summary        ||= grab("BAILOUT\\s+SUMMARY");
   out.emergency              ||= grab("EMERGENCY\\s+CONTACTS?\\s*&\\s*NUMBERS?");
   out.final_brief            ||= grab("FINAL\\s+BRIEF\\s+SUMMARY");
-  out.field_disclaimer         = FIELD_DISCLAIMER_TEXT;
+  out.field_disclaimer       ||= grab("FIELD\\s+DISCLAIMER");
+
 
 // ===== DAYS: parse all DAY / DAYS blocks from mission_text =====
 if (true) {
@@ -2427,6 +2445,7 @@ if (permit && Array.isArray(permit.comboPermits) && permit.comboPermits.length) 
 <!-- --- End Permits CTA --- -->
   
   kvOrParagraph('shuttle_transportation', data.shuttle_transportation);
+  kvOrParagraph('prepost_logistics', data.prepost_logistics);
   const mapURL = data.map_embed_url || data.shuttle_map_url || "";
   if (mapURL && $('shuttle_map')) $('shuttle_map').src = mapURL;
   kvOrParagraph('permit_timeline', data.permit_timeline);
@@ -2459,6 +2478,7 @@ $('itineraryDays').innerHTML = days.map((d,i) => renderDay(d,i)).join('');
   kvOrParagraph('gear_checklist', data.gear_checklist);
   kvOrParagraph('optional_mod', data.optional_mod);
   kvOrParagraph('risk_matrix', data.risk_matrix);
+  kvOrParagraph('sustainment_plan', data.sustainment_plan);  // NEW
   kvOrParagraph('conditions_watch', data.conditions_watch);
   kvOrParagraph('bailout_summary', data.bailout_summary);
   kvOrParagraph('emergency', data.emergency);
@@ -2560,6 +2580,8 @@ function hideTrulyEmptySections(){
     ['final brief summary', 'h-final'],
     ['field disclaimer', 'h-disclaimer'],
     ['gpx route & elevation', 'h-gpx']
+    ['pre/post mission logistics','h-timeline'],
+    ['sustainment plan','h-gear'],
   ]);
 
   const links = [];
@@ -2697,6 +2719,8 @@ function hideTrulyEmptySections(){
     ['emergency contacts & numbers','h-emergency'],
     ['final brief summary','h-final'],
     ['field disclaimer','h-disclaimer']
+    ['pre/post mission logistics','h-timeline'],
+    ['sustainment plan','h-gear'],
   ]);
 
   document.querySelectorAll('.section > h3').forEach(h3 => {
@@ -3153,11 +3177,25 @@ kvOrParagraph(
 
   // ========== TEXT SECTIONS ==========
   const sec = [
-    'permits_entry','shuttle_transportation','permit_timeline','multi_trailhead',
-    'key_considerations','campsite_intel','weather_altitude','gear_checklist',
-    'optional_mod','risk_matrix','conditions_watch','bailout_summary','emergency',
-    'final_brief','field_disclaimer'
+    'permits_entry',
+    'shuttle_transportation',
+    'prepost_logistics',
+    'permit_timeline',
+    'multi_trailhead',
+    'key_considerations',
+    'risk_matrix',
+    'sustainment_plan',
+    'campsite_intel',
+    'weather_altitude',
+    'gear_checklist',
+    'optional_mod',
+    'conditions_watch',
+    'bailout_summary',
+    'emergency',
+    'final_brief',
+    'field_disclaimer'
   ];
+
   sec.forEach(k => kvOrParagraph(k, (raw && raw[k]) || base[k] || ''));
 
 // Force Shuttle / Transportation to always come from mission_text (base), not scenarios
