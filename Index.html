@@ -1932,12 +1932,22 @@ function inflateFromMission(data){
 const parts = txt.split(/\n?\s*(?:—|⸻|---)\s*\n?/g);
 const grab = (label) => {
   const re = new RegExp(
-    `(^|\\n)${label}\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:—|⸻|---)|\\n[A-Z][A-Z &]+\\n|\\nDAYS?\\s+\\d|$)`,
+    `(^|\\n)${label}\\s*\\n` +                  // the header line itself
+    `([\\s\\S]*?)` +                           // capture the body
+    `(?=` +
+      `\\n\\s*(?:—|⸻|---)` +                   // next hard divider
+      `|\\n(?:[A-Z][A-Z &/]+)(?:\\s*[–-].*)?\\n` +  // NEXT SECTION HEADER:
+                                                   // "KEY CONSIDERATIONS"
+                                                   // or "TRANSPORTATION – Nearest..."
+      `|\\nDAYS?\\s+\\d` +                     // DAY 1 / DAYS 3–5
+      `|$` +
+    `)`,
     'i'
   );
   const m = txt.match(re);
-  return m ? m[2].trim() : "";
+  return m ? m[2].trim() : '';
 };
+
   // ===== Header → expedition_itinerary =====
   {
     const head = parts[0] || "";
@@ -3220,21 +3230,12 @@ function renderScenario(name){
     taglineEl.textContent = clean(raw?.tagline?.marketing || raw?.tagline?.functional || '');
   }
 
-  // Always trust the Blueprint's own ROUTE OVERVIEW slice from mission_text
-  // over any per-scenario override. This prevents dumping the entire mission
-  // into the Expedition Itinerary card if a scenario mis-populates it.
-  const routeOverviewText =
-    base.route_overview ||                                   // primary: mission_text slice
-    first(base, [
-      'overview',
-      'user.0.route_overview',
-      'user.0.overview',
-      'user.0'
-    ]) ||
-    (raw && (raw.route_overview || raw.overview)) ||         // last-ditch: scenario field
-    '';
-
-  kvOrParagraph('route_overview', routeOverviewText);
+kvOrParagraph(
+  'route_overview',
+  (raw && (raw.route_overview || raw.overview)) ||
+  first(base, ['route_overview','overview','user.0.route_overview','user.0.overview','user.0']) ||
+  ''
+);
 
   
   // ========== GPX + MAP ==========
