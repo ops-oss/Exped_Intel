@@ -1618,8 +1618,11 @@ function kvOrParagraph(containerId, text){
   // General case: decide per line whether it's "Label: value"
   const lines = String(text)
     .split(/\r?\n/)
-    .map(s => s.trim().replace(/^-\s*/, ""))   // strip leading "- "
-    .filter(Boolean);
+    .map(s => s.trim())
+    // strip leading bullets like "-", "•", "–", "—"
+    .map(s => s.replace(/^[\-•–—]\s*/, ""))
+    // drop lines that are now empty or just a bare bullet
+    .filter(s => s && !/^[-•–—]\s*$/.test(s));
 
   const kvRows = [];
   const paraLines = [];
