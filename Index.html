@@ -967,6 +967,47 @@ h1.title {
     padding: 0 6px;
     opacity: 0.7;
   }
+/* === FINAL HORIZONTAL GUARDRAIL =============================== */
+
+/* 1) Lock the main column and never let inner blocks exceed it */
+.page{
+  max-width: 1120px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page,
+.section,
+#expItin,
+#expChips,
+.day,
+.row{
+  max-width: 100%;
+}
+
+/* 2) Chips: never force the layout wider than the column */
+.chip{
+  /* allow wrapping on ALL viewports, not just mobile */
+  white-space: normal !important;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* let chip containers actually shrink & wrap */
+.row .labelB + div{
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.row .labelB + div .chip{
+  /* allow shrinking inside flex rows */
+  flex: 0 1 auto;
+  margin: 0;
+}
 
 </style>
 </head>
