@@ -13,7 +13,9 @@
     --chip-border:rgba(0,0,0,.22); --chip-fill:rgba(255,255,255,.66);
     --chip2-border:rgba(0,0,0,.16); --chip2-fill:rgba(0,0,0,.06);
     --label-w:210px;
-  }
+  /* NEW: inner column width (tweak to taste) */
+  --page-max: 1040px;
+}
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
@@ -1007,6 +1009,36 @@ h1.title {
   /* allow shrinking inside flex rows */
   flex: 0 1 auto;
   margin: 0;
+}
+/* === FINAL COLUMN LOCK: hero full, content fixed =================== */
+
+/* Main content column */
+.page{
+  max-width: var(--page-max) !important;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Keep the photo credit aligned to the same column */
+#credit,
+.credit{
+  max-width: var(--page-max) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Sections + itinerary card never exceed the column */
+.section,
+#expItin,
+.actions,
+.grid2,
+#status,
+h1.title{
+  width: 100%;
+  max-width: var(--page-max);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 </style>
