@@ -1589,16 +1589,25 @@ function kvOrParagraph(containerId, text){
   const paragraphOnly = new Set(['route_overview', 'final_brief', 'field_disclaimer']);
 
   if (paragraphOnly.has(id)) {
-    const paras = String(text)
+    let body = String(text || '').trim();
+
+    // SPECIAL CLEANUP: if route_overview accidentally contains the next section,
+    // cut everything from the first divider + header onward.
+    if (id === 'route_overview') {
+      body = body.replace(
+        /\n{2,}(?:[-–]{2,}\s*\n)?\s*(TRANSPORTATION|PRE\/POST MISSION LOGISTICS|MULTI-TRAILHEAD LOGISTICS|KEY CONSIDERATIONS|RISK MATRIX & HAZARD TIMELINE|PERMITS\s*&\s*ENTRY)[\s\S]*$/i,
+        ''
+      );
+    }
+
+    const paras = body
       .trim()
-      .split(/\n{2,}/)          // blank line = new paragraph
+      .split(/\n{2,}/)
       .map(s => s.trim())
-      // strip leading bullet markers like "- Foo" or "• Foo"
       .map(p => p.replace(/^\s*[-•]\s+/, ''))
-      // drop paragraphs that are just "-" or "•"
       .filter(p => p && !/^[-•]\s*$/.test(p));
 
-    const out = (paras.length ? paras : [String(text).trim()])
+    const out = (paras.length ? paras : [body])
       .map(p => p.replace(/\n/g, ' '))
       .join('<br/><br/>');
 
