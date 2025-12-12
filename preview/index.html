@@ -869,7 +869,13 @@
   background: var(--bg);
 }
 .ei-nav__logo{ display:flex; align-items:center; width:80px; height:50px; text-decoration:none; }
-.ei-nav__logo img{ display:block; width:100%; height:100%; object-fit:contain; }
+.ei-nav__logo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter: brightness(0) saturate(100%); /* forces logo to black */
+}
 
 .ei-nav__toggle{
   pointer-events:auto;
@@ -925,6 +931,24 @@
 @media (max-width: 900px){
   .ei-nav__bar{ padding:10px 20px; }
   .shell{ padding-top: 74px; }
+}
+.mode-toggle{
+  display:flex;
+  gap:8px;
+}
+.mode-btn{
+  flex:1;
+  height:40px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.18);
+  background:#f5f5f5;
+  font:600 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  cursor:pointer;
+}
+.mode-btn.is-active{
+  background:#fff;
+  border-color: var(--accent);
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
 
 </style>
@@ -1090,11 +1114,17 @@
     Discover Free Scout
   </button>
 
+<div class="mode-toggle" id="bpMode" style="display:none">
+  <button type="button" class="mode-btn is-active" data-mode="upgrade">Upgrade this Scout</button>
+  <button type="button" class="mode-btn" data-mode="new">New Blueprint</button>
+</div>
+  
   <button id="btnBuyBlueprint" class="btn btn--cta" type="button">
     Advance to Expedition Blueprint $99
   </button>
-</div>
-      </form>
+  </div> <!-- closes .actions.actions--form -->
+</div>   <!-- ✅ add this: closes the .row-1 wrapper -->
+</form>
     </aside>
 
     <!-- RIGHT: live preview -->
@@ -1224,9 +1254,50 @@ field.
     } catch {}
   });
 })();
+
+  let BLUEPRINT_MODE = "upgrade";
+
+function setBlueprintMode(mode){
+  BLUEPRINT_MODE = mode;
+  const wrap = document.getElementById("bpMode");
+  if (!wrap) return;
+  wrap.querySelectorAll(".mode-btn").forEach(b=>{
+    b.classList.toggle("is-active", b.dataset.mode === mode);
+  });
+}
+  function updateLeftBlueprintCTA(){
+  const modeWrap = document.getElementById("bpMode");
+  const buyBtn = document.getElementById("btnBuyBlueprint");
+  if (!buyBtn) return;
+
+  const hasScout = !!(window.SCOUT?.options && window.SCOUT.options.length);
+
+  // Toggle only appears after a Scout exists
+  if (modeWrap) modeWrap.style.display = hasScout ? "flex" : "none";
+
+  if (!hasScout) {
+    buyBtn.textContent = "Advance to Expedition Blueprint $99";
+    return;
+  }
+
+  if (BLUEPRINT_MODE === "upgrade") {
+    const opt = window.SCOUT.options[window.ACTIVE || 0];
+    buyBtn.textContent = `Blueprint “${opt?.title || `Option ${(window.ACTIVE||0)+1}`}” →`;
+  } else {
+    buyBtn.textContent = "Start New Expedition Blueprint $99";
+  }
+}
+document.getElementById("bpMode")?.addEventListener("click", (e)=>{
+  const b = e.target.closest(".mode-btn");
+  if (!b) return;
+  setBlueprintMode(b.dataset.mode);
+  updateLeftBlueprintCTA();
+});
+
 </script>
 <style>body.ei-nav-lock{overflow:hidden}</style>
 
+  
   
 <script>
 /* ---------- tiny helpers ---------- */
@@ -1405,17 +1476,19 @@ function updateCTA_forScout(opt){
 }
 
 /* ===== State + tabs ===== */
-let SCOUT={ options:[] }, ACTIVE=0;
+let SCOUT = (window.SCOUT = { options: [] });
+let ACTIVE = (window.ACTIVE = 0);
 
 function setActive(idx){
   ACTIVE=idx;
+  window.ACTIVE = ACTIVE;
   const tabs=$id("optTabs"), card=$id("optCard"); if(!tabs||!card) return;
   tabs.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-selected", i===idx ? "true" : "false"));
   const opt=SCOUT.options[idx];
   card.innerHTML=buildScoutCard(opt, idx);
-  ensureCTA(); updateCTA_forScout(opt);
+  ensureCTA(); updateCTA_forScout(opt); updateLeftBlueprintCTA();
 }
-
+  
 function renderTabs(){
   const tabs=$id("optTabs"); if(!tabs) return;
   tabs.innerHTML=(SCOUT.options||[]).map((o,i)=>{
@@ -1554,27 +1627,53 @@ const payload = {
 ];
   const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
 
-  const btn=$id("btnGenerateScout"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
-  const card = $id("optCard");
-  if (card) {
-    card.innerHTML = `
-      <div id="scoutLoading">
-        <div class="spin"></div>
-        <div>
-          <div class="h">Generating your Scout Recon</div>
-          <div class="p" id="scoutStepLabel">Locking in your objective…</div>
-          <div class="bar"><span></span></div>
-          <div class="p" style="margin-top:8px;font-size:12px;opacity:.7;">
-            This usually takes under a minute. Behind the scenes we:
-            <br>• Save your intake
-            <br>• Generate 3 route options
-            <br>• Wire Blueprint upgrade links
-            <br>• Prep the email and preview
-          </div>
+// ---- RESET UI (clears old options while new scout runs) ----
+SCOUT.options = [];
+ACTIVE = 0;
+window.ACTIVE = 0;
+
+setBlueprintMode("new");           // default mode while generating
+updateLeftBlueprintCTA();          // hides toggle + sets button label
+
+const tabs = $id("optTabs");
+if (tabs) tabs.innerHTML = "";              // ✅ removes the leftover pills
+
+const ctaWrap = $id("blueprintCta");
+if (ctaWrap) ctaWrap.style.display = "none"; // ✅ hide right-side blueprint CTA during run
+
+// Disable option blueprint button (right card) if it exists
+const optBtn = $id("btnBlueprint");
+if (optBtn) { optBtn.disabled = true; optBtn.textContent = "Blueprint this route →"; }
+
+// Disable the left “Advance…” button during scout generation
+const buyBtn = $id("btnBuyBlueprint");
+if (buyBtn) { buyBtn.disabled = true; buyBtn.dataset.mode = "loading"; }
+
+// ---- Disable Generate button + show loader card ----
+const btn = $id("btnGenerateScout") || $id("btnGenerate");
+if (btn) { btn.disabled = true; btn.textContent = "Generating…"; }
+
+const card = $id("optCard");
+if (card) {
+  card.innerHTML = `
+    <div id="scoutLoading">
+      <div class="spin"></div>
+      <div>
+        <div class="h">Generating your Scout Recon</div>
+        <div class="p" id="scoutStepLabel">Locking in your objective…</div>
+        <div class="bar"><span></span></div>
+        <div class="p" style="margin-top:8px;font-size:12px;opacity:.7;">
+          This usually takes under a minute. Behind the scenes we:
+          <br>• Save your intake
+          <br>• Generate 3 route options
+          <br>• Wire Blueprint upgrade links
+          <br>• Prep the email and preview
         </div>
-      </div>`;
-  }
-  startScoutProgress();
+      </div>
+    </div>`;
+}
+startScoutProgress();
+
 
   try {
     const res = await fetch(ENDPOINT, {
@@ -1675,6 +1774,13 @@ SCOUT.options.forEach(o => { o.blueprint_url = null; });
 ACTIVE = 0;
 renderTabs();
 setActive(0);
+const buyBtn = $id("btnBuyBlueprint");
+if (buyBtn) buyBtn.disabled = false;
+
+setBlueprintMode("upgrade");  // default after Scout exists
+updateLeftBlueprintCTA();     // shows toggle + sets button label to selected option
+
+
   } catch (err) {
     console.error(err);
     card && (card.innerHTML = `<div class="empty">Network error. Please try again.</div>`);
@@ -1684,6 +1790,17 @@ setActive(0);
       btn.textContent = "Discover Free Scout";
     }
     stopScoutProgress();
+    
+const buyBtn2 = $id("btnBuyBlueprint");
+if (buyBtn2) buyBtn2.disabled = false;
+
+// Only reset to "new" if no Scout options exist (i.e., failed run)
+if (!(window.SCOUT?.options && window.SCOUT.options.length)) {
+  setBlueprintMode("new");
+}
+
+// Refresh the button label + toggle visibility
+updateLeftBlueprintCTA();
   }
 
 }); // <-- closes addEventListener
@@ -1844,6 +1961,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function buyBlueprintDirect() {
     console.log("✅ buyBlueprintDirect fired");
+
+    // If a Scout exists, the left button should blueprint the currently-selected option
+const hasScout = !!(window.SCOUT?.options && window.SCOUT.options.length);
+
+if (hasScout && BLUEPRINT_MODE === "upgrade") {
+  const opt = window.SCOUT.options[window.ACTIVE || 0];
+  if (!opt) { alert("Select an option first."); return; }
+  return startCheckout(opt); // Scout->Blueprint upgrade
+}
+
+// If mode is "new" (or no scout), continue into the direct Blueprint checkout flow below.
 
     // 1) Gate ALL orange-* fields (every control with [required])
     const form = document.getElementById("scoutForm");
