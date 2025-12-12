@@ -867,7 +867,10 @@
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 40px;
   background: var(--bg);
+  position: relative;
+  z-index: 2;
 }
+
 .ei-nav__logo{ display:flex; align-items:center; width:80px; height:50px; text-decoration:none; }
 .ei-nav__logo img{
   display:block;
@@ -877,6 +880,11 @@
   filter: brightness(0) saturate(100%); /* forces logo to black */
 }
 
+.ei-nav.is-open .ei-nav__logo img{
+  filter: brightness(0) saturate(100%) !important; /* keep logo black */
+  opacity: 1 !important;
+}
+  
 .ei-nav__toggle{
   pointer-events:auto;
   width:50px; height:50px;
@@ -887,7 +895,7 @@
 .ei-nav__icon{ width:28px; height:18px; position:relative; display:block; }
 .ei-nav__line{
   position:absolute; left:0; right:0; height:2px;
-  background: var(--ink);
+  background: #1f1f1f;
   border-radius:10px;
   transition:transform .25s ease, top .25s ease, bottom .25s ease;
 }
@@ -902,6 +910,7 @@
   background: var(--bg);
   transition:opacity .25s cubic-bezier(.44,0,.56,1), visibility 0s linear .25s; /* ✅ add */
   display:flex; align-items:center; justify-content:center;
+  z-index: 1;
 }
 
 .ei-nav.is-open .ei-nav__overlay{
@@ -909,6 +918,9 @@
   visibility:visible;          /* ✅ add */
   pointer-events:auto;
   transition:opacity .25s cubic-bezier(.44,0,.56,1), visibility 0s; /* ✅ add */
+}
+  .ei-nav.is-open .ei-nav__line{
+  background:#1f1f1f; /* force visible X */
 }
 
 .ei-nav__menu{
