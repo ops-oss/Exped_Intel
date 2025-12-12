@@ -895,13 +895,22 @@
 .ei-nav__line--bottom{ bottom:0; }
 
 .ei-nav__overlay{
-  pointer-events:none;
   opacity:0;
+  visibility:hidden;          /* ✅ add */
+  pointer-events:none;        /* ✅ keep */
   position:fixed; inset:0;
   background: var(--bg);
-  transition:opacity .25s cubic-bezier(.44,0,.56,1);
+  transition:opacity .25s cubic-bezier(.44,0,.56,1), visibility 0s linear .25s; /* ✅ add */
   display:flex; align-items:center; justify-content:center;
 }
+
+.ei-nav.is-open .ei-nav__overlay{
+  opacity:1;
+  visibility:visible;          /* ✅ add */
+  pointer-events:auto;
+  transition:opacity .25s cubic-bezier(.44,0,.56,1), visibility 0s; /* ✅ add */
+}
+
 .ei-nav__menu{
   pointer-events:auto;
   display:flex; flex-direction:column;
@@ -1235,6 +1244,7 @@ field.
 
   const setOpen = (open) => {
     root.classList.toggle("is-open", open);
+    if (!open) overlay.style.pointerEvents = "none";   // ✅ add
     btn.setAttribute("aria-expanded", String(open));
     btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
     document.body.classList.toggle("ei-nav-lock", open);
@@ -1280,12 +1290,13 @@ function setBlueprintMode(mode){
     return;
   }
 
-  if (BLUEPRINT_MODE === "upgrade") {
-    const opt = window.SCOUT.options[window.ACTIVE || 0];
-    buyBtn.textContent = `Upgrade this Scout (Option ${(window.ACTIVE || 0) + 1}) →`;
-  } else {
-    buyBtn.textContent = "Start New Expedition Blueprint $99";
-  }
+if (BLUEPRINT_MODE === "upgrade") {
+  const optNum = (window.ACTIVE || 0) + 1;
+  buyBtn.textContent = `Upgrade Option ${optNum} →`;
+} else {
+  buyBtn.textContent = "Start New Expedition Blueprint $99";
+}
+
 }
 document.getElementById("bpMode")?.addEventListener("click", (e)=>{
   const b = e.target.closest(".mode-btn");
@@ -1496,7 +1507,22 @@ function renderTabs(){
     const name=label ? `OPTION ${i+1} — ${label}` : `OPTION ${i+1}`;
     return `<li><button type="button" class="ei-tab" role="tab" aria-selected="${i===ACTIVE?'true':'false'}" data-idx="${i}">${name}</button></li>`;
   }).join("");
-  tabs.onclick=(e)=>{ const b=e.target.closest("button[data-idx]"); if(!b) return; const idx=+b.dataset.idx; if(Number.isInteger(idx)) setActive(idx); };
+  tabs.onclick = (e) => {
+  const b = e.target.closest("button[data-idx]");
+  if (!b) return;
+
+  // ✅ hard stop any accidental link navigation
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+
+  // ✅ also force-close nav if it was left open
+  document.querySelector("[data-ei-nav]")?.classList.remove("is-open");
+  document.body.classList.remove("ei-nav-lock");
+
+  const idx = Number(b.dataset.idx);
+  if (Number.isInteger(idx)) setActive(idx);
+};
 }
 
 /* ===== Sample data (dev) ===== */
