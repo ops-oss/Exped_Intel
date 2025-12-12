@@ -1282,7 +1282,7 @@ function setBlueprintMode(mode){
 
   if (BLUEPRINT_MODE === "upgrade") {
     const opt = window.SCOUT.options[window.ACTIVE || 0];
-    buyBtn.textContent = `Blueprint “${opt?.title || `Option ${(window.ACTIVE||0)+1}`}” →`;
+    buyBtn.textContent = `Upgrade this Scout (Option ${(window.ACTIVE || 0) + 1}) →`;
   } else {
     buyBtn.textContent = "Start New Expedition Blueprint $99";
   }
