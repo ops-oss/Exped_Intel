@@ -854,9 +854,110 @@
   color: rgba(0,0,0,0.45) !important;     /* softer grey for "Select From Dropdown" */
   -webkit-text-fill-color: rgba(0,0,0,0.45) !important;
 }
+  /* =========================
+   EI NAV (Framer-match)
+   ========================= */
+.ei-nav{
+  position:fixed; inset:0 0 auto 0;
+  z-index:9999;
+  pointer-events:none;
+}
+.ei-nav__bar{
+  pointer-events:auto;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 40px;
+  background: var(--bg);
+}
+.ei-nav__logo{ display:flex; align-items:center; width:80px; height:50px; text-decoration:none; }
+.ei-nav__logo img{ display:block; width:100%; height:100%; object-fit:contain; }
+
+.ei-nav__toggle{
+  pointer-events:auto;
+  width:50px; height:50px;
+  display:grid; place-items:center;
+  background:transparent; border:0; padding:0; cursor:pointer;
+}
+
+.ei-nav__icon{ width:28px; height:18px; position:relative; display:block; }
+.ei-nav__line{
+  position:absolute; left:0; right:0; height:2px;
+  background: var(--ink);
+  border-radius:10px;
+  transition:transform .25s ease, top .25s ease, bottom .25s ease;
+}
+.ei-nav__line--top{ top:0; }
+.ei-nav__line--bottom{ bottom:0; }
+
+.ei-nav__overlay{
+  pointer-events:none;
+  opacity:0;
+  position:fixed; inset:0;
+  background: var(--bg);
+  transition:opacity .25s cubic-bezier(.44,0,.56,1);
+  display:flex; align-items:center; justify-content:center;
+}
+.ei-nav__menu{
+  pointer-events:auto;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center;
+}
+.ei-nav__link{
+  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+  font-weight:600;
+  font-size:50px;
+  line-height:1.1;
+  text-transform:uppercase;
+  text-decoration:none;
+  color: var(--ink);
+  transition: color .3s cubic-bezier(.44,0,.56,1);
+}
+.ei-nav__link:hover{ color: var(--accent); }
+.ei-nav__link.is-active{ color: var(--accent); }
+
+/* Open state */
+.ei-nav.is-open .ei-nav__overlay{ opacity:1; pointer-events:auto; }
+.ei-nav.is-open .ei-nav__line--top{ top:8px; transform:rotate(45deg); }
+.ei-nav.is-open .ei-nav__line--bottom{ bottom:8px; transform:rotate(-45deg); }
+
+/* Make room for fixed nav */
+.shell{ padding-top: 84px; }
+@media (max-width: 900px){
+  .ei-nav__bar{ padding:10px 20px; }
+  .shell{ padding-top: 74px; }
+}
+
 </style>
 </head>
 <body>
+  <header class="ei-nav" data-ei-nav>
+  <div class="ei-nav__bar">
+    <a class="ei-nav__logo" href="https://www.expeditionintel.com/#hero" aria-label="Expedition Intel Home">
+      <img
+        src="https://framerusercontent.com/images/G49qHOFRK9sYqNH3Pwj4OuzH6k.svg"
+        alt="Expedition Intel"
+        width="78"
+        height="30"
+      />
+    </a>
+
+    <button class="ei-nav__toggle" type="button" aria-label="Open menu" aria-expanded="false" data-ei-nav-toggle>
+      <span class="ei-nav__icon" aria-hidden="true">
+        <span class="ei-nav__line ei-nav__line--top"></span>
+        <span class="ei-nav__line ei-nav__line--bottom"></span>
+      </span>
+    </button>
+  </div>
+
+  <div class="ei-nav__overlay" data-ei-nav-overlay>
+    <nav class="ei-nav__menu" aria-label="Primary">
+      <a class="ei-nav__link" href="https://www.expeditionintel.com/" data-ei-nav-link>HOME</a>
+      <a class="ei-nav__link" href="https://www.expeditionintel.com/stories" data-ei-nav-link>FIELD DEBRIEFS</a>
+      <a class="ei-nav__link" href="https://www.expeditionintel.com/contact-us" data-ei-nav-link>CONTACT US</a>
+    </nav>
+  </div>
+</header>
+
   <main class="shell">
     <!-- LEFT: form -->
     <aside class="panel form-panel">
@@ -1092,6 +1193,41 @@ field.
   </div>
 </footer>
 
+
+<script>
+(() => {
+  const root = document.querySelector("[data-ei-nav]");
+  if (!root) return;
+
+  const btn = root.querySelector("[data-ei-nav-toggle]");
+  const overlay = root.querySelector("[data-ei-nav-overlay]");
+  const links = root.querySelectorAll("[data-ei-nav-link]");
+
+  const setOpen = (open) => {
+    root.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    document.body.classList.toggle("ei-nav-lock", open);
+  };
+
+  btn.addEventListener("click", () => setOpen(!root.classList.contains("is-open")));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) setOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+  links.forEach(a => a.addEventListener("click", () => setOpen(false)));
+
+  // Active state based on path
+  const path = location.pathname.replace(/\/$/, "") || "/";
+  links.forEach(a => {
+    try {
+      const ap = new URL(a.href).pathname.replace(/\/$/, "") || "/";
+      if (ap === path) a.classList.add("is-active");
+    } catch {}
+  });
+})();
+</script>
+<style>body.ei-nav-lock{overflow:hidden}</style>
+
+  
 <script>
 /* ---------- tiny helpers ---------- */
 const $id = (id)=>document.getElementById(id);
@@ -1418,7 +1554,7 @@ const payload = {
 ];
   const miss=required.filter(k=>!payload[k]); if(miss.length){ alert("Please complete:\n• "+miss.join("\n• ")); return; }
 
-  const btn=$id("btnGenerate"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
+  const btn=$id("btnGenerateScout"); if(btn){ btn.disabled=true; btn.textContent="Generating…"; }
   const card = $id("optCard");
   if (card) {
     card.innerHTML = `
