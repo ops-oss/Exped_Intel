@@ -1733,11 +1733,11 @@ field.
     border:1px solid rgba(0,0,0,.12);">
 
     <div style="font-weight:800; font-size:18px; margin-bottom:6px;">
-      Building your Expedition Blueprint…
+      Building Expedition Blueprint…
     </div>
 
     <div id="eiBuildMsg" style="opacity:.7; font-size:13px; line-height:1.4; margin-bottom:12px;">
-      Enqueued. Standing by for worker pickup…
+      Enqueued. Standing by for builder pickup…
     </div>
 
     <div style="height:8px; background:rgba(0,0,0,.08); border-radius:999px; overflow:hidden;">
@@ -2685,10 +2685,7 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
 (function(){
   const params = new URLSearchParams(location.search);
   const sessionId = params.get("session_id") || "";
-  if (!sessionId) return; // only run on Stripe return
-
-  // Optional extra safety:
-  // if (!location.pathname.includes("/success")) return;
+  if (!sessionId) return;
 
   const JOB_STATUS = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/job-status";
 
@@ -2703,31 +2700,58 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   overlay.style.display = "flex";
 
   let t = 0;
+  let stopped = false;
+  let timer = null;
+
+  function stopPolling() {
+    stopped = true;
+    if (timer) clearTimeout(timer);
+  }
+
   async function tick(){
+    if (stopped) return;
+
     try {
+      // progress animation only while NOT complete
       t += 1;
-      bar.style.width = Math.min(90, 18 + t * 3) + "%";
+      bar.style.width = Math.min(95, 18 + t * 3) + "%";
 
       const url = JOB_STATUS + "?session_id=" + encodeURIComponent(sessionId);
       const res = await fetch(url, { cache: "no-store" });
-
       const j = await res.json().catch(() => null);
+
       if (!res.ok || !j) throw new Error("status fetch failed");
 
       msg.textContent = j.message || (j.status === "running" ? "Processing…" : "Queued…");
 
-      if (j.status === "succeeded" && j.result) {
-        if (j.result.ok) {
+      // Normalize result in case it ever comes back as a string
+      let R = j.result;
+      if (typeof R === "string") {
+        try { R = JSON.parse(R); } catch {}
+      }
+
+      if (j.status === "succeeded") {
+        if (R && R.ok) {
           bar.style.width = "100%";
           done.style.display = "flex";
-          const slug = j.result.slug || "";
-          slugEl.textContent = slug ? ("Slug: " + slug) : "";
-          openBtn.href = R.json_url || "#";
 
+          const slug = R.slug || "";
+          slugEl.textContent = slug ? ("Slug: " + slug) : "";
+
+          // ✅ Send them to the trip page (not the json)
+          openBtn.href = slug
+            ? `https://trip.expeditionintel.com/trip/${slug}`
+            : (R.json_url || "#");
+
+          stopPolling();
           return;
-        } else {
+        }
+
+        // succeeded but worker returned an error
+        if (R && R.ok === false) {
           err.style.display = "block";
-          msg.textContent = (j.result.error || "Build failed.");
+          msg.textContent = R.error || "Build failed.";
+          stopPolling();
           return;
         }
       }
@@ -2735,17 +2759,18 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
       if (j.status === "failed") {
         err.style.display = "block";
         msg.textContent = j.error_text || "Build failed.";
+        stopPolling();
         return;
       }
 
-      setTimeout(tick, 2000);
+      timer = setTimeout(tick, 2000);
     } catch (e) {
-      setTimeout(tick, 2500);
+      timer = setTimeout(tick, 2500);
     }
   }
 
   tick();
 })();
-</script>  
+</script> 
 </body>
 </html>
