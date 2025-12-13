@@ -2722,7 +2722,9 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
           done.style.display = "flex";
           const slug = j.result.slug || "";
           slugEl.textContent = slug ? ("Slug: " + slug) : "";
-          openBtn.href = j.result.json_url || "#"; // later you can swap to your trip viewer URL
+          const slug = R.slug || "";
+          openBtn.href = slug ? `https://trip.expeditionintel.com/trip/${slug}` : (R.json_url || "#");
+
           return;
         } else {
           err.style.display = "block";
