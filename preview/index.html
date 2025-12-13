@@ -2691,7 +2691,6 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   // if (!location.pathname.includes("/success")) return;
 
   const JOB_STATUS = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/job-status";
-  const ANON = "PASTE_ANON_KEY_HERE";
 
   const overlay = document.getElementById("eiBuildOverlay");
   const msg = document.getElementById("eiBuildMsg");
@@ -2710,9 +2709,8 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
       bar.style.width = Math.min(90, 18 + t * 3) + "%";
 
       const url = JOB_STATUS + "?session_id=" + encodeURIComponent(sessionId);
-      const res = await fetch(url, {
-        headers: { apikey: ANON, Authorization: "Bearer " + ANON }
-      });
+      const res = await fetch(url, { cache: "no-store" });
+
       const j = await res.json().catch(() => null);
       if (!res.ok || !j) throw new Error("status fetch failed");
 
