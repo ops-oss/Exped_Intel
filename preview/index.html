@@ -927,6 +927,9 @@
   background: var(--bg);
   position: relative;
   z-index: 2;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  padding-left: calc(20px + env(safe-area-inset-left));
+  padding-right: calc(20px + env(safe-area-inset-right));
 }
 
 .ei-nav__logo{ display:flex; align-items:center; width:80px; height:50px; text-decoration:none; }
@@ -1452,11 +1455,16 @@
   </div>
 
   <div class="ei-nav__overlay" data-ei-nav-overlay>
-    <nav class="ei-nav__menu" aria-label="Primary">
-      <a class="ei-nav__link" href="https://www.expeditionintel.com/" data-ei-nav-link>HOME</a>
-      <a class="ei-nav__link" href="https://www.expeditionintel.com/stories" data-ei-nav-link>FIELD DEBRIEFS</a>
-      <a class="ei-nav__link" href="https://www.expeditionintel.com/contact-us" data-ei-nav-link>CONTACT US</a>
-    </nav>
+<nav class="ei-nav__menu" aria-label="Primary">
+  <a class="ei-nav__link" href="https://www.expeditionintel.com/" data-ei-nav-link>HOME</a>
+
+  <a class="ei-nav__link" href="https://trip.expeditionintel.com/preview/" data-ei-nav-link>
+    DISCOVER &amp; DESIGN
+  </a>
+
+  <a class="ei-nav__link" href="https://www.expeditionintel.com/stories" data-ei-nav-link>FIELD DEBRIEFS</a>
+  <a class="ei-nav__link" href="https://www.expeditionintel.com/contact-us" data-ei-nav-link>CONTACT US</a>
+</nav>
   </div>
 </header>
 
@@ -1737,13 +1745,17 @@ field.
   links.forEach(a => a.addEventListener("click", () => setOpen(false)));
 
   // Active state based on path
-  const path = location.pathname.replace(/\/$/, "") || "/";
-  links.forEach(a => {
-    try {
-      const ap = new URL(a.href).pathname.replace(/\/$/, "") || "/";
-      if (ap === path) a.classList.add("is-active");
-    } catch {}
-  });
+const path = location.pathname.replace(/\/$/, "") || "/";
+links.forEach(a => {
+  try {
+    const ap = new URL(a.href).pathname.replace(/\/$/, "") || "/";
+
+    // exact match OR current page is within that section (e.g. /preview/success)
+    const isActive = (ap === path) || (ap !== "/" && path.startsWith(ap));
+
+    if (isActive) a.classList.add("is-active");
+  } catch {}
+});
 })();
 
   let BLUEPRINT_MODE = "upgrade";
@@ -1804,8 +1816,8 @@ const chip = (t, secondary=false, iconId="") => {
 const fmtDateView = (s)=> s ? new Date(s+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—";
 
   const INTEL_ICON = {
-  "Solitude": "c-morale",
-  "Photo Ops": "c-features",
+  "Solitude": "c-features",          // ✅ flipped
+  "Photo Ops": "c-morale",           // ✅ flipped
   "Physical Challenge": "c-elevation",
   "Navigation Difficulty": "c-gps",
   "Scenic Reward": "c-terrain",
@@ -2196,22 +2208,36 @@ if (card) {
   card.innerHTML = `
     <div id="scoutLoading">
       <div class="spin"></div>
-      <div>
+
+      <div style="width:100%">
         <div class="h">Generating your Scout Recon</div>
         <div class="p" id="scoutStepLabel">Locking in your objective…</div>
+
         <div class="bar"><span></span></div>
-        <div class="p" style="margin-top:8px;font-size:12px;opacity:.7;">
-          This usually takes under a minute. Behind the scenes we:
-          <br>• Save your intake
-          <br>• Generate 3 route options
-          <br>• Wire Blueprint upgrade links
-          <br>• Prep the email and preview
+
+        <div class="chips chips--steps" style="margin-top:12px">
+          <span class="chip secondary">
+            <svg aria-hidden="true" focusable="false"><use href="#c-decision"></use></svg>
+            Step 1: Complete Form
+          </span>
+          <span class="chip secondary">
+            <svg aria-hidden="true" focusable="false"><use href="#c-features"></use></svg>
+            Step 2: Discover Scout
+          </span>
+          <span class="chip secondary">
+            <svg aria-hidden="true" focusable="false"><use href="#c-trail"></use></svg>
+            Step 3: Review Options
+          </span>
+        </div>
+
+        <div class="p" style="margin-top:10px;font-size:12px;opacity:.7;">
+          Typical runtime: under a minute. We save your intake, generate 3 options, wire upgrade links, and prep the preview + email.
         </div>
       </div>
-    </div>`;
+    </div>
+  `;
 }
 startScoutProgress();
-
 
   try {
     const res = await fetch(ENDPOINT, {
