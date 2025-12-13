@@ -1,0 +1,17 @@
+name: cron-drain-shadow
+
+on:
+  schedule:
+    - cron: "* * * * *"
+  workflow_dispatch:
+
+jobs:
+  hit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call cron-drain-shadow
+        run: |
+          curl -s -X POST "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/cron-drain-shadow" \
+            -H "Content-Type: application/json" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
