@@ -1820,7 +1820,7 @@ const fmtDateView = (s)=> s ? new Date(s+"T00:00:00").toLocaleDateString(undefin
   "Photo Ops": "c-morale",           // ✅ flipped
   "Physical Challenge": "c-elevation",
   "Navigation Difficulty": "c-gps",
-  "Scenic Reward": "c-terrain",
+  "Scenic Reward": "c-trail"         // ✅ flag icon
 };
 
 
@@ -1871,7 +1871,7 @@ function parseScoutOptions(txt){
 /* ===== Build one option card body ===== */
 function buildScoutCard(opt, index){
   const chips=[];
-if (opt.duration) chips.push(chip(opt.duration, false, "c-duration"));         // DAYS
+if (opt.duration) chips.push(chip(opt.duration, false, "i-calendar"));         // DAYS
 if (opt.miles)    chips.push(chip(`${opt.miles} miles`, false, "c-distance")); // MILES
 
 // Elevation stays optional (still nice)
