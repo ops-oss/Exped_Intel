@@ -2722,8 +2722,7 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
           done.style.display = "flex";
           const slug = j.result.slug || "";
           slugEl.textContent = slug ? ("Slug: " + slug) : "";
-          const slug = R.slug || "";
-          openBtn.href = slug ? `https://trip.expeditionintel.com/trip/${slug}` : (R.json_url || "#");
+          openBtn.href = R.json_url || "#";
 
           return;
         } else {
