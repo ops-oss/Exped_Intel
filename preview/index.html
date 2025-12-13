@@ -1722,7 +1722,45 @@ field.
   </div>
 </footer>
 
+<!-- EI BUILD OVERLAY (shows only when ?session_id=... is present) -->
+<div id="eiBuildOverlay" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center;
+  z-index:9999; padding:24px;">
+  <div style="
+    width:min(560px, 92vw);
+    background:#fff; border-radius:14px; padding:18px 18px 16px;
+    border:1px solid rgba(0,0,0,.12);">
 
+    <div style="font-weight:800; font-size:18px; margin-bottom:6px;">
+      Building your Expedition Blueprint…
+    </div>
+
+    <div id="eiBuildMsg" style="opacity:.7; font-size:13px; line-height:1.4; margin-bottom:12px;">
+      Enqueued. Standing by for worker pickup…
+    </div>
+
+    <div style="height:8px; background:rgba(0,0,0,.08); border-radius:999px; overflow:hidden;">
+      <div id="eiBuildBar" style="height:100%; width:18%; background:#fe5733;"></div>
+    </div>
+
+    <div id="eiBuildDone" style="display:none; margin-top:12px; gap:10px; align-items:center;">
+      <a id="eiOpenBlueprint" href="#" target="_self" style="
+        display:inline-flex; align-items:center; justify-content:center;
+        background:#111; color:#fff; text-decoration:none;
+        padding:12px 14px; border-radius:10px; font-weight:800;">
+        Open Blueprint →
+      </a>
+      <span id="eiBuildSlug" style="font-size:12px; opacity:.65;"></span>
+    </div>
+
+    <div id="eiBuildErr" style="display:none; margin-top:12px; font-size:13px; color:#b00020;">
+      Build failed. Please refresh or contact support.
+    </div>
+  </div>
+</div>
+
+  
 <script>
 (() => {
   const root = document.querySelector("[data-ei-nav]");
@@ -2642,5 +2680,73 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   }
 });
 </script>
+
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get("session_id") || "";
+  if (!sessionId) return; // only run on Stripe return
+
+  // Optional extra safety:
+  // if (!location.pathname.includes("/success")) return;
+
+  const JOB_STATUS = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/job-status";
+  const ANON = "PASTE_ANON_KEY_HERE";
+
+  const overlay = document.getElementById("eiBuildOverlay");
+  const msg = document.getElementById("eiBuildMsg");
+  const bar = document.getElementById("eiBuildBar");
+  const done = document.getElementById("eiBuildDone");
+  const err = document.getElementById("eiBuildErr");
+  const openBtn = document.getElementById("eiOpenBlueprint");
+  const slugEl = document.getElementById("eiBuildSlug");
+
+  overlay.style.display = "flex";
+
+  let t = 0;
+  async function tick(){
+    try {
+      t += 1;
+      bar.style.width = Math.min(90, 18 + t * 3) + "%";
+
+      const url = JOB_STATUS + "?session_id=" + encodeURIComponent(sessionId);
+      const res = await fetch(url, {
+        headers: { apikey: ANON, Authorization: "Bearer " + ANON }
+      });
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j) throw new Error("status fetch failed");
+
+      msg.textContent = j.message || (j.status === "running" ? "Processing…" : "Queued…");
+
+      if (j.status === "succeeded" && j.result) {
+        if (j.result.ok) {
+          bar.style.width = "100%";
+          done.style.display = "flex";
+          const slug = j.result.slug || "";
+          slugEl.textContent = slug ? ("Slug: " + slug) : "";
+          openBtn.href = j.result.json_url || "#"; // later you can swap to your trip viewer URL
+          return;
+        } else {
+          err.style.display = "block";
+          msg.textContent = (j.result.error || "Build failed.");
+          return;
+        }
+      }
+
+      if (j.status === "failed") {
+        err.style.display = "block";
+        msg.textContent = j.error_text || "Build failed.";
+        return;
+      }
+
+      setTimeout(tick, 2000);
+    } catch (e) {
+      setTimeout(tick, 2500);
+    }
+  }
+
+  tick();
+})();
+</script>  
 </body>
 </html>
