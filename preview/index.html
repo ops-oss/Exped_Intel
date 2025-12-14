@@ -1165,7 +1165,46 @@
   color: rgba(0,0,0,0.45) !important;
   -webkit-text-fill-color: rgba(0,0,0,0.45) !important; /* iOS */
 }
+/* === Trip Date (iOS): left align + match other fields === */
+#scoutForm #tripDate{
+  width:100% !important;
+  box-sizing:border-box !important;
+  display:block !important;
 
+  min-height:48px !important;
+  padding:12px 14px !important;
+  border-radius:12px !important;
+
+  text-align:left !important;           /* ← fixes centered look */
+  background:#fff !important;
+  color:#222 !important;
+  -webkit-text-fill-color:#222 !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
+
+/* iOS renders the visible date via these inner parts */
+#scoutForm #tripDate::-webkit-datetime-edit{
+  text-align:left !important;
+}
+#scoutForm #tripDate::-webkit-datetime-edit-text,
+#scoutForm #tripDate::-webkit-datetime-edit-month-field,
+#scoutForm #tripDate::-webkit-datetime-edit-day-field,
+#scoutForm #tripDate::-webkit-datetime-edit-year-field{
+  color:#222 !important;
+  -webkit-text-fill-color:#222 !important;
+}
+
+/* Grey “prefill” state (only when we set data-autofill="true") */
+#scoutForm #tripDate[data-autofill="true"],
+#scoutForm #tripDate[data-autofill="true"]::-webkit-datetime-edit,
+#scoutForm #tripDate[data-autofill="true"]::-webkit-datetime-edit-text,
+#scoutForm #tripDate[data-autofill="true"]::-webkit-datetime-edit-month-field,
+#scoutForm #tripDate[data-autofill="true"]::-webkit-datetime-edit-day-field,
+#scoutForm #tripDate[data-autofill="true"]::-webkit-datetime-edit-year-field{
+  color: rgba(0,0,0,0.45) !important;
+  -webkit-text-fill-color: rgba(0,0,0,0.45) !important;
+}
 </style>
 </head>
 <body>
@@ -2647,19 +2686,12 @@ async function updateHeroIfNeeded(placeText) {
 (function initPreview(){
   ensureCTA();
 })();
-// === Default Trip Date to today (local) + make it look "placeholder grey" ===
+// === Default Trip Date to today (local) + grey “prefill” styling ===
 (function defaultTripDateToToday(){
   const el = document.getElementById("tripDate");
   if (!el) return;
 
-  // When user changes it, revert to normal (dark) style
-  const clearAutofill = () => {
-    el.removeAttribute("data-autofill");
-    el.removeEventListener("input", clearAutofill);
-    el.removeEventListener("change", clearAutofill);
-  };
-
-  // Only set if empty (don’t overwrite user input)
+  // only set if empty
   if (!el.value) {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); // local ISO day
@@ -2668,15 +2700,27 @@ async function updateHeroIfNeeded(placeText) {
     // mark as autofilled so CSS can tint it
     el.setAttribute("data-autofill", "true");
 
-    // if they touch it, flip back to normal
-    el.addEventListener("input", clearAutofill, { once: true });
-    el.addEventListener("change", clearAutofill, { once: true });
-
-    // trigger your live preview + season logic
+    // trigger your live preview/season logic (programmatic; should NOT clear autofill)
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.dispatchEvent(new Event("change", { bubbles: true }));
   }
+
+  // Clear ONLY when the user actually engages with the control
+  const clearOnUser = (e) => {
+    if (e && e.isTrusted === false) return; // ignore programmatic events
+    el.removeAttribute("data-autofill");
+    el.removeEventListener("focus", clearOnUser);
+    el.removeEventListener("pointerdown", clearOnUser);
+    el.removeEventListener("touchstart", clearOnUser);
+    el.removeEventListener("keydown", clearOnUser);
+  };
+
+  el.addEventListener("focus", clearOnUser, { once: true });
+  el.addEventListener("pointerdown", clearOnUser, { once: true });
+  el.addEventListener("touchstart", clearOnUser, { once: true });
+  el.addEventListener("keydown", clearOnUser, { once: true });
 })();
+
 
   /* =========================================================
    MARK REQUIRED / OPTIONAL LABELS
