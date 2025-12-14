@@ -2831,6 +2831,11 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/\s{2,}/g, " ")
       .trim();
 
+        // Normalize drain's generic completion message
+    if (/^done$/i.test(stripped)) {
+      return { msg: "Blueprint ready.", step: "Complete" };
+    }
+
     // map common phases → human
     const MAP = [
       { re:/enqueue|enqueued|queued/i, msg:"Queued — waiting for builder pickup…", step:"Queued…" },
@@ -2921,6 +2926,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (R && R.ok) {
           bar.style.width = "100%";
           done.style.display = "flex";
+          if (stepLabel) stepLabel.textContent = "Complete";
 
           const slug = R.slug || "";
           slugEl.textContent = slug ? ("Slug: " + slug) : "";
