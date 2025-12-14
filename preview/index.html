@@ -1160,6 +1160,11 @@
   opacity: .75;
   cursor: pointer;
 }
+/* Trip Date: lighter grey ONLY when we auto-fill it */
+#scoutForm #tripDate[data-autofill="true"]{
+  color: rgba(0,0,0,0.45) !important;
+  -webkit-text-fill-color: rgba(0,0,0,0.45) !important; /* iOS */
+}
 
 </style>
 </head>
@@ -2642,17 +2647,30 @@ async function updateHeroIfNeeded(placeText) {
 (function initPreview(){
   ensureCTA();
 })();
-  // === Default Trip Date to today (local) ===
+// === Default Trip Date to today (local) + make it look "placeholder grey" ===
 (function defaultTripDateToToday(){
   const el = document.getElementById("tripDate");
   if (!el) return;
 
-  // only set if empty (don’t overwrite user input)
+  // When user changes it, revert to normal (dark) style
+  const clearAutofill = () => {
+    el.removeAttribute("data-autofill");
+    el.removeEventListener("input", clearAutofill);
+    el.removeEventListener("change", clearAutofill);
+  };
+
+  // Only set if empty (don’t overwrite user input)
   if (!el.value) {
     const d = new Date();
-    // convert to local ISO date (prevents off-by-one from timezone)
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); // local ISO day
     el.value = d.toISOString().slice(0, 10);
+
+    // mark as autofilled so CSS can tint it
+    el.setAttribute("data-autofill", "true");
+
+    // if they touch it, flip back to normal
+    el.addEventListener("input", clearAutofill, { once: true });
+    el.addEventListener("change", clearAutofill, { once: true });
 
     // trigger your live preview + season logic
     el.dispatchEvent(new Event("input", { bubbles: true }));
