@@ -2961,13 +2961,16 @@ document.addEventListener("DOMContentLoaded", () => {
         stopPolling();
         return;
       }
-
-      // Also stop after timeout even if we keep seeing queued/running (prevents infinite spinner)
-      if ((Date.now() - startedAt) > HARD_TIMEOUT_MS * 4) { // 2 minutes
-        msg.textContent = "Still working… you can close this tab. We’ll email you when it’s ready.";
-        stopPolling();
-        return;
-      }
+      
+// After ~3m10s, stop ramping the bar and just poll slowly.
+// (Covers the 2m30 edge timeout + queue/slack.)
+if ((Date.now() - startedAt) > 190000) {
+  msg.textContent = "Still working… you can close this tab. We’ll email you when it’s ready.";
+  if (stepLabel) stepLabel.textContent = "Finalizing…";
+  bar.style.width = "95%";              // hold steady (no more ramp)
+  timer = setTimeout(tick, 12000);      // keep checking every 12s
+  return;
+}
 
       timer = setTimeout(tick, 2000);
     } catch (e) {
