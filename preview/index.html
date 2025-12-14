@@ -302,6 +302,7 @@
   z-index:9999;
   padding:24px;
 }
+.ei-buildOverlay{ display:flex; }
 .ei-buildOverlay[hidden]{ display:none; }
 
 .ei-buildCard{
@@ -2768,7 +2769,7 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
 </script>
 
 <script>
-(function(){
+document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(location.search);
   const sessionId = params.get("session_id") || "";
   if (!sessionId) return;
@@ -2786,6 +2787,10 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   const logEl = document.getElementById("eiBuildLog");
 
   if (!overlay || !msg || !bar || !done || !err || !openBtn || !slugEl) return;
+
+  // ✅ force show overlay (works even if something set display:none)
+  overlay.hidden = false;
+  overlay.style.display = "flex";
 
   const LOG_LIMIT = 4;
   const seen = new Set();
@@ -2959,7 +2964,7 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   }
 
   tick();
-})();
+});
 </script>
 
 </body>
