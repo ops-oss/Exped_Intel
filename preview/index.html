@@ -1135,6 +1135,31 @@
   border-color: var(--accent);
   box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
+/* === Trip Date: match other fields on iOS/mobile === */
+#scoutForm #tripDate{
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+
+  min-height: 48px !important;     /* forces same “box” height as other inputs */
+  padding: 12px 14px !important;   /* match .grp input padding */
+  border-radius: 12px !important;  /* match other fields */
+
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+
+  background: #fff !important;
+  color: #222 !important;
+  -webkit-text-fill-color: #222 !important;
+
+  -webkit-appearance: none !important; /* iOS */
+  appearance: none !important;
+}
+
+#scoutForm #tripDate::-webkit-calendar-picker-indicator{
+  opacity: .75;
+  cursor: pointer;
+}
 
 </style>
 </head>
@@ -2617,6 +2642,24 @@ async function updateHeroIfNeeded(placeText) {
 (function initPreview(){
   ensureCTA();
 })();
+  // === Default Trip Date to today (local) ===
+(function defaultTripDateToToday(){
+  const el = document.getElementById("tripDate");
+  if (!el) return;
+
+  // only set if empty (don’t overwrite user input)
+  if (!el.value) {
+    const d = new Date();
+    // convert to local ISO date (prevents off-by-one from timezone)
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    el.value = d.toISOString().slice(0, 10);
+
+    // trigger your live preview + season logic
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+})();
+
   /* =========================================================
    MARK REQUIRED / OPTIONAL LABELS
    ========================================================= */
