@@ -1745,12 +1745,12 @@ field.
     </div>
 
     <div id="eiBuildDone" style="display:none; margin-top:12px; gap:10px; align-items:center;">
-      <a id="eiOpenBlueprint" href="#" target="_self" style="
-        display:inline-flex; align-items:center; justify-content:center;
-        background:#111; color:#fff; text-decoration:none;
-        padding:12px 14px; border-radius:10px; font-weight:800;">
-        Open Blueprint →
-      </a>
+<a id="eiOpenBlueprint" href="#" target="_self" style="
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#fe5733; color:#fff; text-decoration:none;
+  padding:12px 14px; border-radius:10px; font-weight:800;">
+  Open Blueprint →
+</a>
       <span id="eiBuildSlug" style="font-size:12px; opacity:.65;"></span>
     </div>
 
@@ -2703,28 +2703,54 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
   let stopped = false;
   let timer = null;
 
+  const HARD_TIMEOUT_MS = 30000;       // 30s fallback if queue is off / no job record
+  const startedAt = Date.now();
+
   function stopPolling() {
     stopped = true;
     if (timer) clearTimeout(timer);
+  }
+
+  function fallbackNoQueue() {
+    // Don’t "fail" — just stop and tell them what’s happening.
+    bar.style.width = "100%";
+    msg.textContent = "Payment confirmed. Your Blueprint is being prepared — check your email shortly.";
+    done.style.display = "none";
+    err.style.display = "none";
+    stopPolling();
   }
 
   async function tick(){
     if (stopped) return;
 
     try {
-      // progress animation only while NOT complete
+      // progress animation while waiting
       t += 1;
       bar.style.width = Math.min(95, 18 + t * 3) + "%";
 
       const url = JOB_STATUS + "?session_id=" + encodeURIComponent(sessionId);
       const res = await fetch(url, { cache: "no-store" });
+
+      // If job-status is temporarily down, keep trying until timeout
+      if (!res.ok) throw new Error("status http " + res.status);
+
       const j = await res.json().catch(() => null);
 
-      if (!res.ok || !j) throw new Error("status fetch failed");
+      // If queue is off, job-status will likely return null forever.
+      // Wait a bit, then show a friendly message and stop.
+      if (!j) {
+        if ((Date.now() - startedAt) > HARD_TIMEOUT_MS) {
+          fallbackNoQueue();
+          return;
+        }
+        msg.textContent = "Payment confirmed. Finalizing…";
+        timer = setTimeout(tick, 1500);
+        return;
+      }
 
       msg.textContent = j.message || (j.status === "running" ? "Processing…" : "Queued…");
 
-      // Normalize result in case it ever comes back as a string
+      // Normalize result
       let R = j.result;
       if (typeof R === "string") {
         try { R = JSON.parse(R); } catch {}
@@ -2738,7 +2764,6 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
           const slug = R.slug || "";
           slugEl.textContent = slug ? ("Slug: " + slug) : "";
 
-          // ✅ Send them to the trip page (not the json)
           openBtn.href = slug
             ? `https://trip.expeditionintel.com/trip/${slug}`
             : (R.json_url || "#");
@@ -2747,7 +2772,6 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
           return;
         }
 
-        // succeeded but worker returned an error
         if (R && R.ok === false) {
           err.style.display = "block";
           msg.textContent = R.error || "Build failed.";
@@ -2763,14 +2787,27 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
         return;
       }
 
+      // Also stop after timeout even if we keep seeing queued/running (prevents infinite spinner)
+      if ((Date.now() - startedAt) > HARD_TIMEOUT_MS * 4) { // 2 minutes
+        msg.textContent = "Still working… you can close this tab. We’ll email you when it’s ready.";
+        stopPolling();
+        return;
+      }
+
       timer = setTimeout(tick, 2000);
     } catch (e) {
+      // transient errors; still honor timeout
+      if ((Date.now() - startedAt) > HARD_TIMEOUT_MS) {
+        fallbackNoQueue();
+        return;
+      }
       timer = setTimeout(tick, 2500);
     }
   }
 
   tick();
 })();
-</script> 
+</script>
+
 </body>
 </html>
