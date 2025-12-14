@@ -1040,6 +1040,22 @@ h1.title{
   margin-left: auto;
   margin-right: auto;
 }
+/* === Title wrapping: keep whole words, no hyphen splits =========== */
+h1.title,
+#title.title{
+  white-space: normal !important;     /* allow wrapping */
+  overflow-wrap: normal !important;   /* don't break in the middle of words */
+  word-break: keep-all !important;    /* keep words intact */
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+}
+
+/* On very narrow phones, shrink instead of breaking ugly */
+@media (max-width: 480px){
+  h1.title{
+    font-size: clamp(28px, 10vw, 40px);
+  }
+}
 
 </style>
 </head>
