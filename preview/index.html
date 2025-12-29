@@ -1780,7 +1780,7 @@
 </div>
   
   <button id="btnBuyBlueprint" class="btn btn--cta" type="button">
-    Advance to Expedition Blueprint $99
+    Advance to Expedition Blueprint $29
   </button>
   </div> <!-- closes .actions.actions--form -->
 </div>   <!-- ✅ add this: closes the .row-1 wrapper -->
@@ -1983,7 +1983,7 @@ function setBlueprintMode(mode){
   if (modeWrap) modeWrap.style.display = hasScout ? "flex" : "none";
 
   if (!hasScout) {
-    buyBtn.textContent = "Advance to Expedition Blueprint $99";
+    buyBtn.textContent = "Advance to Expedition Blueprint $29";
     return;
   }
 
@@ -1991,7 +1991,7 @@ if (BLUEPRINT_MODE === "upgrade") {
   const optNum = (window.ACTIVE || 0) + 1;
   buyBtn.textContent = `Upgrade Option ${optNum} →`;
 } else {
-  buyBtn.textContent = "Start New Expedition Blueprint $99";
+  buyBtn.textContent = "Start New Expedition Blueprint $29";
 }
 
 }
@@ -2126,7 +2126,7 @@ const CHECKOUT_ENDPOINT =
   "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/create-checkout-session";
 
 // 👉 Put your Stripe Price ID here (from the Scout → Blueprint product)
-const PRICE_UPGRADE = "price_1S4jmKKyANuReHHWTf5jC6CB"; // <-- replace with your real Price ID
+const PRICE_UPGRADE = "price_1SjiVOKyANuReHHWSsfxNAnQ"; // <-- replace with your real Price ID
 
 /* ===== CTA wiring ===== */
 function ensureCTA(){
@@ -2822,7 +2822,7 @@ if (hasScout && BLUEPRINT_MODE === "upgrade") {
       return;
     }
 
-    const BLUEPRINT_PRICE_ID = "price_1SRw3ZKyANuReHHWei4HLs5K";
+    const BLUEPRINT_PRICE_ID = "price_1SjiNHKyANuReHHWxZ6S7le7";
 
     const payload = {
       price_id: BLUEPRINT_PRICE_ID,
