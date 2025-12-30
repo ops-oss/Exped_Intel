@@ -1794,7 +1794,6 @@ Includes:
 
         <div class="gpx-actions2">
           <button class="gpx-btn primary" id="gpxNoticeAcknowledge" type="button">Got it</button>
-          <button class="gpx-btn ghost" id="gpxNoticeOpen" type="button">Open in GPX Studio</button>
         </div>
       </div>
     </div>
@@ -3718,19 +3717,30 @@ kvOrParagraph(
 </script>
   
 <script>
-(function initGPXStarterNotice(){
+/* ===========================
+GPX STARTER NOTICE (FINAL)
+- Overlay is INFO ONLY (no Open/Download buttons inside overlay)
+- Gates the real CTAs below (#gpxBtn + #gpxStudioLink) until acknowledged
+- If user clicked a CTA first, “Got it” continues that action
+- “Why is this Starter GPX?” re-opens overlay (no gating)
+Paste this whole block near the end of your final <script> (before </body>)
+=========================== */
+(function initGPXStarterNotice_FINAL(){
   const wrap  = document.getElementById('gpxEmbedWrap');
   const over  = document.getElementById('gpxNotice');
   const close = document.getElementById('gpxNoticeClose');
   const ack   = document.getElementById('gpxNoticeAcknowledge');
-  const open  = document.getElementById('gpxNoticeOpen');
 
+  // Real CTAs below the map
   const btnDownload = document.getElementById('gpxBtn');
   const linkStudio  = document.getElementById('gpxStudioLink');
-  const why         = document.getElementById('gpxNoticeWhy');
+
+  // Optional link under note
+  const why = document.getElementById('gpxNoticeWhy');
 
   if (!wrap || !over) return;
 
+  // Per-trip/per-path key (uses slug if available)
   const storageKey = () => {
     const slug = (window.EI_DATA && window.EI_DATA.slug) ? String(window.EI_DATA.slug) : '';
     return 'ei_gpx_notice_dismissed:' + (slug || location.pathname);
@@ -3744,7 +3754,7 @@ kvOrParagraph(
     try { localStorage.setItem(storageKey(), '1'); } catch {}
   };
 
-  // Gate state: if user clicked Download/Open before acknowledging
+  // If user tries a CTA before acknowledging, we store it and fulfill after “Got it”
   let gateActive = false;
   let pending = null; // { kind:'download'|'open', href:string }
 
@@ -3755,15 +3765,19 @@ kvOrParagraph(
     pending = next || null;
 
     over.classList.add('is-open');
-    over.setAttribute('aria-hidden','false');
-    setTimeout(() => (ack || close)?.focus?.(), 0);
+    over.setAttribute('aria-hidden', 'false');
+
+    // Focus for keyboard users
+    setTimeout(() => (ack || close || over)?.focus?.(), 0);
     return true;
   }
 
   function hide({ dismiss=true } = {}){
     over.classList.remove('is-open');
-    over.setAttribute('aria-hidden','true');
+    over.setAttribute('aria-hidden', 'true');
+
     if (dismiss) setDismissed();
+
     gateActive = false;
     pending = null;
   }
@@ -3776,7 +3790,7 @@ kvOrParagraph(
       return;
     }
 
-    // download: simulate click with download attribute if present
+    // download: simulate a click
     const a = document.createElement('a');
     a.href = pending.href;
 
@@ -3789,7 +3803,6 @@ kvOrParagraph(
     a.remove();
   }
 
-  // ---------- Gate intercepts ----------
   function interceptClick(el, kind){
     if (!el) return;
 
@@ -3800,53 +3813,44 @@ kvOrParagraph(
       e.stopPropagation();
 
       const href = el.getAttribute('href') || '';
-      if (!href) {
-        show({ force:true, gate:true, next:null });
-        return;
-      }
-
-      show({ force:true, gate:true, next:{ kind, href } });
+      show({ force:true, gate:true, next: href ? { kind, href } : null });
     });
   }
 
+  // Gate the real CTAs
   interceptClick(btnDownload, 'download');
   interceptClick(linkStudio,  'open');
 
-  // ---------- Overlay actions ----------
-  // "Got it" = dismiss AND continue pending action (if any)
+  // “Got it” acknowledges + continues the pending action (if there was one)
   ack?.addEventListener('click', () => {
     if (pending) performPending();
     hide({ dismiss:true });
   });
 
-  // "Open in GPX Studio" inside overlay: opens studio and dismisses
-  open?.addEventListener('click', () => {
-    const href = (linkStudio && linkStudio.href) ? linkStudio.href : (pending?.href || '');
-    if (href) window.open(href, '_blank', 'noopener');
-    hide({ dismiss:true });
-  });
-
-  // Close methods:
-  // - If gateActive, DO NOT dismiss (prevents bypass)
-  // - If not gateActive (scroll-trigger), dismiss like normal
+  // Close behaviors:
+  // - If gateActive (they tried to click a CTA), closing does NOT dismiss (prevents bypass).
+  // - If not gateActive (first-view informational), closing dismisses.
   function closeOverlay(){
     hide({ dismiss: !gateActive });
   }
 
   close?.addEventListener('click', closeOverlay);
-  over.addEventListener('click', (e) => { if (e.target === over) closeOverlay(); });
+
+  over.addEventListener('click', (e) => {
+    if (e.target === over) closeOverlay();
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && over.classList.contains('is-open')) closeOverlay();
   });
 
-  // “Why is this Starter GPX?” always re-opens (no gate)
+  // “Why is this Starter GPX?” re-opens (no gate)
   why?.addEventListener('click', (e) => {
     e.preventDefault();
     show({ force:true, gate:false, next:null });
   });
 
-  // ---------- First-view auto-show (scroll into GPX section) ----------
+  // First-view auto-show when GPX section enters view
   const section = wrap.closest('.section') || wrap.parentElement;
   if (!section) return;
 
