@@ -1152,6 +1152,131 @@ h1.title,
   .gpx-overlay, .gpx-sheet{ transition:none !important; }
 }
 
+/* === GPX Starter Notice — orange polish + perfectly centered ============ */
+:root{
+  --ei-orange: var(--accent, #fe5733);
+}
+
+/* Make overlay truly centered within the embed */
+#gpxEmbedWrap{ position:relative; border-radius:12px; overflow:hidden; }
+#gpxEmbedWrap iframe{ border-radius:12px; }
+
+/* Scrim */
+.gpx-overlay{
+  position:absolute; inset:0; z-index:10;
+  display:grid;
+  place-items:center;                /* PERFECT CENTER */
+  padding:18px;
+  background: rgba(0,0,0,.42);
+  opacity:0;
+  pointer-events:none;
+  transition: opacity .18s ease;
+}
+.gpx-overlay.is-open{ opacity:1; pointer-events:auto; }
+
+/* Card */
+.gpx-sheet{
+  width:min(720px, calc(100% - 24px));
+  background: rgba(255,255,255,.97);
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius:18px;
+  box-shadow: 0 22px 70px rgba(0,0,0,.22);
+  padding:18px 18px 16px;
+  transform: translateY(10px);
+  transition: transform .18s ease;
+  position:relative;
+  text-align:left;
+}
+.gpx-overlay.is-open .gpx-sheet{ transform:none; }
+
+/* Close */
+.gpx-x{
+  position:absolute; top:10px; right:10px;
+  border:0; background:transparent; cursor:pointer;
+  width:36px; height:36px; border-radius:12px;
+  font-size:22px; line-height:1;
+  color: rgba(0,0,0,.55);
+}
+.gpx-x:hover{ background: rgba(0,0,0,.06); }
+
+/* Header layout */
+.gpx-head{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding-right:42px; /* room for X */
+}
+
+/* Orange mark */
+.gpx-mark{
+  width:22px; height:22px;
+  margin-top:2px;
+  flex:0 0 auto;
+  color: var(--ei-orange);           /* makes the icon orange */
+}
+
+/* Title */
+.gpx-title{
+  font-weight: 850;
+  letter-spacing: -0.015em;
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+/* Body */
+.gpx-body{
+  font-size: 14.75px;
+  line-height: 1.45;
+  color: rgba(0,0,0,.84);
+}
+.gpx-body strong{ font-weight: 850; }
+
+/* Buttons */
+.gpx-actions2{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+
+/* Primary = orange, Secondary = clean outline */
+.gpx-btn{
+  border-radius:999px;
+  padding:11px 14px;
+  font-weight:850;
+  cursor:pointer;
+  font-size:13.5px;
+  border:1px solid rgba(0,0,0,.14);
+}
+
+.gpx-btn.primary{
+  background: var(--ei-orange);
+  border-color: color-mix(in srgb, var(--ei-orange) 65%, rgba(0,0,0,.14));
+  color:#fff;
+  box-shadow: 0 8px 18px rgba(0,0,0,.14);
+}
+.gpx-btn.primary:hover{
+  filter: saturate(1.05) brightness(.98);
+}
+
+.gpx-btn.ghost{
+  background: rgba(255,255,255,0);
+  border-color: rgba(0,0,0,.18);
+  color:#111;
+}
+.gpx-btn.ghost:hover{ background: rgba(0,0,0,.05); }
+
+/* Focus ring uses orange */
+.gpx-btn:focus-visible,
+.gpx-x:focus-visible{
+  outline: 2px solid var(--ei-orange);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .gpx-overlay, .gpx-sheet{ transition:none !important; }
+}
+
   
 </style>
 </head>
@@ -1658,10 +1783,10 @@ Includes:
           <svg aria-hidden="true" class="gpx-mark"><use href="#h-disclaimer"></use></svg>
           <div>
             <div class="gpx-title">Starter GPX</div>
-            <div class="gpx-body">
-              Review and adjust in your mapping app.<br/>
-              <strong>Do not rely on it as your only navigation source.</strong>
-            </div>
+<div class="gpx-body">
+  Baseline route only — use the campsites and POIs from your itinerary to edit and refine this file in your mapping app.
+  Trails and lines may not be exact. <strong>Do not rely on this as your only navigation source.</strong>
+</div>
           </div>
         </div>
 
