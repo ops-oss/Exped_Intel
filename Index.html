@@ -1277,6 +1277,11 @@ h1.title,
   .gpx-overlay, .gpx-sheet{ transition:none !important; }
 }
 
+  /* Single-button overlay: align button with TEXT column (not the icon) */
+.gpx-actions2{
+  justify-content:flex-start;
+  padding-left: calc(22px + 12px); /* icon width (gpx-mark) + gap in .gpx-head */
+}
   
 </style>
 </head>
