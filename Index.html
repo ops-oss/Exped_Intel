@@ -1057,6 +1057,102 @@ h1.title,
   }
 }
 
+/* === GPX Starter Notice (no banner, no pill; no iframe obstruction) ===== */
+#gpxEmbedWrap{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden; /* keeps overlay clipped to the embed */
+}
+#gpxEmbedWrap iframe{ border-radius:12px; }
+
+/* Overlay scrim */
+.gpx-overlay{
+  position:absolute; inset:0; z-index:10;
+  display:grid; place-items:end center;   /* bottom sheet */
+  padding:16px;
+  background: rgba(0,0,0,.40);
+  opacity:0;
+  pointer-events:none;
+  transition: opacity .18s ease;
+}
+.gpx-overlay.is-open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* Sheet */
+.gpx-sheet{
+  width:min(760px, 100%);
+  background: rgba(255,255,255,.96);
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:16px;
+  box-shadow:0 18px 50px rgba(0,0,0,.22);
+  padding:16px 16px 14px;
+  transform: translateY(10px);
+  transition: transform .18s ease;
+  position:relative;
+}
+.gpx-overlay.is-open .gpx-sheet{ transform:none; }
+
+/* Close */
+.gpx-x{
+  position:absolute; top:10px; right:10px;
+  border:0; background:transparent; cursor:pointer;
+  width:34px; height:34px; border-radius:10px;
+  font-size:22px; line-height:1; color:rgba(0,0,0,.55);
+}
+.gpx-x:hover{ background: rgba(0,0,0,.06); }
+
+/* Content hierarchy */
+.gpx-head{
+  display:flex; gap:12px; align-items:flex-start;
+  padding-right:38px; /* room for the X */
+}
+.gpx-mark{ width:22px; height:22px; margin-top:2px; flex:0 0 auto; }
+.gpx-title{
+  font-weight:800;
+  letter-spacing:-.01em;
+  font-size:18px;
+  margin:0 0 4px;
+}
+.gpx-body{
+  font-size:14.75px;
+  line-height:1.35;
+  color: rgba(0,0,0,.84);
+}
+.gpx-body strong{ font-weight:800; }
+
+/* Buttons */
+.gpx-actions2{
+  display:flex; gap:10px; flex-wrap:wrap;
+  margin-top:14px;
+}
+.gpx-btn{
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:13.5px;
+  border:1px solid rgba(0,0,0,.14);
+}
+.gpx-btn.primary{
+  background:#000; color:#fff;
+}
+.gpx-btn.ghost{
+  background: rgba(255,255,255,0);
+  color:#000;
+}
+.gpx-btn:focus-visible{
+  outline:2px solid var(--accent,#fe5733);
+  outline-offset:2px;
+}
+
+/* Motion respect */
+@media (prefers-reduced-motion: reduce){
+  .gpx-overlay, .gpx-sheet{ transition:none !important; }
+}
+
+  
 </style>
 </head>
 <body>
@@ -1539,17 +1635,66 @@ h1.title,
   <!-- DAYS -->
   <section class="section"><h3>Itinerary Overview</h3><div id="itineraryDays"></div></section>
 
-  <!-- GPX -->
-  <div class="section">
-    <h3>GPX Route & Elevation</h3>
-    <div class="embed" id="gpxEmbedWrap"><iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-    <div class="gpx-actions" id="gpxActions">
-      <a id="gpxBtn" class="btn" href="#" download><svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX</a>
-      <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener"><svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio</a>
-      <span id="trailheads" style="opacity:.8"></span>
+<!-- =========================
+GPX STARTER NOTICE (PILL-FREE)
+Includes:
+- First-view overlay (one-time)
+- Gate: Download + Open are intercepted until “Got it”
+- “Why is this Starter GPX?” link re-opens overlay
+========================= -->
+
+<div class="section">
+  <h3>GPX Route & Elevation</h3>
+
+  <div class="embed" id="gpxEmbedWrap">
+    <iframe id="gpxStudio" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+    <!-- First-view overlay -->
+    <div class="gpx-overlay" id="gpxNotice" aria-hidden="true">
+      <div class="gpx-sheet" role="dialog" aria-label="Starter GPX notice">
+        <button class="gpx-x" id="gpxNoticeClose" type="button" aria-label="Close notice">×</button>
+
+        <div class="gpx-head">
+          <svg aria-hidden="true" class="gpx-mark"><use href="#h-disclaimer"></use></svg>
+          <div>
+            <div class="gpx-title">Starter GPX</div>
+            <div class="gpx-body">
+              Review and adjust in your mapping app.<br/>
+              <strong>Do not rely on it as your only navigation source.</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="gpx-actions2">
+          <button class="gpx-btn primary" id="gpxNoticeAcknowledge" type="button">Got it</button>
+          <button class="gpx-btn ghost" id="gpxNoticeOpen" type="button">Open in GPX Studio</button>
+        </div>
+      </div>
     </div>
-    <div class="gpx-note">Starter GPX — review and adjust in your mapping app.<br/><strong>Do not rely on it as your only navigation source.</strong></div>
   </div>
+
+  <div class="gpx-actions" id="gpxActions">
+    <a id="gpxBtn" class="btn" href="#" download>
+      <svg class="ico"><use href="#i-download"/></svg> DOWNLOAD GPX
+    </a>
+    <a id="gpxStudioLink" class="btn" href="#" target="_blank" rel="noopener">
+      <svg class="ico"><use href="#i-external"/></svg> Open in GPX Studio
+    </a>
+    <span id="trailheads" style="opacity:.8"></span>
+  </div>
+
+  <div class="gpx-note">
+    Starter GPX — review and adjust in your mapping app.<br/>
+    <strong>Do not rely on it as your only navigation source.</strong>
+    <div style="margin-top:6px">
+      <a href="#" id="gpxNoticeWhy"
+         style="font-weight:700;text-decoration:underline;text-underline-offset:2px">
+        Why is this Starter GPX?
+      </a>
+    </div>
+  </div>
+</div>
+
 
   <!-- Text sections -->
   <section class="section"><h3>Campsite Intel</h3><div id="campsite_intel"></div></section>
@@ -3444,5 +3589,153 @@ kvOrParagraph(
   });
 })();
 </script>
+  
+<script>
+(function initGPXStarterNotice(){
+  const wrap  = document.getElementById('gpxEmbedWrap');
+  const over  = document.getElementById('gpxNotice');
+  const close = document.getElementById('gpxNoticeClose');
+  const ack   = document.getElementById('gpxNoticeAcknowledge');
+  const open  = document.getElementById('gpxNoticeOpen');
+
+  const btnDownload = document.getElementById('gpxBtn');
+  const linkStudio  = document.getElementById('gpxStudioLink');
+  const why         = document.getElementById('gpxNoticeWhy');
+
+  if (!wrap || !over) return;
+
+  const storageKey = () => {
+    const slug = (window.EI_DATA && window.EI_DATA.slug) ? String(window.EI_DATA.slug) : '';
+    return 'ei_gpx_notice_dismissed:' + (slug || location.pathname);
+  };
+
+  const isDismissed = () => {
+    try { return localStorage.getItem(storageKey()) === '1'; } catch { return false; }
+  };
+
+  const setDismissed = () => {
+    try { localStorage.setItem(storageKey(), '1'); } catch {}
+  };
+
+  // Gate state: if user clicked Download/Open before acknowledging
+  let gateActive = false;
+  let pending = null; // { kind:'download'|'open', href:string }
+
+  function show({ force=false, gate=false, next=null } = {}){
+    if (!force && isDismissed()) return false;
+
+    gateActive = !!gate;
+    pending = next || null;
+
+    over.classList.add('is-open');
+    over.setAttribute('aria-hidden','false');
+    setTimeout(() => (ack || close)?.focus?.(), 0);
+    return true;
+  }
+
+  function hide({ dismiss=true } = {}){
+    over.classList.remove('is-open');
+    over.setAttribute('aria-hidden','true');
+    if (dismiss) setDismissed();
+    gateActive = false;
+    pending = null;
+  }
+
+  function performPending(){
+    if (!pending || !pending.href) return;
+
+    if (pending.kind === 'open'){
+      window.open(pending.href, '_blank', 'noopener');
+      return;
+    }
+
+    // download: simulate click with download attribute if present
+    const a = document.createElement('a');
+    a.href = pending.href;
+
+    const dl = btnDownload?.getAttribute('download');
+    if (dl) a.download = dl;
+
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // ---------- Gate intercepts ----------
+  function interceptClick(el, kind){
+    if (!el) return;
+
+    el.addEventListener('click', (e) => {
+      if (isDismissed()) return; // normal behavior after acknowledgement
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const href = el.getAttribute('href') || '';
+      if (!href) {
+        show({ force:true, gate:true, next:null });
+        return;
+      }
+
+      show({ force:true, gate:true, next:{ kind, href } });
+    });
+  }
+
+  interceptClick(btnDownload, 'download');
+  interceptClick(linkStudio,  'open');
+
+  // ---------- Overlay actions ----------
+  // "Got it" = dismiss AND continue pending action (if any)
+  ack?.addEventListener('click', () => {
+    if (pending) performPending();
+    hide({ dismiss:true });
+  });
+
+  // "Open in GPX Studio" inside overlay: opens studio and dismisses
+  open?.addEventListener('click', () => {
+    const href = (linkStudio && linkStudio.href) ? linkStudio.href : (pending?.href || '');
+    if (href) window.open(href, '_blank', 'noopener');
+    hide({ dismiss:true });
+  });
+
+  // Close methods:
+  // - If gateActive, DO NOT dismiss (prevents bypass)
+  // - If not gateActive (scroll-trigger), dismiss like normal
+  function closeOverlay(){
+    hide({ dismiss: !gateActive });
+  }
+
+  close?.addEventListener('click', closeOverlay);
+  over.addEventListener('click', (e) => { if (e.target === over) closeOverlay(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && over.classList.contains('is-open')) closeOverlay();
+  });
+
+  // “Why is this Starter GPX?” always re-opens (no gate)
+  why?.addEventListener('click', (e) => {
+    e.preventDefault();
+    show({ force:true, gate:false, next:null });
+  });
+
+  // ---------- First-view auto-show (scroll into GPX section) ----------
+  const section = wrap.closest('.section') || wrap.parentElement;
+  if (!section) return;
+
+  const io = new IntersectionObserver((ents) => {
+    for (const ent of ents){
+      if (!ent.isIntersecting) continue;
+      if (isDismissed()) { io.disconnect(); return; }
+      show({ force:false, gate:false, next:null });
+      io.disconnect();
+      return;
+    }
+  }, { threshold: 0.45 });
+
+  io.observe(section);
+})();
+</script>
+
 </body>
 </html>
