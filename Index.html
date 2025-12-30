@@ -229,7 +229,7 @@ body .ei-toc-panel{
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
-  /* TOC (chip-d slideout) */
+  /* TOC (chip-styled slideout) */
   :root{ --ei-toc-blur:2px; --ei-toc-w:min(420px,86vw); }
   body .ei-toc-toggle{
     position:fixed; top:14px; right:16px; z-index:9999;
@@ -269,7 +269,7 @@ body .ei-toc-panel{
   body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
 
   body .ei-toc-title{ font-weight:700; letter-spacing:-.01em; opacity:.85; margin:2px 6px 4px; }
-  body .ei-toc-list{ list-:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
+  body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
   body .ei-toc-list a,
   body .ei-toc-list .ei-chip{
     display:inline-flex; align-items:center; gap:8px;
@@ -473,7 +473,7 @@ html,body{ overflow-x:hidden; }
 }
 /* === Scenario Tabs (CSS only) =========================================== */
 .ei-tabs{ margin:12px 0 0; }
-.ei-tablist{ display:flex; gap:8px; padding:8px 8px 0; margin:0; list-:none; align-items:flex-end; }
+.ei-tablist{ display:flex; gap:8px; padding:8px 8px 0; margin:0; list-style:none; align-items:flex-end; }
 .ei-tab{
   position:relative; display:inline-flex; align-items:center; gap:8px;
   padding:10px 14px; font:inherit; font-weight:600; font-size:14px;
@@ -523,7 +523,7 @@ body .ei-toc-dim{ position:fixed; inset:0; background:rgba(0,0,0,.12); opacity:0
 body.ei-open .ei-toc-dim{ opacity:1; pointer-events:auto; }
 
 body .ei-toc-title{ font-weight:700; letter-spacing:-.01em; opacity:.85; margin:2px 6px 4px; }
-body .ei-toc-list{ list-:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
+body .ei-toc-list{ list-style:none; margin:0; padding:6px 2px; display:flex; flex-direction:column; gap:8px; }
 body .ei-toc-list a,
 body .ei-toc-list .ei-chip{
   display:inline-flex; align-items:center; gap:8px; padding:8px 12px; line-height:1.05; font-size:14px; font-weight:600;
@@ -780,7 +780,7 @@ body .ei-toc-list a[aria-current="true"], body .ei-toc-list .ei-chip[aria-curren
 #expItin.section{ margin-top:0 !important; }
 .ei-tabs + #expItin.section{ margin-top:-1px !important; }  /* erase any hairline */
 
-/* 5) Neutralize older “strip/card” s that created the gap */
+/* 5) Neutralize older “strip/card” styles that created the gap */
 .ei-tablist{ border-bottom:0 !important; }
 #expItin{ border-top:0 !important; }           /* if an older block re-added it */
 
@@ -1277,10 +1277,8 @@ h1.title,
   .gpx-overlay, .gpx-sheet{ transition:none !important; }
 }
 
- /* Single-button overlay: keep it tidy */
-.gpx-actions2{ justify-content:flex-start; }
- 
-</>
+  
+</style>
 </head>
 <body>
 
@@ -1795,9 +1793,9 @@ Includes:
         </div>
 
         <div class="gpx-actions2">
-  <button class="gpx-btn primary" id="gpxNoticeAcknowledge" type="button">Got it</button>
-</div>
-
+          <button class="gpx-btn primary" id="gpxNoticeAcknowledge" type="button">Got it</button>
+          <button class="gpx-btn ghost" id="gpxNoticeOpen" type="button">Open in GPX Studio</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3725,6 +3723,7 @@ kvOrParagraph(
   const over  = document.getElementById('gpxNotice');
   const close = document.getElementById('gpxNoticeClose');
   const ack   = document.getElementById('gpxNoticeAcknowledge');
+  const open  = document.getElementById('gpxNoticeOpen');
 
   const btnDownload = document.getElementById('gpxBtn');
   const linkStudio  = document.getElementById('gpxStudioLink');
@@ -3816,10 +3815,16 @@ kvOrParagraph(
   // ---------- Overlay actions ----------
   // "Got it" = dismiss AND continue pending action (if any)
   ack?.addEventListener('click', () => {
-  if (pending) performPending();    // if they clicked Download/Open first, continue it now
-  hide({ dismiss:true });
-});
+    if (pending) performPending();
+    hide({ dismiss:true });
+  });
 
+  // "Open in GPX Studio" inside overlay: opens studio and dismisses
+  open?.addEventListener('click', () => {
+    const href = (linkStudio && linkStudio.href) ? linkStudio.href : (pending?.href || '');
+    if (href) window.open(href, '_blank', 'noopener');
+    hide({ dismiss:true });
+  });
 
   // Close methods:
   // - If gateActive, DO NOT dismiss (prevents bypass)
