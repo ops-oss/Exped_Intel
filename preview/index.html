@@ -2911,18 +2911,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const seen = new Set();
   const logLines = [];
 
-  function pushLog(line){
-    if (!line) return;
-    if (seen.has(line)) return;
-    seen.add(line);
-    logLines.push(line);
-    while (logLines.length > LOG_LIMIT) logLines.shift();
+function pushLog(line){
+  if (!line) return;
+  if (seen.has(line)) return;
+  seen.add(line);
 
-    if (logEl){
-      logEl.style.display = "block";
-      logEl.innerHTML = logLines.map(t => `<div class="line">• ${t}</div>`).join("");
-    }
+  logLines.push(line);
+  while (logLines.length > LOG_LIMIT) logLines.shift();
+
+  if (!logEl) return;
+  logEl.style.display = "block";
+  logEl.innerHTML = ""; // clear
+
+  for (const t of logLines) {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = `• ${t}`; // ✅ text only (no HTML rendering)
+    logEl.appendChild(div);
   }
+}
 
   function friendlyFromStatus(status){
     if (status === "queued") return { msg:"Queued — waiting for builder pickup…", step:"Queued…" };
@@ -2933,6 +2940,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function friendlyMessage(raw, status){
     const s = String(raw || "").trim();
     if (!s) return friendlyFromStatus(status);
+
+    // ✅ guardrail: never display gateway HTML blobs
+    if (/<\/?html|<!doctype/i.test(s)) {
+    return { msg: "Temporary server hiccup. Retrying…", step: "Retrying…" };
+  }
 
     // hard-strip function names + internal jargon
     const stripped = s
@@ -2965,10 +2977,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // fallback: show cleaned message, but never internal function ids
     return { msg: stripped || "Processing…", step: "Building…" };
   }
-
-
-  overlay.hidden = false;
-  overlay.style.display = "flex";
 
   let t = 0;
   let stopped = false;
@@ -3014,12 +3022,24 @@ document.addEventListener("DOMContentLoaded", () => {
           fallbackNoQueue();
           return;
         }
+ 
         msg.textContent = "Payment confirmed. Finalizing…";
         if (stepLabel) stepLabel.textContent = "Queued…";
         pushLog("Payment confirmed. Finalizing…");
         timer = setTimeout(tick, 1500);
         return;
       }
+
+      if (j && j.error) {
+       done.style.display = "none";
+       err.style.display = "none";
+       err.textContent = ""; // ✅ clear any prior error 
+       msg.textContent = "Status check hiccup. Retrying…";
+     if (stepLabel) stepLabel.textContent = "Retrying…";
+       pushLog("Status check hiccup — retrying…");
+       timer = setTimeout(tick, 2500);
+      return;
+     }
 
       const f = friendlyMessage(j.message, j.status);
       msg.textContent = f.msg;
@@ -3036,6 +3056,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (R && R.ok) {
           bar.style.width = "100%";
           done.style.display = "flex";
+          err.style.display = "none";
+          err.textContent = "";
           overlay.querySelector(".ei-buildCard")?.classList.add("is-done");
           if (stepLabel) stepLabel.textContent = "Complete";
 
@@ -3060,12 +3082,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      if (j.status === "failed") {
-        err.style.display = "block";
-        msg.textContent = j.error_text || "Build failed.";
-        stopPolling();
-        return;
-      }
+  if (j.status === "failed") {
+  const attempts = Number(j.attempts || 0);
+  const max = Number(j.max_attempts || 0);
+
+  // retries remain → keep polling, don’t hard-fail the UI
+  if (max && attempts < max) {
+    done.style.display = "none";
+    err.style.display = "none";
+    msg.textContent = "Temporary builder hiccup. Retrying…";
+    if (stepLabel) stepLabel.textContent = `Retrying… (${attempts}/${max})`;
+    pushLog(`Retrying… (${attempts}/${max})`);
+    timer = setTimeout(tick, 2500);
+    return;
+  }
+
+  // terminal failure
+  err.style.display = "block";
+  msg.textContent = j.error_text || "Build failed.";
+  stopPolling();
+  return;
+}
+
       
 // After ~3m10s, stop ramping the bar and just poll slowly.
 // (Covers the 2m30 edge timeout + queue/slack.)
