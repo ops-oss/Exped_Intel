@@ -2051,10 +2051,39 @@ function parseScoutOptions(txt){
     const logistics=grab("Logistics Snapshot");
     const intelBlock=grab("Intel Score \\(1–10\\)");
 
-    let miles=null, gain_ft=null, loss_ft=null;
-    const mmiles=dist.match(/([\d.,]+)\s*miles?/i); if(mmiles) miles=mmiles[1];
-    const mgain=dist.match(/\+([\d.,]+)\s*ft/i);    const mloss=dist.match(/-([\d.,]+)\s*ft/i);
-    if(mgain) gain_ft=mgain[1].replace(/,/g,""); if(mloss) loss_ft=mloss[1].replace(/,/g,"");
+// Distance label for chip (keeps ranges + softens single-values)
+function milesLabelFromDist(distStr){
+  const s = String(distStr || "");
+
+  // Capture: "~45–60 miles" OR "45-60 miles" OR "60 miles" OR "60 mi"
+  const m = s.match(/(~?\s*\d[\d.,]*\s*(?:[–-]\s*\d[\d.,]*)?\s*(?:miles?|mi)\b)/i);
+  if (!m) return null;
+
+  let label = m[1].trim().replace(/\s+/g, " ");
+
+  // Normalize unit to "mi"
+  label = label.replace(/\bmiles\b/i, "mi").replace(/\bmi\b/i, "mi");
+
+  // If it's a single value without "~", prefix "~" to avoid implied precision
+  const hasRange = /[–-]/.test(label);
+  if (!hasRange && !label.startsWith("~")) label = "~" + label;
+
+  // Tighten spaces around dashes
+  label = label.replace(/\s*[–-]\s*/g, "–");
+
+  return label;
+}
+
+let miles=null, gain_ft=null, loss_ft=null;
+
+// miles becomes a display label now (ex: "~45–60 mi" or "~60 mi")
+miles = milesLabelFromDist(dist);
+
+// Keep elevation extraction as-is (still optional)
+const mgain=dist.match(/\+([\d.,]+)\s*ft/i);
+const mloss=dist.match(/-([\d.,]+)\s*ft/i);
+if(mgain) gain_ft=mgain[1].replace(/,/g,"");
+if(mloss) loss_ft=mloss[1].replace(/,/g,"");
 
     const intel={}; if(intelBlock){
       intelBlock.split("\n").forEach(line=>{
@@ -2076,7 +2105,7 @@ function parseScoutOptions(txt){
 function buildScoutCard(opt, index){
   const chips=[];
 if (opt.duration) chips.push(chip(opt.duration, false, "i-calendar"));         // DAYS
-if (opt.miles)    chips.push(chip(`${opt.miles} miles`, false, "c-distance")); // MILES
+if (opt.miles) chips.push(chip(`${opt.miles}`, false, "c-distance")); // MILES (label already includes mi)
 
 // Elevation stays optional (still nice)
 if (opt.gain_ft || opt.loss_ft) {
@@ -2147,6 +2176,8 @@ function saveScoutContext(optIndex){
 }
 
 async function startCheckout(opt){
+  console.debug("[checkout] active", (ACTIVE + 1), "uid", opt?.option_uid, "title", opt?.title);
+  
   saveScoutContext(ACTIVE);
 
   const btn = document.getElementById("btnBlueprint");
@@ -2285,7 +2316,7 @@ document.getElementById("loadSample")?.addEventListener("click", ()=>{
 const ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/shadow-scout-recon-send";
 
 // Make sure intake ID persists between form submit and checkout
-window.EI_INTAKE_ID = localStorage.getItem("ei_intake_id") || "";
+window.EI_INTAKE_ID = localStorage.getItem("EI_INTAKE_ID") || "";
   
 // === HERO IMAGE ENDPOINT ===
 const HERO_ENDPOINT = "https://rtpfkfhvlkuagwqdsnfj.supabase.co/functions/v1/hero-image";
@@ -2500,48 +2531,30 @@ if (!opts.length) {
     }
   }
   opts.forEach(o => {
-    const href = o?.cta?.url || o?.href || "";
+    const href = o?.blueprint_url || "";
     if (!o.option_uid) o.option_uid = extractUidFromUrl(href);
   });
 })();
 
-/* --- Prefer canonical from your schema: scout_latest_payload --- */
-try {
-  const iid = window.EI_INTAKE_ID || "";
-  if (iid) {
-    const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/scout_latest_payload?select=options&intake_id=eq.${encodeURIComponent(iid)}&limit=1`,
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    const arr = await r.json().catch(() => []);
-    const canonical = Array.isArray(arr) && arr[0]?.options ? arr[0].options : null;
-
-    if (canonical && canonical.length) {
-      // map canonical -> your UI shape (index/title/region/option_uid)
-      const withUids = canonical.map((o, i) => ({
-        index:  Number(o.option_index ?? (i + 1)),
-        title:  String(o.title ?? `Option ${i + 1}`),
-        region: String(o.region ?? ""),
-        option_uid: String(o.option_uid ?? "")
-      })).sort((a, b) => a.index - b.index);
-
-      SCOUT.options = withUids;
-    } else {
-      SCOUT.options = opts.sort((a, b) => a.index - b.index);
-    }
-  } else {
-    SCOUT.options = opts.sort((a, b) => a.index - b.index);
-  }
-} catch {
-  SCOUT.options = opts.sort((a, b) => a.index - b.index);
+// ✅ Merge server option_uids into parsed options (keeps rich card + keeps UID authoritative)
+if (Array.isArray(data.options) && data.options.length) {
+  const byIndex = new Map(data.options.map(o => [Number(o.option_index), o]));
+  opts.forEach(o => {
+    const server = byIndex.get(Number(o.index));
+    if (server?.option_uid) o.option_uid = String(server.option_uid);
+  });
 }
 
-// drop any stale hrefs from older runs (safety)
+// Make parsed options the source of truth for the UI
+SCOUT.options = opts.sort((a, b) => a.index - b.index);
+
+// Optional safety: drop any stale hrefs from older runs
 SCOUT.options.forEach(o => { o.blueprint_url = null; });
 
 ACTIVE = 0;
 renderTabs();
 setActive(0);
+
 const buyBtn = $id("btnBuyBlueprint");
 if (buyBtn) buyBtn.disabled = false;
 
